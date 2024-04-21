@@ -1,0 +1,19 @@
+// database
+datasource db {
+  provider = "postgres"
+  url      = env("DATABASE_URL")
+}
+
+// generator
+generator client {
+  provider             = "prisma-client-js"
+  recursive_type_depth = 5
+  interface            = "sync"
+}
+
+// data models
+model URL {
+  id    Int    @id @default(autoincrement())
+  url   String
+  title String
+}

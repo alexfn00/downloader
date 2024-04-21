@@ -1,18 +1,26 @@
-export async function GET(res: Request) {
-  const shazamSearchURL =
-    'https://www.shazam.com/services/amapi/v1/catalog/GB/search?types=artists&term=abc&limit=3'
-  const response = await fetch(shazamSearchURL)
-  const data = await response.json()
-  if (data) {
-    return new Response(data.tracks.hits)
-  } else {
-    return new Response('error')
-  }
-}
+import { createClient } from '@vercel/kv'
 
-export async function POST(req: Request) {
-  const body = await req.json()
-  console.log(body)
+export async function GET() {
+  const users = createClient({
+    url: process.env.USERS_REST_API_URL || '',
+    token: process.env.USERS_REST_API_TOKEN || '',
+  })
 
-  return new Response(JSON.stringify({ hello: 'world' }))
+  const user = await users.hgetall('user:me')
+
+  const products = createClient({
+    url: process.env.PRODUCTS_REST_API_URL || '',
+    token: process.env.PRODUCTS_REST_API_TOKEN || '',
+  })
+
+  const product = await products.hgetall('product:shirt')
+  return Response.json(
+    {
+      user,
+      product,
+    },
+    {
+      status: 200,
+    },
+  )
 }
