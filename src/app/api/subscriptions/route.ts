@@ -1,6 +1,4 @@
 import { createRedisInstance } from '@/lib/redis'
-import axios from 'axios'
-import Redis from 'ioredis'
 import { NextResponse } from 'next/server'
 
 export async function GET(res: Request) {
