@@ -11,9 +11,9 @@ import axios from 'axios'
 import { ArrowBigLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
 
-const Page = () => {
+const VideoPlay = () => {
   const searchParams = useSearchParams()
   const search = searchParams.get('url')
   console.log(search)
@@ -94,8 +94,8 @@ const Page = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <div rounded-md text-white>
-                <button className='border rounded-md p-1 font-semibold'>
+              <div className='rounded-md'>
+                <button className='border border-white px-4 py-2 rounded-md font-semibold'>
                   Download
                 </button>
               </div>
@@ -107,6 +107,15 @@ const Page = () => {
         make call
       </button> */}
     </main>
+  )
+}
+
+const Page = () => {
+  return (
+    // You could have a loading skeleton as the `fallback` too
+    <Suspense>
+      <VideoPlay />
+    </Suspense>
   )
 }
 

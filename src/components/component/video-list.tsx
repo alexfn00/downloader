@@ -21,6 +21,7 @@ import axios from 'axios'
 import { Play } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 
 export function VideoList() {
   const [isLoad, setIsLoad] = useState(false)
@@ -61,11 +62,10 @@ export function VideoList() {
                 href={`/dashboard/watch?url=${video.href}`}>
                 <span className='sr-only'>Play</span>
                 <div className='absolute inset-0 flex items-center justify-center'>
-                  <Play className='w-12 h-12 text-white drop-shadow-lg' />
-                  {/* <PlayIcon className='w-12 h-12 text-white drop-shadow-lg' /> */}
+                  <Play className='w-12 h-12 drop-shadow-lg' />
                 </div>
               </Link>
-              <img
+              <Image
                 alt='Video Thumbnail'
                 className='object-cover w-full h-56'
                 height={225}
