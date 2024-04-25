@@ -18,6 +18,7 @@ To read more about using these font, please visit the Next.js documentation:
 - Pages Directory: https://nextjs.org/docs/pages/building-your-application/optimizing/fonts
 **/
 import axios from 'axios'
+import { Play } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
@@ -60,7 +61,8 @@ export function VideoList() {
                 href={`/dashboard/watch?url=${video.href}`}>
                 <span className='sr-only'>Play</span>
                 <div className='absolute inset-0 flex items-center justify-center'>
-                  <PlayIcon className='w-12 h-12 text-white drop-shadow-lg' />
+                  <Play className='w-12 h-12 text-white drop-shadow-lg' />
+                  {/* <PlayIcon className='w-12 h-12 text-white drop-shadow-lg' /> */}
                 </div>
               </Link>
               <img
@@ -88,23 +90,5 @@ export function VideoList() {
         ))}
       </section>
     </>
-  )
-}
-
-function PlayIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns='http://www.w3.org/2000/svg'
-      width='24'
-      height='24'
-      viewBox='0 0 24 24'
-      fill='none'
-      stroke='currentColor'
-      strokeWidth='2'
-      strokeLinecap='round'
-      strokeLinejoin='round'>
-      <polygon points='5 3 19 12 5 21 5 3' />
-    </svg>
   )
 }
