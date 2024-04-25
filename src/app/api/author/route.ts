@@ -1,14 +1,14 @@
 import { db } from '@/app/db'
 
 export async function GET() {
-  const urls = await db.uRL.findMany({
+  const authors = await db.author.findMany({
     take: 10,
   })
-  console.log(urls)
+  console.log(authors)
 
   return Response.json(
     {
-      urls,
+      authors,
     },
     {
       status: 200,

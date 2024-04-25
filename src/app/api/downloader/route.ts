@@ -5,7 +5,7 @@ import ytdl from 'ytdl-core'
 export async function GET(res: Request) {
   const { searchParams } = new URL(res.url)
 
-  const url = searchParams.get('url') || ''
+  const url = 'https://www.youtube.com/' + searchParams.get('url') || ''
 
   try {
     let options = {}

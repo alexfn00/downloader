@@ -12,8 +12,15 @@ generator client {
 }
 
 // data models
-model URL {
-  id    Int    @id @default(autoincrement())
-  url   String
-  title String
+model author {
+  id     Int    @id @default(autoincrement())
+  name   String
+  avatar String
+}
+
+model video {
+  id     Int    @id @default(autoincrement())
+  author String
+  title  String
+  href   String
 }
