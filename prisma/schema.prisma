@@ -14,6 +14,7 @@ generator client {
 // data models
 model author {
   id     Int    @id @default(autoincrement())
+  author String
   name   String
   avatar String
 }
@@ -21,6 +22,7 @@ model author {
 model video {
   id     Int    @id @default(autoincrement())
   author String
+  name   String
   title  String
   href   String
 }

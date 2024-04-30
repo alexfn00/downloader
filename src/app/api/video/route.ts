@@ -1,7 +1,13 @@
 import { db } from '@/app/db'
 
-export async function GET() {
+export async function GET(res: Request) {
+  const { searchParams } = new URL(res.url)
+  const author = searchParams.get('q') || ''
+
   const videos = await db.video.findMany({
+    where: {
+      author: author,
+    },
     take: 10,
   })
   console.log(videos)

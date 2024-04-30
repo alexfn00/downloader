@@ -18,19 +18,22 @@ To read more about using these font, please visit the Next.js documentation:
 - Pages Directory: https://nextjs.org/docs/pages/building-your-application/optimizing/fonts
 **/
 import axios from 'axios'
-import { Play } from 'lucide-react'
+import { Loader2, Play } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
+import { useWatch } from '../WatchProvider'
 
 export function VideoList() {
-  const [isLoad, setIsLoad] = useState(false)
+  const { watchId, UpdateWatchId } = useWatch()
+  const [isLoading, setIsLoading] = useState(false)
   const [videos, setVideos] = useState<any[]>([])
 
   useEffect(() => {
     const loadVideos = async () => {
       try {
-        const result = await axios.get(`/api/video`)
+        setIsLoading(true)
+        const result = await axios.get(`/api/video?q=${watchId}`)
         console.log('result.data:', result.data)
         setVideos(result.data.lists)
         console.log('videos:', videos)
@@ -38,56 +41,56 @@ export function VideoList() {
           console.log(video, index)
         })
         console.log(typeof videos)
+        setIsLoading(false)
       } catch (error) {
         console.log(error)
       }
     }
 
     loadVideos()
-  }, [])
+  }, [watchId])
 
   return (
     <>
-      {/* <button
-        onClick={handleLoadVideos}
-        className='border rounded-md p-1 font-semibold'>
-        Load
-      </button> */}
       <section className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 md:p-6'>
-        {videos.map((video, index) => (
-          <>
-            <div className='relative group overflow-hidden rounded-lg'>
-              <Link
-                className='absolute inset-0 z-10'
-                href={`/dashboard/watch?url=${video.href}`}>
-                <span className='sr-only'>Play</span>
-                <div className='absolute inset-0 flex items-center justify-center'>
-                  <Play className='w-12 h-12 drop-shadow-lg' />
-                </div>
-              </Link>
-              <Image
-                alt='Video Thumbnail'
-                className='object-cover w-full h-56'
-                height={225}
-                src='/placeholder.svg'
-                style={{
-                  aspectRatio: '400/225',
-                  objectFit: 'cover',
-                }}
-                width={400}
-              />
-              <div className='bg-white p-4 dark:bg-gray-950'>
-                <h3 className='font-semibold text-lg md:text-xl line-clamp-2'>
-                  {video.title}
-                </h3>
-                <div className='flex items-center justify-between text-sm text-gray-500 dark:text-gray-400'>
-                  <span>{video.author}</span>
-                  <span>5:32</span>
+        {isLoading ? (
+          <Loader2 className='mr-4 h-16 w-16 animate-spin' />
+        ) : (
+          videos.map((video, index) => (
+            <>
+              <div className='relative group overflow-hidden rounded-lg'>
+                <Link
+                  className='absolute inset-0 z-10'
+                  href={`/dashboard/watch?url=${video.href}`}>
+                  <span className='sr-only'>Play</span>
+                  <div className='absolute inset-0 flex items-center justify-center'>
+                    <Play className='w-12 h-12 drop-shadow-lg' />
+                  </div>
+                </Link>
+                <Image
+                  alt='Video Thumbnail'
+                  className='object-cover w-full h-56'
+                  height={225}
+                  src='/placeholder.svg'
+                  style={{
+                    aspectRatio: '400/225',
+                    objectFit: 'cover',
+                  }}
+                  width={400}
+                />
+                <div className='bg-white p-4 dark:bg-gray-950'>
+                  <h3 className='font-semibold text-lg md:text-xl line-clamp-2'>
+                    {video.title}
+                  </h3>
+                  <div className='flex items-center justify-between text-sm text-gray-500 dark:text-gray-400'>
+                    <span>{video.author}</span>
+                    <span>5:32</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </>
-        ))}
+            </>
+          ))
+        )}
       </section>
     </>
   )
