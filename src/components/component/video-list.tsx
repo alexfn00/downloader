@@ -50,9 +50,27 @@ export function VideoList() {
     loadVideos()
   }, [watchId])
 
+  const createTask = async () => {
+    try {
+      const result = await axios.get(`/api/task?q=${watchId}`)
+      console.log('result.data:', result.data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <>
       <section className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 md:p-6'>
+        <button
+          className='flex items-center justify-start hover:bg-slate-300 rounded-md'
+          onClick={() => {
+            createTask()
+          }}>
+          {' '}
+          Click Me
+        </button>
+
         {isLoading ? (
           <Loader2 className='mr-4 h-16 w-16 animate-spin' />
         ) : (
