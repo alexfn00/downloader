@@ -14,19 +14,38 @@ export default function Home() {
     try {
       setIsLoading(true)
       console.log('enter handleSearch')
-      const result = await axios.get(`/api/task?q=${author}`)
-      console.log('result.data:', result.data)
-      setTaskId(result.data['id'])
-      setResults(result.data['result'])
-
-      const intervalId = setInterval(async () => {
-        console.log('enter setInterval')
-        const result = await axios.get(`/api/task/${taskId}`)
-        console.log('result.data:', result.data)
-        if (result.data.state == 'SUCCESS') {
-          clearInterval(intervalId)
+      await axios({
+        url: '/api/task',
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          name: 'youtube',
+          author: author,
+        },
+      }).then((res) => {
+        const data = res.data['result']
+        console.log('res.data:', res.data['result'])
+        setTaskId(data['id'])
+        // setResults(res.data['result'])
+        if (data['id']) {
+          let counter = 0
+          const intervalId = setInterval(async () => {
+            console.log('enter setInterval taskId', taskId)
+            const result = await axios.get(`/api/task?q=${taskId}`)
+            console.log('result.data:', result.data)
+            counter++
+            if (result.data.state == 'SUCCESS') {
+              clearInterval(intervalId)
+            }
+            if (counter >= 5) {
+              clearInterval(intervalId) // 清除定时器
+              console.log('定时器已结束')
+            }
+          }, 500)
         }
-      }, 500)
+      })
 
       setIsLoading(false)
     } catch (error) {
@@ -34,25 +53,25 @@ export default function Home() {
     }
   }
 
-  useEffect(() => {
-    const startQuery = async () => {
-      let counter = 0
-      const timer = setInterval(() => {
-        // 每秒访问接口的逻辑
-        console.log(`访问接口，当前时间戳：${Date.now()}`)
+  // useEffect(() => {
+  //   const startQuery = async () => {
+  //     let counter = 0
+  //     const timer = setInterval(() => {
+  //       // 每秒访问接口的逻辑
+  //       console.log(`访问接口，当前时间戳：${Date.now()}`)
 
-        counter++
+  //       counter++
 
-        if (counter >= 600) {
-          clearInterval(timer) // 清除定时器
-          console.log('定时器已结束')
-        }
-      }, 1000)
-      console.log('timer:', timer)
-    }
+  //       if (counter >= 600) {
+  //         clearInterval(timer) // 清除定时器
+  //         console.log('定时器已结束')
+  //       }
+  //     }, 1000)
+  //     console.log('timer:', timer)
+  //   }
 
-    startQuery()
-  }, [taskId])
+  //   startQuery()
+  // }, [taskId])
 
   return (
     <main className='mx-auto md:max-w-6xl px-4'>
