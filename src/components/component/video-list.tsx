@@ -23,6 +23,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { useWatch } from '../WatchProvider'
+import SidebarToggle from '../sidebar-toggle'
 
 export function VideoList() {
   const { watchId, UpdateWatchId } = useWatch()
@@ -61,6 +62,9 @@ export function VideoList() {
 
   return (
     <>
+      <div className='mx-5'>
+        <SidebarToggle />
+      </div>
       <section className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 md:p-6'>
         {isLoading ? (
           <Loader2 className='mr-4 h-16 w-16 animate-spin' />

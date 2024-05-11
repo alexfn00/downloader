@@ -1,7 +1,4 @@
 import React from 'react'
-import SidebarToggle from './sidebar-toggle'
-// import SidebarMobile from './SidebarMobile'
-// import ChatHistory from './ChatHistory'
 
 const Header = () => {
   return (
@@ -10,7 +7,7 @@ const Header = () => {
         {/* <SidebarMobile>
           <ChatHistory />
         </SidebarMobile> */}
-        <SidebarToggle />
+        {/* <SidebarToggle /> */}
       </div>
     </>
   )
