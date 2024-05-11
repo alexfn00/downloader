@@ -62,15 +62,6 @@ export function VideoList() {
   return (
     <>
       <section className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 md:p-6'>
-        <button
-          className='flex items-center justify-start hover:bg-slate-300 rounded-md'
-          onClick={() => {
-            createTask()
-          }}>
-          {' '}
-          Click Me
-        </button>
-
         {isLoading ? (
           <Loader2 className='mr-4 h-16 w-16 animate-spin' />
         ) : (
@@ -85,24 +76,33 @@ export function VideoList() {
                     <Play className='w-12 h-12 drop-shadow-lg' />
                   </div>
                 </Link>
-                <Image
+                <div>
+                  <img
+                    className='w-[480px] h-auto'
+                    src={video.thumbnail}
+                    alt='Youtube video cover'
+                  />
+                </div>
+
+                {/* <Image
                   alt='Video Thumbnail'
-                  className='object-cover w-full h-56'
-                  height={225}
-                  src='/placeholder.svg'
-                  style={{
-                    aspectRatio: '400/225',
-                    objectFit: 'cover',
-                  }}
-                  width={400}
-                />
+                  className='w-[480px] h-auto'
+                  height={360}
+                  src='https://i.ytimg.com/vi/YDIQo-py2bI/hqdefault.jpg'
+                  // style={{
+                  //   aspectRatio: '480/360',
+                  //   objectFit: 'cover',
+                  // }}
+                  width={480}
+                  srcSet='https://i.ytimg.com/vi/YDIQo-py2bI/hqdefault.jpg 480w'
+                /> */}
                 <div className='bg-white p-4 dark:bg-gray-950'>
                   <h3 className='font-semibold text-lg md:text-xl line-clamp-2'>
                     {video.title}
                   </h3>
                   <div className='flex items-center justify-between text-sm text-gray-500 dark:text-gray-400'>
                     <span>{video.author}</span>
-                    <span>5:32</span>
+                    <span>{video.period}</span>
                   </div>
                 </div>
               </div>

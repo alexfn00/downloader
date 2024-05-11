@@ -18,6 +18,8 @@ export async function GET(res: Request) {
       author: item.author,
       title: item.title,
       href: item.href,
+      period: item.period,
+      thumbnail: item.thumbnail,
     })
   })
 

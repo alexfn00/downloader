@@ -20,9 +20,16 @@ model author {
 }
 
 model video {
-  id     Int    @id @default(autoincrement())
-  author String
-  name   String
-  title  String
-  href   String
+  id        Int    @id @default(autoincrement())
+  author    String
+  name      String
+  title     String
+  href      String
+  thumbnail String
+  period    String
+}
+
+model task {
+  id   Int    @id @default(autoincrement())
+  task String
 }
