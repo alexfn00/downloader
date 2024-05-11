@@ -21,6 +21,7 @@ import axios from 'axios'
 import { Loader2, Play } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import { useWatch } from '../WatchProvider'
 
 export function VideoList() {
@@ -32,18 +33,9 @@ export function VideoList() {
     const loadVideos = async () => {
       try {
         setIsLoading(true)
-        await axios
-          .get(`/api/video?q=${watchId}`)
-          .then((res) => {
-            const data = res.data['result']
-            console.log('res.data:', data)
-            setVideos(data['lists'])
-          })
-          .catch((res) => {
-            console.log('/api/video error:', res)
-          })
-        // console.log('result.data:', result.data)
-        // setVideos(result.data.lists)
+        const result = await axios.get(`/api/video?q=${watchId}`)
+        console.log('result.data:', result.data)
+        setVideos(result.data.lists)
         console.log('videos:', videos)
         videos.map((video, index) => {
           console.log(video, index)
