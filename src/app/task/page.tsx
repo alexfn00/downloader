@@ -78,7 +78,6 @@ export default function Home() {
             className='w-[480px] h-auto'
             src={videoSrc}
             alt='Youtube video cover'
-            srcset={videoSrc}
             width={480}
             height={360}
           />

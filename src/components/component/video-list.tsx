@@ -21,7 +21,6 @@ import axios from 'axios'
 import { Loader2, Play } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import Image from 'next/image'
 import { useWatch } from '../WatchProvider'
 
 export function VideoList() {
