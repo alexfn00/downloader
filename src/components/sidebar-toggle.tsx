@@ -8,7 +8,7 @@ const SidebarToggle = () => {
   const { toggleSidebar } = useSidebar()
   return (
     <Button
-      className='-ml-2 hidden size-9 p-0 lg:flex'
+      className='-ml-2 size-9 p-0 lg:flex'
       variant='ghost'
       onClick={() => {
         toggleSidebar()
