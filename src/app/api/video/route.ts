@@ -10,7 +10,6 @@ export async function GET(res: Request) {
     },
     take: 10,
   })
-  console.log(videos)
   let lists: object[] = []
 
   videos.map((item) => {

@@ -53,7 +53,6 @@ export default function Home() {
             if (res.state == 'SUCCESS') {
               clearInterval(timer)
               setIsLoading(false)
-              // setResults('SUCCESS')
             }
           })
           .catch((error) => {
@@ -61,7 +60,7 @@ export default function Home() {
             setIsLoading(false)
             console.error(error)
           })
-      }, 1000)
+      }, 5000)
     }
     console.log('startQuery taskId:', taskId)
     if (taskId != '') {
