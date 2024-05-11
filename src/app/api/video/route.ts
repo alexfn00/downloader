@@ -20,6 +20,8 @@ export async function GET(res: Request) {
       href: item.href,
       period: item.period,
       thumbnail: item.thumbnail,
+      published: item.published,
+      viewCount: item.viewCount,
     })
   })
 

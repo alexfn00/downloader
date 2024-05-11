@@ -1,6 +1,6 @@
 // database
 datasource db {
-  provider = "postgres"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -27,6 +27,8 @@ model video {
   href      String
   thumbnail String
   period    String
+  published String
+  viewCount String
 }
 
 model task {

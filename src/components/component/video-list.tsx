@@ -33,9 +33,18 @@ export function VideoList() {
     const loadVideos = async () => {
       try {
         setIsLoading(true)
-        const result = await axios.get(`/api/video?q=${watchId}`)
-        console.log('result.data:', result.data)
-        setVideos(result.data.lists)
+        await axios
+          .get(`/api/video?q=${watchId}`)
+          .then((res) => {
+            const data = res.data['result']
+            console.log('res.data:', data)
+            setVideos(data['lists'])
+          })
+          .catch((res) => {
+            console.log('/api/video error:', res)
+          })
+        // console.log('result.data:', result.data)
+        // setVideos(result.data.lists)
         console.log('videos:', videos)
         videos.map((video, index) => {
           console.log(video, index)
@@ -103,6 +112,10 @@ export function VideoList() {
                   <div className='flex items-center justify-between text-sm text-gray-500 dark:text-gray-400'>
                     <span>{video.author}</span>
                     <span>{video.period}</span>
+                  </div>
+                  <div className='flex items-center justify-between text-sm text-gray-500 dark:text-gray-400'>
+                    <span>{video.published}</span>
+                    <span>{video.viewCount}</span>
                   </div>
                 </div>
               </div>
