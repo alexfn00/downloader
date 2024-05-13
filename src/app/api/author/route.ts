@@ -1,4 +1,4 @@
-import { db } from '@/app/db'
+import { db } from '@/db'
 
 export async function GET() {
   const authors = await db.author.findMany({

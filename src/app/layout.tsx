@@ -1,8 +1,13 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
+import { GeistSans } from 'geist/font/sans'
+import { GeistMono } from 'geist/font/mono'
 
-const inter = Inter({ subsets: ['latin'] })
+import type { Metadata } from 'next'
+import './globals.css'
+import SidebarProvider from '@/components/SidebarProvider'
+import Header from '@/components/Header'
+import { cn } from '@/lib/utils'
+import { Toaster } from '@/components/ui/toaster'
+import Navbar from '@/components/Navbar'
 
 export const metadata: Metadata = {
   title: 'Youtube Downloader',
@@ -17,8 +22,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en'>
-      <body className={inter.className}>
-        <main className=''>{children}</main>
+      <body
+        className={cn(
+          'min-h-screen font-sans antialiased grainy',
+          GeistSans.variable,
+          GeistMono.variable,
+        )}>
+        <SidebarProvider>
+          <Toaster />
+          <Navbar />
+          <main className='flex flex-col flex-1 bg-muted/50'>{children}</main>
+        </SidebarProvider>
       </body>
     </html>
   )

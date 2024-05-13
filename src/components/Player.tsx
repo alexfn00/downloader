@@ -1,6 +1,6 @@
 'use client'
-
-import Player from '@/components/Player'
+import axios from 'axios'
+import { useEffect, useState } from 'react'
 import {
   Select,
   SelectContent,
@@ -8,13 +8,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import axios from 'axios'
-import { ArrowBigLeft } from 'lucide-react'
-import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import React, { Suspense, useEffect, useState } from 'react'
 
-const VideoPlay = () => {
+const Player = () => {
   const searchParams = useSearchParams()
   const search = searchParams.get('url')
   console.log('search:', search)
@@ -98,13 +94,4 @@ const VideoPlay = () => {
   )
 }
 
-const Page = () => {
-  return (
-    // You could have a loading skeleton as the `fallback` too
-    <Suspense>
-      <Player />
-    </Suspense>
-  )
-}
-
-export default Page
+export default Player

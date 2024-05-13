@@ -1,6 +1,7 @@
 import React, { createContext, useEffect, useState } from 'react'
 import Image from 'next/image'
 import { useWatch } from './WatchProvider'
+import SidebarToggle from './sidebar-toggle'
 
 const SearchAuthor = () => {
   const { watchId, UpdateWatchId } = useWatch()
@@ -24,34 +25,30 @@ const SearchAuthor = () => {
     }
   }, [query])
   return (
-    <div className='mt-4 space-x-2 w-full flex flex-col p-4'>
-      <h1>{watchId}</h1>
-      <input
-        type='text'
-        onChange={search}
-        className='p-2 w-[60%] outline-none text-black'
-        placeholder='Search author'
-      />
-      {results.map((item, index) => (
-        <>
-          <button
-            className='flex items-center justify-start hover:bg-slate-300 rounded-md'
-            key={item.id}
-            onClick={() => {
-              // alert(item.author)
-              UpdateWatchId(item.author)
-            }}>
-            <img
-              className='rounded-full mx-3 my-3'
-              alt='Author'
-              height={30}
-              width={30}
-              src={item.avatar}
-            />
-            <h3 className='text-sm line-clamp-1'>{item.name}</h3>
-          </button>
-        </>
-      ))}
+    <div className='mt-4 space-x-2 w-full p-4'>
+      <div className='mx-5 flex flex-row sm:flex-col'>
+        {results.map((item, index) => (
+          <>
+            <button
+              className='flex items-center justify-start hover:bg-slate-300 rounded-md'
+              key={item.id}
+              onClick={() => {
+                UpdateWatchId(item.author)
+              }}>
+              <img
+                className='rounded-full mx-3 my-3'
+                alt='Author'
+                height={48}
+                width={48}
+                src={item.avatar}
+              />
+              <h3 className='text-sm line-clamp-1 hidden sm:block'>
+                {item.name}
+              </h3>
+            </button>
+          </>
+        ))}
+      </div>
     </div>
   )
 }
