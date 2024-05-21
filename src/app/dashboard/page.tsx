@@ -3,6 +3,8 @@
 import { VideoList } from '@/components/component/video-list'
 import SearchAuthor from '@/components/search-author'
 import SidebarToggle from '@/components/sidebar-toggle'
+import { SkeletonCard } from '@/components/skeletons'
+import { Suspense } from 'react'
 
 const Home = () => {
   return (
@@ -11,7 +13,9 @@ const Home = () => {
         <SidebarToggle />
       </div>
       <div className=' block sm:hidden'>
-        <SearchAuthor />
+        <Suspense fallback={<SkeletonCard />}>
+          <SearchAuthor />
+        </Suspense>
       </div>
       <VideoList />
     </div>

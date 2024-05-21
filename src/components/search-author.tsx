@@ -1,53 +1,62 @@
-import React, { createContext, useEffect, useState } from 'react'
-import Image from 'next/image'
+import React, { useEffect, useState } from 'react'
 import { useWatch } from './WatchProvider'
-import SidebarToggle from './sidebar-toggle'
+import axios from 'axios'
+import { SkeletonCard } from './skeletons'
 
 const SearchAuthor = () => {
-  const { watchId, UpdateWatchId } = useWatch()
-  const [query, setQuery] = useState(true)
+  const { UpdateWatchId } = useWatch()
+  const [loading, setLoading] = useState(false)
   const [results, setResults] = useState<any[]>([])
-  const search = (e: any) => {
-    setTimeout(() => {
-      setQuery(e.target.value)
-    }, 500)
+
+  const loadAuthors = async () => {
+    try {
+      setLoading(true)
+      const response = await axios.get(`/api/author?q=`)
+      // debugger
+
+      if (response) {
+        const data = response.data.authors
+        setResults(data)
+      }
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
-    if (query) {
-      fetch(`/api/search?q=${query}`)
-        .then((response) => {
-          return response.json()
-        })
-        .then((data) => {
-          setResults(data.authors)
-        })
-    }
-  }, [query])
+    loadAuthors()
+  }, [])
+
   return (
-    <div className='mt-4 space-x-2 w-full p-4'>
-      <div className='mx-5 flex flex-row sm:flex-col'>
-        {results.map((item, index) => (
-          <>
-            <button
-              className='flex items-center justify-start hover:bg-slate-300 rounded-md'
-              key={item.id}
-              onClick={() => {
-                UpdateWatchId(item.author)
-              }}>
-              <img
-                className='rounded-full mx-3 my-3'
-                alt='Author'
-                height={48}
-                width={48}
-                src={item.avatar}
-              />
-              <h3 className='text-sm line-clamp-1 hidden sm:block'>
-                {item.name}
-              </h3>
-            </button>
-          </>
-        ))}
+    <div className='mt-2 space-x-2 w-full p-4 overflow-auto '>
+      <div className='mx-2 flex flex-row justify-center border sm:flex-col bg-gray-100 rounded-md '>
+        {loading && <SkeletonCard />}
+        {loading &&
+          results.map((item, index) => (
+            <>
+              <div className='m-2'>
+                <button
+                  className='flex items-center justify-start hover:bg-slate-300 rounded-md'
+                  key={item.id}
+                  onClick={() => {
+                    UpdateWatchId(item.author)
+                  }}>
+                  <img
+                    className='rounded-full mx-3 my-3'
+                    alt='Author'
+                    height={48}
+                    width={48}
+                    src={item.avatar}
+                  />
+                  <h3 className='text-sm line-clamp-1 hidden sm:block'>
+                    {item.name}
+                  </h3>
+                </button>
+              </div>
+            </>
+          ))}
       </div>
     </div>
   )
