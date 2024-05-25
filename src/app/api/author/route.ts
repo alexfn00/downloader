@@ -5,6 +5,7 @@ export async function GET() {
     take: 10,
   })
 
+  // console.log('authors:', authors)
   return Response.json(
     {
       authors,

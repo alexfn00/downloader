@@ -17,56 +17,45 @@ To read more about using these font, please visit the Next.js documentation:
 - App Directory: https://nextjs.org/docs/app/building-your-application/optimizing/fonts
 - Pages Directory: https://nextjs.org/docs/pages/building-your-application/optimizing/fonts
 **/
-import axios from 'axios'
 import { Loader2, Play } from 'lucide-react'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import Image from 'next/image'
-import { useWatch } from '../WatchProvider'
-import SidebarToggle from '../sidebar-toggle'
+import { useWatch } from './WatchProvider'
+import { useMutation } from '@tanstack/react-query'
+import { getVideos } from '@/app/actions'
+import { useEffect } from 'react'
 
 export function VideoList() {
-  const { watchId, UpdateWatchId } = useWatch()
-  const [isLoading, setIsLoading] = useState(false)
-  const [videos, setVideos] = useState<any[]>([])
+  const { watchId } = useWatch()
+  console.log('VideoList:', watchId)
+  console.log('watchId length:', watchId.length)
 
-  useEffect(() => {
-    const loadVideos = async () => {
-      try {
-        setIsLoading(true)
-        const result = await axios.get(`/api/video?q=${watchId}`)
-        console.log('result.data:', result.data)
-        setVideos(result.data.lists)
-        console.log('videos:', videos)
-        videos.map((video, index) => {
-          console.log(video, index)
-        })
-        console.log(typeof videos)
-        setIsLoading(false)
-      } catch (error) {
-        console.log(error)
-      }
-    }
+  const {
+    data,
+    mutate: searchVideos,
+    isPending,
+    isError,
+  } = useMutation({
+    mutationFn: async () => await getVideos({ author: watchId }),
+    mutationKey: ['author'],
+  })
 
-    loadVideos()
-  }, [watchId])
-
-  const createTask = async () => {
-    try {
-      const result = await axios.get(`/api/task?q=${watchId}`)
-      console.log('result.data:', result.data)
-    } catch (error) {
-      console.log(error)
-    }
+  if (isError) return <div>Sorry There was an Error</div>
+  if (!isPending) {
+    console.log('data:', data)
   }
 
   return (
     <>
       <section className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 md:p-6'>
-        {isLoading ? (
-          <Loader2 className='mr-4 h-16 w-16 animate-spin' />
-        ) : (
-          videos.map((video, index) => (
+        <button
+          onClick={() => {
+            searchVideos()
+          }}>
+          Click me
+        </button>
+        {isPending && <Loader2 className='mr-4 h-16 w-16 animate-spin' />}
+        {!isPending &&
+          data?.map((video) => (
             <>
               <div className='relative group overflow-hidden rounded-lg'>
                 <Link
@@ -85,18 +74,6 @@ export function VideoList() {
                   />
                 </div>
 
-                {/* <Image
-                  alt='Video Thumbnail'
-                  className='w-[480px] h-auto'
-                  height={360}
-                  src='https://i.ytimg.com/vi/YDIQo-py2bI/hqdefault.jpg'
-                  // style={{
-                  //   aspectRatio: '480/360',
-                  //   objectFit: 'cover',
-                  // }}
-                  width={480}
-                  srcSet='https://i.ytimg.com/vi/YDIQo-py2bI/hqdefault.jpg 480w'
-                /> */}
                 <div className='bg-white p-4 dark:bg-gray-950'>
                   <h3 className='font-semibold text-lg md:text-xl line-clamp-2'>
                     {video.title}
@@ -112,8 +89,7 @@ export function VideoList() {
                 </div>
               </div>
             </>
-          ))
-        )}
+          ))}
       </section>
     </>
   )

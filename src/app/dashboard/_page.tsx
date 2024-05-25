@@ -1,6 +1,6 @@
 'use client'
 
-import { VideoList } from '@/components/component/video-list'
+import { VideoList } from '@/components/video-list'
 import SearchAuthor from '@/components/search-author'
 import SidebarToggle from '@/components/sidebar-toggle'
 import { SkeletonCard } from '@/components/skeletons'

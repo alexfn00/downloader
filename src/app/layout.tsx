@@ -8,6 +8,7 @@ import Header from '@/components/Header'
 import { cn } from '@/lib/utils'
 import { Toaster } from '@/components/ui/toaster'
 import Navbar from '@/components/Navbar'
+import Providers from '@/components/Providers'
 
 export const metadata: Metadata = {
   title: 'Youtube Downloader',
@@ -28,11 +29,13 @@ export default function RootLayout({
           GeistSans.variable,
           GeistMono.variable,
         )}>
-        <SidebarProvider>
-          <Toaster />
-          <Navbar />
-          <main className='flex flex-col flex-1 bg-muted/50'>{children}</main>
-        </SidebarProvider>
+        <Providers>
+          <SidebarProvider>
+            <Toaster />
+            <Navbar />
+            <main className='flex flex-col flex-1 bg-muted/50'>{children}</main>
+          </SidebarProvider>
+        </Providers>
       </body>
     </html>
   )

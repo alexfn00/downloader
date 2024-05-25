@@ -1,58 +1,43 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useWatch } from './WatchProvider'
 import axios from 'axios'
 import { SkeletonCard } from './skeletons'
+import { useQuery } from '@tanstack/react-query'
+import { getUser } from '@/app/actions'
 
 const SearchAuthor = () => {
   const { UpdateWatchId } = useWatch()
-  const [loading, setLoading] = useState(false)
-  const [results, setResults] = useState<any[]>([])
+  const { data, isLoading, isError } = useQuery({
+    queryFn: async () => await getUser({ userId: '0001' }),
+    queryKey: ['q'], //Array according to Documentation
+  })
 
-  const loadAuthors = async () => {
-    try {
-      setLoading(true)
-      const response = await axios.get(`/api/author?q=`)
-      // debugger
-
-      if (response) {
-        const data = response.data.authors
-        setResults(data)
-      }
-    } catch (error) {
-      console.log(error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    loadAuthors()
-  }, [])
+  if (isError) return <div>Sorry There was an Error</div>
 
   return (
     <div className='mt-2 space-x-2 w-full p-4 overflow-auto '>
       <div className='mx-2 flex flex-row justify-center border sm:flex-col bg-gray-100 rounded-md '>
-        {loading && <SkeletonCard />}
-        {loading &&
-          results.map((item, index) => (
+        {isLoading && <SkeletonCard />}
+        {!isLoading &&
+          data?.map((item, index) => (
             <>
               <div className='m-2'>
                 <button
-                  className='flex items-center justify-start hover:bg-slate-300 rounded-md'
+                  className='flex items-center justify-start hover:bg-slate-300 rounded-md w-full'
                   key={item.id}
                   onClick={() => {
                     UpdateWatchId(item.author)
                   }}>
                   <img
-                    className='rounded-full mx-3 my-3'
+                    className='rounded-full mx-3 my-2'
                     alt='Author'
                     height={48}
                     width={48}
                     src={item.avatar}
                   />
-                  <h3 className='text-sm line-clamp-1 hidden sm:block'>
+                  <p className='text-md truncate hidden sm:block'>
                     {item.name}
-                  </h3>
+                  </p>
                 </button>
               </div>
             </>

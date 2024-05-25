@@ -24,6 +24,7 @@ const WatchProvider = ({ children }: WatchProviderProps) => {
   const [watchId, setWatchId] = useState('')
 
   const UpdateWatchId = (value: string) => {
+    console.log('UpdateWatchId:', value)
     setWatchId(value)
   }
 
