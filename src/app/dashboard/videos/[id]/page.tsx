@@ -1,14 +1,10 @@
 'use client'
 import { fetchVideos } from '@/app/actions'
 import { SkeletonCard } from '@/components/skeletons'
-import {
-  useInfiniteQuery,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query'
-import { Loader2, Play } from 'lucide-react'
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
+import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useInView } from 'react-intersection-observer'
 
 const Page = ({ params }: { params: { id: string } }) => {
@@ -86,7 +82,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                         {item.title}
                       </h3>
                       <div className='flex items-center justify-between text-sm text-gray-500 dark:text-gray-400'>
-                        <span>{item.author}</span>
+                        <span>{item.name}</span>
                         <span>{item.period}</span>
                       </div>
                       <div className='flex items-center justify-between text-sm text-gray-500 dark:text-gray-400'>

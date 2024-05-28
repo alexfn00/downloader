@@ -3,7 +3,6 @@
 import { db } from '@/db'
 
 export const getUser = async ({ userId }: { userId: string }) => {
-  console.log('userId:', userId)
   const authors = await db.author.findMany({
     take: 10,
   })

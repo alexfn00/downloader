@@ -29,7 +29,6 @@ export default function SideNav() {
       fetchNextPage()
     }
   }, [fetchNextPage, inView])
-  console.log('inView:', inView)
 
   if (status === 'pending')
     return (
@@ -41,19 +40,19 @@ export default function SideNav() {
   if (status === 'error') return <div>{error.message}</div>
 
   return (
-    <div className='flex max-full flex-col px-3 py-4 md:px-2 border bg-orange-300'>
+    <div className='flex max-full flex-col px-3 py- md:px-2 h-[calc(100vh-6rem)] '>
       <Link
-        className='mb-2 flex h-20 items-end justify-start rounded-md bg-blue-600 p-4 md:h-40'
+        className='mb-2 flex h-20 items-end justify-start rounded-md bg-blue-600 p-4 md:h-30'
         href='/'>
         <div className='w-32 text-white md:w-40'>
           <div
             className={` flex flex-row items-center leading-none text-white`}>
             <Globe className='h-12 w-12 rotate-[15deg]' />
-            <p className='text-[44px]'>Acme</p>
+            <p className='text-[20px] ml-2'>Authors</p>
           </div>
         </div>
       </Link>
-      <div className='flex  grow flex-row justify-start space-x-2 md:flex-col md:space-x-0 md:space-y-2'>
+      <div className='flex grow flex-row overflow-y-auto justify-start space-x-2 md:flex-col md:space-x-0 md:space-y-2 border'>
         {data.pages.map((page) => {
           return (
             <>
