@@ -69,18 +69,9 @@ export default function Home() {
   }, [taskId])
 
   return (
-    <main className='mx-auto md:max-w-6xl px-4'>
-      <div className='flex flex-col items-center min-h-[300px] justify-center border bg-indigo-400 rounded-md text-white'>
-        <h3>Search Authors</h3>
-        <div>
-          <Image
-            className='w-[480px] h-auto'
-            src={videoSrc}
-            alt='Youtube video cover'
-            width={480}
-            height={360}
-          />
-        </div>
+    <main className='md:max-w-6xl px-4 mx-auto w-2/3'>
+      <div className='flex flex-col items-center min-h-[200px] justify-center border bg-indigo-400 rounded-md text-white'>
+        <h3 className=' w-11/12 text-center'>Search Authors</h3>
         <div className='mt-4 space-x-2 w-full flex justify-center p-4'>
           <input
             type='text'

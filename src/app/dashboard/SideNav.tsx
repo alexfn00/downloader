@@ -4,38 +4,44 @@ import Link from 'next/link'
 import { Globe, Loader2 } from 'lucide-react'
 import clsx from 'clsx'
 import { usePathname } from 'next/navigation'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { getUser } from '../actions'
-
-const links = [
-  { name: 'Home', href: '/dashboard', icon: Globe },
-  {
-    name: 'Invoices',
-    href: '/dashboard/invoices',
-    icon: Globe,
-  },
-  { name: 'Customers', href: '/dashboard/customers', icon: Globe },
-]
+import { useInfiniteQuery } from '@tanstack/react-query'
+import { fetchAuthors } from '../actions'
+import { SkeletonCard } from '@/components/skeletons'
+import { useEffect } from 'react'
+import { useInView } from 'react-intersection-observer'
 
 export default function SideNav() {
-  const queryClient = useQueryClient()
-
   const pathname = usePathname()
-  const {
-    data: links,
-    isLoading,
-    isError,
-  } = useQuery({
-    queryFn: async () => await getUser({ userId: '0001' }),
-    queryKey: ['q'], //Array according to Documentation
-    staleTime: Infinity,
-    // gcTime: 0,
-  })
+  const { data, error, status, fetchNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ['authors'],
+      queryFn: ({ pageParam }) => fetchAuthors({ pageParam }),
+      initialPageParam: 0,
+      getNextPageParam: (lastPage) => {
+        return lastPage.nextPage
+      },
+    })
 
-  if (isError) return <div>Sorry There was an Error</div>
+  const { ref, inView } = useInView()
+
+  useEffect(() => {
+    if (inView) {
+      fetchNextPage()
+    }
+  }, [fetchNextPage, inView])
+  console.log('inView:', inView)
+
+  if (status === 'pending')
+    return (
+      <div>
+        <SkeletonCard />
+      </div>
+    )
+
+  if (status === 'error') return <div>{error.message}</div>
 
   return (
-    <div className='flex h-full flex-col px-3 py-4 md:px-2'>
+    <div className='flex max-full flex-col px-3 py-4 md:px-2 border bg-orange-300'>
       <Link
         className='mb-2 flex h-20 items-end justify-start rounded-md bg-blue-600 p-4 md:h-40'
         href='/'>
@@ -47,32 +53,40 @@ export default function SideNav() {
           </div>
         </div>
       </Link>
-      <div className='flex grow flex-row justify-start space-x-2 md:flex-col md:space-x-0 md:space-y-2'>
-        {isLoading && <Loader2 className='mr-4 h-16 w-16 animate-spin' />}
-        {!isLoading &&
-          links?.map((link) => {
-            // const LinkIcon = link.icon
-            return (
-              <Link
-                key={link.name}
-                href={`/dashboard/videos/${link.author}`}
-                className={clsx(
-                  'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3',
-                  {
-                    'bg-sky-100 text-blue-600': pathname === link.author,
-                  },
-                )}>
-                <img
-                  className='rounded-full mx-3 my-2'
-                  alt='Author'
-                  height={48}
-                  width={48}
-                  src={link.avatar}
-                />
-                <p className='hidden md:block'>{link.name}</p>
-              </Link>
-            )
-          })}
+      <div className='flex  grow flex-row justify-start space-x-2 md:flex-col md:space-x-0 md:space-y-2'>
+        {data.pages.map((page) => {
+          return (
+            <>
+              {page.authors.map((item) => {
+                return (
+                  <Link
+                    key={item.name}
+                    href={`/dashboard/videos/${item.author}`}
+                    className={clsx(
+                      'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3',
+                      {
+                        'bg-sky-100 text-blue-600': pathname === item.author,
+                      },
+                    )}>
+                    <img
+                      className='rounded-full mx-3 my-2'
+                      alt='Author'
+                      height={48}
+                      width={48}
+                      src={item.avatar}
+                    />
+                    <p className='hidden md:block'>{item.name}</p>
+                  </Link>
+                )
+              })}
+            </>
+          )
+        })}
+      </div>
+      <div ref={ref} className='flex flex-col items-center'>
+        {isFetchingNextPage && (
+          <Loader2 className='mr-4 h-16 w-16 animate-spin' />
+        )}
       </div>
     </div>
   )

@@ -14,28 +14,57 @@ export const setUser = async ({ userId }: { userId: string }) => {
   return { name: 'John' }
 }
 
-export const getVideos = async ({ author }: { author: string }) => {
-  console.log('getVideos author:', author)
-  const data = await db.video.findMany({
+const LIMIT = 10
+
+export const fetchVideos = async ({
+  author,
+  pageParam,
+}: {
+  author: string
+  pageParam: number | 0
+}) => {
+  const totalCount = await db.video.count({
     where: {
       author: author,
     },
-    take: 10,
   })
-  let lists: object[] = []
-
-  data.map((item) => {
-    lists.push({
-      author: item.author,
-      title: item.title,
-      href: item.href,
-      period: item.period,
-      thumbnail: item.thumbnail,
-      published: item.published,
-      viewCount: item.viewCount,
-    })
+  const data = await db.video.findMany({
+    skip: pageParam * LIMIT,
+    where: {
+      author: author,
+    },
+    take: LIMIT,
   })
+  const nextPage = pageParam + LIMIT < totalCount ? pageParam + 1 : null
+  const totalPages = totalCount / LIMIT + (totalCount % LIMIT)
 
-  // console.log(data)
-  return data
+  return {
+    videos: [...data],
+    totalCount: totalCount,
+    totalPages: totalPages,
+    currentPage: pageParam,
+    nextPage: nextPage,
+  }
+}
+
+export const fetchAuthors = async ({
+  pageParam,
+}: {
+  pageParam: number | 0
+}) => {
+  const totalCount = await db.author.count({})
+  const data = await db.author.findMany({
+    skip: pageParam * LIMIT,
+    take: LIMIT,
+  })
+  const nextPage = pageParam + LIMIT < totalCount ? pageParam + 1 : null
+  const totalPages = totalCount / LIMIT + (totalCount % LIMIT)
+
+  return {
+    authors: [...data],
+    totalCount: totalCount,
+    totalPages: totalPages,
+    currentPage: pageParam,
+    nextPage: nextPage,
+  }
 }

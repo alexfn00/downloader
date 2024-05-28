@@ -5,7 +5,7 @@ interface ChatLayoutProps {
 
 const DashboardLayout = ({ children }: ChatLayoutProps) => {
   return (
-    <div className='flex h-screen flex-col md:flex-row md:overflow-hidden'>
+    <div className='flex h-[calc(100vh-4rem)] flex-col md:flex-row md:overflow-hidden'>
       <div className='w-full flex-none md:w-64'>
         <SideNav />
       </div>
