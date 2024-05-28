@@ -1,16 +1,38 @@
 'use client'
 
-import Image from 'next/image'
 import axios from 'axios'
 import { Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { SkeletonCard } from '@/components/skeletons'
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
+import { fetchAuthors } from '../actions'
+import { useInView } from 'react-intersection-observer'
+import { Button } from '@/components/ui/button'
 
 export default function Home() {
+  // const queryClient = useQueryClient()
   const [author, setAuthor] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [results, setResults] = useState('')
   const [taskId, setTaskId] = useState('')
-  const videoSrc = 'https://i.ytimg.com/vi/Ha4Y8HoaTmg/hqdefault.jpg'
+
+  const { data, error, status, fetchNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ['authors'],
+      queryFn: ({ pageParam }) => fetchAuthors({ pageParam }),
+      initialPageParam: 0,
+      getNextPageParam: (lastPage) => {
+        return lastPage.nextPage
+      },
+    })
+
+  const { ref, inView } = useInView()
+
+  useEffect(() => {
+    if (inView) {
+      fetchNextPage()
+    }
+  }, [fetchNextPage, inView])
 
   const handleSearch = async () => {
     try {
@@ -29,6 +51,7 @@ export default function Home() {
         const data = res.data['result']
         console.log('res.data:', data)
         setTaskId(data['id'])
+        fetchNextPage()
       })
     } catch (error) {
       console.log(error)
@@ -68,6 +91,15 @@ export default function Home() {
     }
   }, [taskId])
 
+  if (status === 'pending')
+    return (
+      <div>
+        <SkeletonCard />
+      </div>
+    )
+
+  if (status === 'error') return <div>{error.message}</div>
+
   return (
     <main className='md:max-w-6xl px-4 mx-auto w-2/3'>
       <div className='flex flex-col items-center min-h-[200px] justify-center border bg-indigo-400 rounded-md text-white'>
@@ -86,12 +118,54 @@ export default function Home() {
             Search
           </button>
         </div>
+
         {isLoading ? (
           <Loader2 className='mr-4 h-16 w-16 animate-spin' />
         ) : (
           results
         )}
       </div>
+
+      <section className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 md:p-6'>
+        {data.pages.map((page) => {
+          return (
+            <>
+              {page.authors.map((item) => {
+                return (
+                  <div
+                    key={item.name}
+                    className='flex items-center justify-between bg-gray-100 dark:bg-gray-700 p-4 rounded-md'>
+                    <div>
+                      <img
+                        className='rounded-full mx-3 my-2'
+                        alt='Author'
+                        height={48}
+                        width={48}
+                        src={item.avatar}
+                      />
+                      <p className='hidden md:block'>{item.name}</p>
+                    </div>
+                    <Button
+                      size='sm'
+                      variant='ghost'
+                      onClick={() => {
+                        setAuthor(item.author)
+                        handleSearch()
+                      }}>
+                      Update
+                    </Button>
+                  </div>
+                )
+              })}
+            </>
+          )
+        })}
+        <div ref={ref} className='flex flex-col items-center'>
+          {isFetchingNextPage && (
+            <Loader2 className='mr-4 h-16 w-16 animate-spin' />
+          )}
+        </div>
+      </section>
     </main>
   )
 }

@@ -40,7 +40,7 @@ export default function SideNav() {
   if (status === 'error') return <div>{error.message}</div>
 
   return (
-    <div className='flex max-full flex-col px-3 py- md:px-2 h-[calc(100vh-6rem)] '>
+    <div className='flex max-full flex-col px-3 py- md:px-2 md:h-[calc(100vh-6rem)] '>
       <Link
         className='mb-2 flex h-20 items-end justify-start rounded-md bg-blue-600 p-4 md:h-30'
         href='/'>

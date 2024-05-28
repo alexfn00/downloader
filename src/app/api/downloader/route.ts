@@ -13,11 +13,9 @@ export async function GET(res: Request) {
       const agent = new HttpsProxyAgent(process.env.HTTP_PROXY)
       options = { agent }
     }
-    console.log('start fetching')
     const info = await ytdl.getInfo(url, {
       requestOptions: options,
     })
-    console.log('fetch completed')
 
     let qualities: string[] = []
     let lists: object[] = []
@@ -25,7 +23,6 @@ export async function GET(res: Request) {
 
     const formats = ytdl.filterFormats(info.formats, 'audio')
 
-    console.log(formats)
     const format = ytdl.chooseFormat(formats, { quality: 'highest' })
     const filename = `${info?.videoDetails.title}.${format.container}`
     const responseHeaders = {
