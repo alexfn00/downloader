@@ -23,14 +23,16 @@ model User {
 
 // data models
 model author {
-  id     Int    @id @default(autoincrement())
-  author String
-  name   String
-  avatar String
+  id        Int      @id @default(autoincrement())
+  author    String
+  name      String
+  avatar    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }
 
 model video {
-  id        Int    @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   author    String
   name      String
   title     String
@@ -39,9 +41,13 @@ model video {
   period    String
   published String
   viewCount String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }
 
 model task {
-  id   Int    @id @default(autoincrement())
-  task String
+  id        Int      @id @default(autoincrement())
+  task      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }

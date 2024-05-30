@@ -32,6 +32,11 @@ export const fetchVideos = async ({
     where: {
       author: author,
     },
+    orderBy: [
+      {
+        updatedAt: 'asc',
+      },
+    ],
     take: LIMIT,
   })
   const nextPage = pageParam + LIMIT < totalCount ? pageParam + 1 : null
