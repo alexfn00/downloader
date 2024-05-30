@@ -34,7 +34,7 @@ export const fetchVideos = async ({
     },
     orderBy: [
       {
-        updatedAt: 'asc',
+        updatedAt: 'desc',
       },
     ],
     take: LIMIT,
