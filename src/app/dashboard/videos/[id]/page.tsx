@@ -1,18 +1,32 @@
 'use client'
 import { fetchVideos } from '@/app/actions'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { SkeletonCard } from '@/components/skeletons'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
+
 import Link from 'next/link'
 import { useEffect } from 'react'
 import { useInView } from 'react-intersection-observer'
 
-const Page = ({ params }: { params: { id: string } }) => {
+const VideoSection = ({ params }: { params: { id: string; type: string } }) => {
   const queryClient = useQueryClient()
   const { data, error, status, fetchNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ['items'],
-      queryFn: ({ pageParam }) => fetchVideos({ author: params.id, pageParam }),
+      queryFn: ({ pageParam }) =>
+        fetchVideos({ author: params.id, type: params.type, pageParam }),
       initialPageParam: 0,
       getNextPageParam: (lastPage) => {
         return lastPage.nextPage
@@ -106,4 +120,61 @@ const Page = ({ params }: { params: { id: string } }) => {
   )
 }
 
-export default Page
+const VideoPage = ({ params }: { params: { id: string } }) => {
+  return (
+    <Tabs defaultValue='videos' className='w-full'>
+      <TabsList className='grid w-[400px] grid-cols-3'>
+        <TabsTrigger value='videos'>Videos</TabsTrigger>
+        <TabsTrigger value='streams'>Streams</TabsTrigger>
+        <TabsTrigger value='shorts'>Shorts</TabsTrigger>
+      </TabsList>
+      <TabsContent value='videos'>
+        <Card>
+          <CardHeader>
+            <CardTitle>Videos</CardTitle>
+          </CardHeader>
+          <CardContent className='space-y-2'>
+            <VideoSection
+              params={{
+                id: params.id,
+                type: 'videos',
+              }}
+            />
+          </CardContent>
+        </Card>
+      </TabsContent>
+      <TabsContent value='streams'>
+        <Card>
+          <CardHeader>
+            <CardTitle>Streams</CardTitle>
+          </CardHeader>
+          <CardContent className='space-y-2'>
+            <VideoSection
+              params={{
+                id: params.id,
+                type: 'streams',
+              }}
+            />
+          </CardContent>
+        </Card>
+      </TabsContent>
+      <TabsContent value='shorts'>
+        <Card>
+          <CardHeader>
+            <CardTitle>Shorts</CardTitle>
+          </CardHeader>
+          <CardContent className='space-y-2'>
+            <VideoSection
+              params={{
+                id: params.id,
+                type: 'shorts',
+              }}
+            />
+          </CardContent>
+        </Card>
+      </TabsContent>
+    </Tabs>
+  )
+}
+
+export default VideoPage

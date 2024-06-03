@@ -1,16 +1,25 @@
 'use client'
 
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import axios from 'axios'
 import { Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { SkeletonCard } from '@/components/skeletons'
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
+import { useInfiniteQuery } from '@tanstack/react-query'
 import { fetchAuthors } from '../actions'
 import { useInView } from 'react-intersection-observer'
 import { Button } from '@/components/ui/button'
+import { revalidatePath } from 'next/cache'
 
 export default function Home() {
-  // const queryClient = useQueryClient()
   const [author, setAuthor] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [results, setResults] = useState('')
@@ -50,6 +59,7 @@ export default function Home() {
       }).then((res) => {
         const data = res.data['result']
         console.log('res.data:', data)
+
         setTaskId(data['id'])
         fetchNextPage()
       })
@@ -76,6 +86,7 @@ export default function Home() {
             if (res.state == 'SUCCESS') {
               clearInterval(timer)
               setIsLoading(false)
+              // revalidatePath('/task')
             }
           })
           .catch((error) => {
@@ -126,46 +137,60 @@ export default function Home() {
         )}
       </div>
 
-      <section className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 md:p-6'>
-        {data.pages.map((page) => {
-          return (
-            <>
-              {page.authors.map((item) => {
-                return (
-                  <div
-                    key={item.name}
-                    className='flex items-center justify-between bg-gray-100 dark:bg-gray-700 p-4 rounded-md'>
-                    <div>
-                      <img
-                        className='rounded-full mx-3 my-2'
-                        alt='Author'
-                        height={48}
-                        width={48}
-                        src={item.avatar}
-                      />
-                      <p className='hidden md:block'>{item.name}</p>
-                    </div>
-                    <Button
-                      size='sm'
-                      variant='ghost'
-                      onClick={() => {
-                        setAuthor(item.author)
-                        handleSearch()
-                      }}>
-                      Update
-                    </Button>
-                  </div>
-                )
-              })}
-            </>
-          )
-        })}
+      <Table>
+        <TableCaption>Your favourite authors</TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead className='w-[100px]'></TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Last Update</TableHead>
+            <TableHead className='text-right'>Action</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data.pages.map((page) => {
+            return (
+              <>
+                {page.authors.map((item) => {
+                  return (
+                    <TableRow key={item.id}>
+                      <TableCell className='font-medium'>
+                        <img
+                          className='rounded-full mx-3 my-2'
+                          alt='Author'
+                          height={48}
+                          width={48}
+                          src={item.avatar}
+                        />
+                      </TableCell>
+                      <TableCell>{item.name}</TableCell>
+                      <TableCell>
+                        {new Date(item.updatedAt).toLocaleString()}
+                      </TableCell>
+                      <TableCell className='text-right'>
+                        <Button
+                          size='sm'
+                          variant='ghost'
+                          onClick={() => {
+                            setAuthor(item.author)
+                            handleSearch()
+                          }}>
+                          Update
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </>
+            )
+          })}
+        </TableBody>
         <div ref={ref} className='flex flex-col items-center'>
           {isFetchingNextPage && (
             <Loader2 className='mr-4 h-16 w-16 animate-spin' />
           )}
         </div>
-      </section>
+      </Table>
     </main>
   )
 }

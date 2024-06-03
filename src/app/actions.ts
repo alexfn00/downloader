@@ -17,9 +17,11 @@ const LIMIT = 10
 
 export const fetchVideos = async ({
   author,
+  type,
   pageParam,
 }: {
   author: string
+  type: string
   pageParam: number | 0
 }) => {
   const totalCount = await db.video.count({
@@ -31,6 +33,7 @@ export const fetchVideos = async ({
     skip: pageParam * LIMIT,
     where: {
       author: author,
+      type: type
     },
     orderBy: [
       {
