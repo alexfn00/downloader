@@ -3,7 +3,7 @@
 import { db } from '@/db'
 
 export const getUser = async ({ userId }: { userId: string }) => {
-  const authors = await db.author.findMany({
+  const authors = await db.channel.findMany({
     take: 10,
   })
   return authors
@@ -16,24 +16,27 @@ export const setUser = async ({ userId }: { userId: string }) => {
 const LIMIT = 10
 
 export const fetchVideos = async ({
-  author,
+  channel,
   type,
   pageParam,
 }: {
-  author: string
+  channel: string
   type: string
   pageParam: number | 0
 }) => {
   const totalCount = await db.video.count({
     where: {
-      author: author,
+      channelId: channel,
     },
   })
   const data = await db.video.findMany({
     skip: pageParam * LIMIT,
     where: {
-      author: author,
-      type: type
+      channelId: channel,
+      videoType: type,
+    },
+    include: {
+      channel: true,
     },
     orderBy: [
       {
@@ -44,7 +47,6 @@ export const fetchVideos = async ({
   })
   const nextPage = pageParam + LIMIT < totalCount ? pageParam + 1 : null
   const totalPages = totalCount / LIMIT + (totalCount % LIMIT)
-
   return {
     videos: [...data],
     totalCount: totalCount,
@@ -59,8 +61,8 @@ export const fetchAuthors = async ({
 }: {
   pageParam: number | 0
 }) => {
-  const totalCount = await db.author.count({})
-  const data = await db.author.findMany({
+  const totalCount = await db.channel.count({})
+  const data = await db.channel.findMany({
     skip: pageParam * LIMIT,
     take: LIMIT,
   })
@@ -68,10 +70,18 @@ export const fetchAuthors = async ({
   const totalPages = totalCount / LIMIT + (totalCount % LIMIT)
 
   return {
-    authors: [...data],
+    channels: [...data],
     totalCount: totalCount,
     totalPages: totalPages,
     currentPage: pageParam,
     nextPage: nextPage,
   }
 }
+
+// export const deleteAuthor = async ({ authorName }: { authorName: string }) => {
+//   const deleteUser = await db.author.delete({
+//     where: {
+//       author: authorName,
+//     },
+//   })
+// }

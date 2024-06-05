@@ -56,15 +56,15 @@ export default function SideNav() {
         {data.pages.map((page) => {
           return (
             <>
-              {page.authors.map((item) => {
+              {page.channels.map((item) => {
                 return (
                   <Link
-                    key={item.name}
-                    href={`/dashboard/videos/${item.author}`}
+                    key={item.id}
+                    href={`/dashboard/videos/${item.id}`}
                     className={clsx(
                       'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3',
                       {
-                        'bg-sky-100 text-blue-600': pathname === item.author,
+                        'bg-sky-100 text-blue-600': pathname === item.id,
                       },
                     )}>
                     <img
@@ -72,9 +72,9 @@ export default function SideNav() {
                       alt='Author'
                       height={48}
                       width={48}
-                      src={item.avatar}
+                      src={item.channelAvatar}
                     />
-                    <p className='hidden md:block'>{item.name}</p>
+                    <p className='hidden md:block'>{item.channelName}</p>
                   </Link>
                 )
               })}

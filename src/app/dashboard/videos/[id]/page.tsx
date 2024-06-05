@@ -1,17 +1,7 @@
 'use client'
 import { fetchVideos } from '@/app/actions'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SkeletonCard } from '@/components/skeletons'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
@@ -26,7 +16,7 @@ const VideoSection = ({ params }: { params: { id: string; type: string } }) => {
     useInfiniteQuery({
       queryKey: ['items'],
       queryFn: ({ pageParam }) =>
-        fetchVideos({ author: params.id, type: params.type, pageParam }),
+        fetchVideos({ channel: params.id, type: params.type, pageParam }),
       initialPageParam: 0,
       getNextPageParam: (lastPage) => {
         return lastPage.nextPage
@@ -77,7 +67,7 @@ const VideoSection = ({ params }: { params: { id: string; type: string } }) => {
                     className='relative group overflow-hidden rounded-lg'>
                     <Link
                       className='absolute inset-0 z-10'
-                      href={`/dashboard/watch?url=${item.href}`}>
+                      href={`/dashboard/watch?url=${item.videoHref}`}>
                       {/* <span className='sr-only text-white'>Play</span> */}
                       <div className='absolute inset-0 flex items-center justify-center'>
                         {/* <Play className='w-12 h-12 text-blue-700 drop-shadow-lg' /> */}
@@ -86,22 +76,22 @@ const VideoSection = ({ params }: { params: { id: string; type: string } }) => {
                     <div>
                       <img
                         className='w-[480px] h-auto'
-                        src={item.thumbnail}
+                        src={item.videoThumbnail}
                         alt='Youtube video cover'
                       />
                     </div>
 
                     <div className='bg-white p-4 dark:bg-gray-950'>
                       <h3 className=' font-semibold text-sm md:text-md line-clamp-2'>
-                        {item.title}
+                        {item.videoTitle}
                       </h3>
                       <div className='flex items-center justify-between text-sm text-gray-500 dark:text-gray-400'>
-                        <span>{item.name}</span>
-                        <span>{item.period}</span>
+                        <span>{item.channel?.channelName}</span>
+                        <span>{item.videoPeriod}</span>
                       </div>
                       <div className='flex items-center justify-between text-sm text-gray-500 dark:text-gray-400'>
-                        <span>{item.published}</span>
-                        <span>{item.viewCount}</span>
+                        <span>{item.videoPublished}</span>
+                        <span>{item.videoViewCount}</span>
                       </div>
                     </div>
                   </div>

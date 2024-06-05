@@ -13,14 +13,14 @@ import axios from 'axios'
 import { Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { SkeletonCard } from '@/components/skeletons'
-import { useInfiniteQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchAuthors } from '../actions'
 import { useInView } from 'react-intersection-observer'
 import { Button } from '@/components/ui/button'
-import { revalidatePath } from 'next/cache'
 
 export default function Home() {
-  const [author, setAuthor] = useState('')
+  const queryClient = useQueryClient()
+  const [author, setAuthor] = useState<string>('')
   const [isLoading, setIsLoading] = useState(false)
   const [results, setResults] = useState('')
   const [taskId, setTaskId] = useState('')
@@ -68,6 +68,9 @@ export default function Home() {
     }
   }
 
+  const handleDelete = async (author: string) => {
+    console.log(author)
+  }
   useEffect(() => {
     const startQuery = async () => {
       let counter = 0
@@ -87,6 +90,10 @@ export default function Home() {
               clearInterval(timer)
               setIsLoading(false)
               // revalidatePath('/task')
+              queryClient.invalidateQueries({
+                queryKey: ['authors'],
+                exact: true,
+              })
             }
           })
           .catch((error) => {
@@ -151,7 +158,7 @@ export default function Home() {
           {data.pages.map((page) => {
             return (
               <>
-                {page.authors.map((item) => {
+                {page.channels.map((item) => {
                   return (
                     <TableRow key={item.id}>
                       <TableCell className='font-medium'>
@@ -160,10 +167,10 @@ export default function Home() {
                           alt='Author'
                           height={48}
                           width={48}
-                          src={item.avatar}
+                          src={item.channelAvatar}
                         />
                       </TableCell>
-                      <TableCell>{item.name}</TableCell>
+                      <TableCell>{item.channelName}</TableCell>
                       <TableCell>
                         {new Date(item.updatedAt).toLocaleString()}
                       </TableCell>
@@ -172,10 +179,18 @@ export default function Home() {
                           size='sm'
                           variant='ghost'
                           onClick={() => {
-                            setAuthor(item.author)
+                            setAuthor(item.channelId)
                             handleSearch()
                           }}>
                           Update
+                        </Button>
+                        <Button
+                          size='sm'
+                          variant='ghost'
+                          onClick={() => {
+                            handleDelete(item.channelId)
+                          }}>
+                          Delete
                         </Button>
                       </TableCell>
                     </TableRow>

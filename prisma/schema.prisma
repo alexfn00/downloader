@@ -22,33 +22,36 @@ model User {
 }
 
 // data models
-model author {
-  id        Int      @id @default(autoincrement())
-  author    String
-  name      String
-  avatar    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+model Channel {
+  id            String   @id @default(cuid())
+  channelId     String   @unique @map(name: "channel_id")
+  channelName   String   @map(name: "channel_name")
+  channelAvatar String   @map(name: "channel_avatar")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  Video Video[]
 }
 
-model video {
-  id        Int      @id @default(autoincrement())
-  author    String
-  name      String
-  title     String
-  href      String
-  thumbnail String
-  period    String
-  published String
-  viewCount String
-  type      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+model Video {
+  id             String   @id @default(cuid())
+  videoTitle     String   @map(name: "video_title")
+  videoHref      String   @map(name: "video_href")
+  videoThumbnail String   @map(name: "video_thumbnail")
+  videoPeriod    String   @map(name: "video_period")
+  videoPublished String   @map(name: "video_published")
+  videoViewCount String   @map(name: "video_view_count")
+  videoType      String   @map(name: "video_type")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  channel   Channel? @relation(fields: [channelId], references: [id])
+  channelId String?
 }
 
 model task {
   id        Int      @id @default(autoincrement())
   task      String
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
