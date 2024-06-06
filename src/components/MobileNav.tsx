@@ -37,6 +37,26 @@ const MobileNav = ({ isAuth }: { isAuth: boolean }) => {
                 <li>
                   <Link
                     onClick={() => {
+                      closeOnCurrent('/dashboard')
+                    }}
+                    className='flex items-center w-full font-semibold'
+                    href='/dashboard'>
+                    Dashboard
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    onClick={() => {
+                      closeOnCurrent('/task')
+                    }}
+                    className='flex items-center w-full font-semibold'
+                    href='/task'>
+                    Task
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    onClick={() => {
                       closeOnCurrent('/sign-up')
                     }}
                     className='flex items-center w-full font-semibold text-green-600'
