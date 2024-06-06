@@ -1,7 +1,7 @@
 import { db } from '@/db'
 
 export async function GET() {
-  const authors = await db.author.findMany({
+  const authors = await db.channel.findMany({
     take: 10,
   })
 

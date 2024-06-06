@@ -78,10 +78,10 @@ export const fetchAuthors = async ({
   }
 }
 
-// export const deleteAuthor = async ({ authorName }: { authorName: string }) => {
-//   const deleteUser = await db.author.delete({
-//     where: {
-//       author: authorName,
-//     },
-//   })
-// }
+export const deleteChannel = async (channel: { channelId: string }) => {
+  await db.channel.delete({
+    where: {
+      channelId: channel.channelId,
+    },
+  })
+}

@@ -4,7 +4,7 @@ export async function GET(res: Request) {
   const { searchParams } = new URL(res.url)
   const author = searchParams.get('q') || ''
 
-  const authors = await db.author.findMany({
+  const authors = await db.channel.findMany({
     take: 10,
   })
 

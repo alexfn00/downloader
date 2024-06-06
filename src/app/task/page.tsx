@@ -13,8 +13,12 @@ import axios from 'axios'
 import { Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { SkeletonCard } from '@/components/skeletons'
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
-import { fetchAuthors } from '../actions'
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query'
+import { deleteChannel, fetchAuthors } from '../actions'
 import { useInView } from 'react-intersection-observer'
 import { Button } from '@/components/ui/button'
 
@@ -68,9 +72,18 @@ export default function Home() {
     }
   }
 
-  const handleDelete = async (author: string) => {
-    console.log(author)
-  }
+  const { mutateAsync: handleDelete, isPending: isDeletePending } = useMutation(
+    {
+      mutationFn: deleteChannel,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['authors'] })
+      },
+    },
+  )
+
+  // const handleDelete = async (channelId: string) => {
+
+  // }
   useEffect(() => {
     const startQuery = async () => {
       let counter = 0
@@ -144,6 +157,12 @@ export default function Home() {
         )}
       </div>
 
+      {isDeletePending && (
+        <div className='flex items-center justify-center'>
+          <Loader2 className='mr-4 h-8 w-8 animate-spin' />
+        </div>
+      )}
+
       <Table>
         <TableCaption>Your favourite authors</TableCaption>
         <TableHeader>
@@ -186,9 +205,9 @@ export default function Home() {
                         </Button>
                         <Button
                           size='sm'
-                          variant='ghost'
+                          variant='destructive'
                           onClick={() => {
-                            handleDelete(item.channelId)
+                            handleDelete({ channelId: item.channelId })
                           }}>
                           Delete
                         </Button>

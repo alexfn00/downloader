@@ -45,7 +45,7 @@ model Video {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  channel   Channel? @relation(fields: [channelId], references: [id])
+  channel   Channel? @relation(fields: [channelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   channelId String?
 }
 
