@@ -1,6 +1,8 @@
 'use server'
 
 import { db } from '@/db'
+import { HttpsProxyAgent } from 'https-proxy-agent'
+import ytdl from 'ytdl-core'
 
 export const getUser = async ({ userId }: { userId: string }) => {
   const authors = await db.channel.findMany({
@@ -84,4 +86,44 @@ export const deleteChannel = async (channel: { channelId: string }) => {
       channelId: channel.channelId,
     },
   })
+}
+
+export const parseURL = async (search: string | null) => {
+  if (search == null) {
+    return
+  }
+  const url = search
+  try {
+    let options = {}
+    if (process.env.HTTP_PROXY) {
+      const agent = new HttpsProxyAgent(process.env.HTTP_PROXY)
+      options = { agent }
+    }
+    const info = await ytdl.getInfo(url, {
+      requestOptions: options,
+    })
+
+    const videoandaudio_formats = ytdl.filterFormats(
+      info.formats,
+      'videoandaudio',
+    )
+    const videoonly_formats = ytdl.filterFormats(info.formats, 'videoonly')
+    const audioonly_formats = ytdl.filterFormats(info.formats, 'audioonly')
+
+    const filename = info?.videoDetails.title
+    const lengthSeconds = info.videoDetails.lengthSeconds
+
+    const new_list = [
+      ...videoandaudio_formats,
+      ...audioonly_formats,
+      ...videoonly_formats,
+    ]
+    return {
+      filename,
+      lengthSeconds,
+      new_list,
+    }
+  } catch (error) {
+    console.log('parseURL error:', error)
+  }
 }

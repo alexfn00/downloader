@@ -21,6 +21,7 @@ import {
 import { deleteChannel, fetchAuthors } from '../actions'
 import { useInView } from 'react-intersection-observer'
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 export default function Home() {
   const queryClient = useQueryClient()
@@ -132,7 +133,7 @@ export default function Home() {
   if (status === 'error') return <div>{error.message}</div>
 
   return (
-    <main className='md:max-w-6xl px-4 mx-auto w-2/3'>
+    <main className='md:max-w-6xl md:px-4 mx-auto md:w-2/3 border'>
       <div className='flex flex-col items-center min-h-[200px] justify-center border bg-indigo-400 rounded-md text-white'>
         <h3 className=' w-11/12 text-center'>Search Authors</h3>
         <div className='mt-4 space-x-2 w-full flex justify-center p-4'>
@@ -181,15 +182,21 @@ export default function Home() {
                   return (
                     <TableRow key={item.id}>
                       <TableCell className='font-medium'>
-                        <img
-                          className='rounded-full mx-3 my-2'
-                          alt='Author'
-                          height={48}
-                          width={48}
-                          src={item.channelAvatar}
-                        />
+                        <Link href={`/dashboard/videos/${item.id}`}>
+                          <img
+                            className='rounded-full mx-3 my-2'
+                            alt='Author'
+                            height={48}
+                            width={48}
+                            src={item.channelAvatar}
+                          />
+                        </Link>
                       </TableCell>
-                      <TableCell>{item.channelName}</TableCell>
+                      <TableCell>
+                        <Link href={`/dashboard/videos/${item.id}`}>
+                          {item.channelName}
+                        </Link>
+                      </TableCell>
                       <TableCell>
                         {new Date(item.updatedAt).toLocaleString()}
                       </TableCell>

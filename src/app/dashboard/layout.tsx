@@ -9,7 +9,7 @@ const DashboardLayout = ({ children }: ChatLayoutProps) => {
       <div className='w-full flex-none md:w-64 py-6 md:py-12'>
         <SideNav />
       </div>
-      <div className='flex-grow p-6 md:overflow-y-auto md:p-12'>{children}</div>
+      <div className='flex-grow md:overflow-y-auto'>{children}</div>
     </div>
   )
 }

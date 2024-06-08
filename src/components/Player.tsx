@@ -1,6 +1,5 @@
 'use client'
-import axios from 'axios'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   Select,
   SelectContent,
@@ -9,85 +8,110 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useSearchParams } from 'next/navigation'
+import { useQuery } from '@tanstack/react-query'
+import { parseURL } from '@/app/actions'
+import { Loader2 } from 'lucide-react'
+import { Button } from './ui/button'
 
 const Player = () => {
   const searchParams = useSearchParams()
   const search = searchParams.get('url')
   console.log('search:', search)
-  const [videoLink, setVideoLink] = useState('')
-  const [fileName, setFileName] = useState()
-  const [videoTitle, setVideoTitle] = useState('')
-  const [showDownload, setShowDownload] = useState(false)
-  const [options, setOptions] = useState<any[]>([])
-  const [currentOption, setCurrentOption] = useState<any>(null)
-  const [videos, setVideos] = useState<any[]>([])
+  const [currentOption, setCurrentOption] = useState('0')
 
-  useEffect(() => {
-    const loadVideos = async () => {
-      try {
-        if (!search) {
-          console.log('search is null')
-          return
-        }
-        setShowDownload(false)
-        const res = await axios.get(`/api/downloader?url=${search}`)
-        console.log(res.data)
-        console.log(res.data.qualities)
-        setVideoTitle(res.data.filename)
-        setOptions(res.data.lists)
-        setCurrentOption(res.data.currentOption)
-        setShowDownload(true)
-      } catch (error) {
-        console.log(error)
-      }
+  console.log('search=', search)
+  const { data: todos, isLoading } = useQuery({
+    queryFn: () => parseURL(search),
+    queryKey: ['parseURL', { search }],
+    gcTime: 0,
+  })
+
+  if (!isLoading) {
+    console.log(todos)
+  }
+
+  function getCurrent() {
+    const i = Number(currentOption)
+    let video = true
+    if (!todos?.new_list[i].hasVideo) {
+      video = false
     }
+    return { video: video, url: todos?.new_list[i].url }
+  }
 
-    loadVideos()
-  }, [search])
   return (
-    <main className='mx-auto md:max-w-6xl px-4'>
+    <main className='mx-auto max-w-full sm:max-w-6xl mt-12 '>
       <div className='flex flex-col items-center min-h-[300px] justify-center border bg-gray-300 rounded-md'>
-        {showDownload && (
-          <div className='mt-4 space-x-2 w-full flex justify-center p-4'>
-            {/* <div>
-              <audio src={finalLink} controls></audio>
-            </div> */}
-            <div className='p-2'>
-              {currentOption.optionTag === 'video' && (
-                <video src={currentOption.url} controls></video>
-              )}
-              {currentOption.optionTag === 'audio' && (
-                <audio src={currentOption.url} controls></audio>
-              )}
-            </div>
-            <div className='p-2 flex flex-col  gap-8'>
-              <h3>{videoTitle}</h3>
-              <div className='py-4'>
-                <Select
-                  defaultValue={currentOption.url}
-                  onValueChange={(value: any) => {
-                    console.log(value)
-                    setCurrentOption(options[Number(value)])
-                  }}>
-                  <SelectTrigger className='w-[180px]'>
-                    <SelectValue placeholder='Qualitiy' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {options.map((option, index) => (
-                      <SelectItem value={index.toString()} key={option.option}>
-                        {option.option}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className='rounded-md'>
-                <button className='border border-white px-4 py-2 rounded-md font-semibold'>
-                  Download
-                </button>
-              </div>
-            </div>
+        {isLoading && (
+          <div className='flex items-center justify-center'>
+            <Loader2 className='mr-4 h-8 w-8 animate-spin' />
           </div>
+        )}
+        {!isLoading && (
+          <>
+            <div className='mt-4 w-full flex-row overflow-y-auto items-center justify-center'>
+              <div className=' '>
+                <div className='flex flex-col sm:flex-row items-center my-4'>
+                  <div className='w-full sm:w-1/2 items-center justify-center px-4'>
+                    {getCurrent().video && (
+                      <video src={getCurrent().url} controls autoPlay></video>
+                    )}
+                    {!getCurrent().video && (
+                      <audio src={getCurrent().url} controls autoPlay></audio>
+                    )}
+                  </div>
+                  <div className='flex flex-col w-full sm:w-1/2 mt-8 items-start px-4'>
+                    <h3>
+                      <div>{todos?.filename}</div>
+                    </h3>
+                    <div className='py-4 flex items-center'>
+                      <Select
+                        defaultValue={currentOption}
+                        onValueChange={(value: any) => {
+                          console.log(value)
+                          setCurrentOption(value)
+                        }}>
+                        <SelectTrigger className='w-[180px]'>
+                          <SelectValue placeholder='Qualitiy' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {todos?.new_list.map((todo, index) => (
+                            <SelectItem
+                              value={index.toString()}
+                              key={todo.lastModified}>
+                              <span className='px-2'>
+                                {todo.hasAudio && todo.hasVideo && (
+                                  <span>Video and Audio</span>
+                                )}
+                                {todo.hasAudio && !todo.hasVideo && (
+                                  <span>Audio</span>
+                                )}
+                                {!todo.hasAudio && todo.hasVideo && (
+                                  <span>Video</span>
+                                )}
+
+                                {todo.container}
+                              </span>
+                              <span className='px-2'>{todo.codecs}</span>
+                              <span className='px-2'>
+                                {todo.hasVideo && todo.qualityLabel}
+                              </span>
+                              <span className='px-2'>
+                                {Number(todo.bitrate) / 1000}
+                              </span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button size='sm' variant='ghost'>
+                        Download
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
         )}
       </div>
     </main>
