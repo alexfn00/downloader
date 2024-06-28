@@ -1,3 +1,4 @@
+import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import axios from 'axios'
 
 export async function GET(res: Request) {
@@ -16,7 +17,22 @@ export async function GET(res: Request) {
 }
 
 export const POST = async (req: Request) => {
-  const data = await req.json()
+  const { getUser } = getKindeServerSession()
+  const user = await getUser()
+
+  if (!user?.id || !user.email) {
+    return Response.json(
+      {
+        result: 'Forbidden',
+      },
+      {
+        status: 403,
+      },
+    )
+  }
+  console.log(user.id)
+  let data = await req.json()
+  data['userId'] = user.id
   const url = process.env.TASK_URL + '/task/'
   const result = await axios.post(url, data)
   return Response.json(
