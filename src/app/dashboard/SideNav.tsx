@@ -40,7 +40,7 @@ export default function SideNav() {
   if (status === 'error') return <div>{error.message}</div>
 
   return (
-    <div className='flex max-full flex-col px-3 py- md:px-2 md:h-[calc(100vh-6rem)] '>
+    <div className='flex max-full flex-col px-3 md:px-2 md:h-[calc(100vh-6rem)] '>
       <Link
         className='mb-2 flex h-20 items-end justify-start rounded-md bg-blue-600 p-4 md:h-30'
         href='/'>
@@ -52,7 +52,7 @@ export default function SideNav() {
           </div>
         </div>
       </Link>
-      <div className='flex grow flex-row overflow-y-auto justify-start space-x-2 md:flex-col md:space-x-0 md:space-y-2 border'>
+      <div className='flex grow flex-row overflow-auto justify-start space-x-2 md:flex-col md:space-x-0 md:space-y-2 border'>
         {data.pages.map((page) => {
           return (
             <>

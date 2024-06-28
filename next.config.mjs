@@ -4,6 +4,10 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
+        hostname: 'gravatar.com'
+      },
+      {
+        protocol: 'https',
         hostname: 'i.ytimg.com'
       },
       {

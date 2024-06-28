@@ -1,6 +1,7 @@
 'use server'
 
 import { db } from '@/db'
+import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import ytdl from 'ytdl-core'
 
@@ -58,6 +59,34 @@ export const fetchVideos = async ({
   }
 }
 
+
+export const authCallback = async () => {
+  try {
+    const { getUser } = getKindeServerSession()
+    const user = await getUser()
+    if (!user?.id || !user.email) {
+      return { success: false }
+    }
+    const dbUser = await db.user.findFirst({
+      where: {
+        id: user.id,
+      },
+    })
+    if (!dbUser) {
+      await db.user.create({
+        data: {
+          id: user.id,
+          email: user.email,
+        },
+      })
+    }
+    return { success: true }
+
+  } catch (error) {
+    console.log('authCallback error:', error)
+  }
+}
+
 export const fetchAuthors = async ({
   pageParam,
 }: {
@@ -103,6 +132,8 @@ export const parseURL = async (search: string | null) => {
       requestOptions: options,
     })
 
+    const audio_formats = ytdl.filterFormats(info.formats, 'audio')
+    const format = ytdl.chooseFormat(audio_formats, { quality: 'highest' })
     const videoandaudio_formats = ytdl.filterFormats(
       info.formats,
       'videoandaudio',
@@ -121,6 +152,8 @@ export const parseURL = async (search: string | null) => {
     return {
       filename,
       lengthSeconds,
+      audio_formats,
+      format,
       new_list,
     }
   } catch (error) {

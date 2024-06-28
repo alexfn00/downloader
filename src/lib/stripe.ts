@@ -38,8 +38,8 @@ export async function getUserSubscriptionPlan() {
 
   const isSubscribed = Boolean(
     dbUser.stripePriceId &&
-      dbUser.stripeCurrentPeriodEnd && // 86400000 = 1 day
-      dbUser.stripeCurrentPeriodEnd.getTime() + 86_400_000 > Date.now(),
+    dbUser.stripeCurrentPeriodEnd && // 86400000 = 1 day
+    dbUser.stripeCurrentPeriodEnd.getTime() + 86_400_000 > Date.now(),
   )
 
   const plan = isSubscribed

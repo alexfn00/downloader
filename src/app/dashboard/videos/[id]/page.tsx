@@ -4,11 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SkeletonCard } from '@/components/skeletons'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Search } from 'lucide-react'
 
 import Link from 'next/link'
 import { useEffect } from 'react'
 import { useInView } from 'react-intersection-observer'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 
 const VideoSection = ({ params }: { params: { id: string; type: string } }) => {
   const queryClient = useQueryClient()
@@ -112,58 +114,66 @@ const VideoSection = ({ params }: { params: { id: string; type: string } }) => {
 
 const VideoPage = ({ params }: { params: { id: string } }) => {
   return (
-    <Tabs defaultValue='videos' className='w-full'>
-      <TabsList className='grid w-[400px] grid-cols-3'>
-        <TabsTrigger value='videos'>Videos</TabsTrigger>
-        <TabsTrigger value='streams'>Streams</TabsTrigger>
-        <TabsTrigger value='shorts'>Shorts</TabsTrigger>
-      </TabsList>
-      <TabsContent value='videos'>
-        <Card>
-          <CardHeader>
-            <CardTitle>Videos</CardTitle>
-          </CardHeader>
-          <CardContent className='space-y-2'>
-            <VideoSection
-              params={{
-                id: params.id,
-                type: 'videos',
-              }}
-            />
-          </CardContent>
-        </Card>
-      </TabsContent>
-      <TabsContent value='streams'>
-        <Card>
-          <CardHeader>
-            <CardTitle>Streams</CardTitle>
-          </CardHeader>
-          <CardContent className='space-y-2'>
-            <VideoSection
-              params={{
-                id: params.id,
-                type: 'streams',
-              }}
-            />
-          </CardContent>
-        </Card>
-      </TabsContent>
-      <TabsContent value='shorts'>
-        <Card>
-          <CardHeader>
-            <CardTitle>Shorts</CardTitle>
-          </CardHeader>
-          <CardContent className='space-y-2'>
-            <VideoSection
-              params={{
-                id: params.id,
-                type: 'shorts',
-              }}
-            />
-          </CardContent>
-        </Card>
-      </TabsContent>
-    </Tabs>
+    <>
+      <div className='m-auto flex w-full max-w-sm items-center space-x-2 py-4'>
+        <Search />
+        <Input type='text' placeholder='Search' />
+        <Button type='submit'>Search</Button>
+      </div>
+
+      <Tabs defaultValue='videos' className='w-full'>
+        <TabsList className='grid w-[400px] grid-cols-3'>
+          <TabsTrigger value='videos'>Videos</TabsTrigger>
+          <TabsTrigger value='streams'>Streams</TabsTrigger>
+          <TabsTrigger value='shorts'>Shorts</TabsTrigger>
+        </TabsList>
+        <TabsContent value='videos'>
+          <Card>
+            <CardHeader>
+              <CardTitle>Videos</CardTitle>
+            </CardHeader>
+            <CardContent className='space-y-2'>
+              <VideoSection
+                params={{
+                  id: params.id,
+                  type: 'videos',
+                }}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value='streams'>
+          <Card>
+            <CardHeader>
+              <CardTitle>Streams</CardTitle>
+            </CardHeader>
+            <CardContent className='space-y-2'>
+              <VideoSection
+                params={{
+                  id: params.id,
+                  type: 'streams',
+                }}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value='shorts'>
+          <Card>
+            <CardHeader>
+              <CardTitle>Shorts</CardTitle>
+            </CardHeader>
+            <CardContent className='space-y-2'>
+              <VideoSection
+                params={{
+                  id: params.id,
+                  type: 'shorts',
+                }}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </>
   )
 }
 

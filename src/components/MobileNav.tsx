@@ -4,6 +4,11 @@ import { ArrowRight, Menu } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import {
+  LoginLink,
+  LogoutLink,
+  RegisterLink,
+} from '@kinde-oss/kinde-auth-nextjs/components'
 
 const MobileNav = ({ isAuth }: { isAuth: boolean }) => {
   const [isOpen, setOpen] = useState<boolean>(false)
@@ -37,54 +42,32 @@ const MobileNav = ({ isAuth }: { isAuth: boolean }) => {
                 <li>
                   <Link
                     onClick={() => {
-                      closeOnCurrent('/dashboard')
-                    }}
-                    className='flex items-center w-full font-semibold'
-                    href='/dashboard'>
-                    Dashboard
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    onClick={() => {
-                      closeOnCurrent('/task')
-                    }}
-                    className='flex items-center w-full font-semibold'
-                    href='/task'>
-                    Task
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    onClick={() => {
-                      closeOnCurrent('/sign-up')
-                    }}
-                    className='flex items-center w-full font-semibold text-green-600'
-                    href='/sign-up'>
-                    Get started <ArrowRight className='ml-2 h-5 w-5' />
-                  </Link>
-                </li>
-                <li className='my-3 h-px w-full bg-gray-300' />
-                <li>
-                  <Link
-                    onClick={() => {
-                      closeOnCurrent('/sign-in')
-                    }}
-                    className='flex items-center w-full font-semibold'
-                    href='/sign-in'>
-                    Sign in
-                  </Link>
-                </li>
-                <li className='my-3 h-px w-full bg-gray-300' />
-                <li>
-                  <Link
-                    onClick={() => {
                       closeOnCurrent('/pricing')
                     }}
                     className='flex items-center w-full font-semibold'
                     href='/pricing'>
                     Pricing
                   </Link>
+                </li>
+                <li className='my-3 h-px w-full bg-gray-300' />
+                <li>
+                  <RegisterLink
+                    onClick={() => {
+                      closeOnCurrent('/sign-in')
+                    }}
+                    className='flex items-center w-full font-semibold'>
+                    Sign in
+                  </RegisterLink>
+                </li>
+                <li className='my-3 h-px w-full bg-gray-300' />
+                <li>
+                  <LoginLink
+                    onClick={() => {
+                      closeOnCurrent('/sign-up')
+                    }}
+                    className='flex items-center w-full font-semibold text-green-600'>
+                    Get started <ArrowRight className='ml-2 h-5 w-5' />
+                  </LoginLink>
                 </li>
               </>
             ) : (
@@ -102,10 +85,19 @@ const MobileNav = ({ isAuth }: { isAuth: boolean }) => {
                 <li className='my-3 h-px w-full bg-gray-300' />
                 <li>
                   <Link
+                    onClick={() => {
+                      closeOnCurrent('/task')
+                    }}
                     className='flex items-center w-full font-semibold'
-                    href='/sign-out'>
-                    Sign out
+                    href='/task'>
+                    Task
                   </Link>
+                </li>
+                <li className='my-3 h-px w-full bg-gray-300' />
+                <li>
+                  <LogoutLink className='flex items-center w-full font-semibold'>
+                    Sign out
+                  </LogoutLink>
                 </li>
               </>
             )}
