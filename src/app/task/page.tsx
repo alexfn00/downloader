@@ -9,7 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import axios from 'axios'
 import { Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { SkeletonCard } from '@/components/skeletons'
@@ -18,7 +17,7 @@ import {
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query'
-import { deleteChannel, fetchAuthors } from '../actions'
+import { addChannel, deleteChannel, fetchAuthors } from '../actions'
 import { useInView } from 'react-intersection-observer'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -26,9 +25,17 @@ import Link from 'next/link'
 export default function Home() {
   const queryClient = useQueryClient()
   const [author, setAuthor] = useState<string>('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [results, setResults] = useState('')
-  const [taskId, setTaskId] = useState('')
+
+  const {
+    data: taskResult,
+    mutateAsync: handleAdd,
+    isPending: isAddPending,
+  } = useMutation({
+    mutationFn: addChannel,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['authors'] })
+    },
+  })
 
   const { data, error, status, fetchNextPage, isFetchingNextPage } =
     useInfiniteQuery({
@@ -48,31 +55,6 @@ export default function Home() {
     }
   }, [fetchNextPage, inView])
 
-  const handleSearch = async () => {
-    try {
-      setIsLoading(true)
-      await axios({
-        url: '/api/task',
-        method: 'post',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          name: 'youtube',
-          author: author,
-        },
-      }).then((res) => {
-        const data = res.data['result']
-        console.log('res.data:', data)
-
-        setTaskId(data['id'])
-        fetchNextPage()
-      })
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
   const { mutateAsync: handleDelete, isPending: isDeletePending } = useMutation(
     {
       mutationFn: deleteChannel,
@@ -81,47 +63,6 @@ export default function Home() {
       },
     },
   )
-
-  // const handleDelete = async (channelId: string) => {
-
-  // }
-  useEffect(() => {
-    const startQuery = async () => {
-      let counter = 0
-      const timer = setInterval(async () => {
-        counter++
-        if (counter >= 120) {
-          clearInterval(timer) // 清除定时器
-          setIsLoading(false)
-          setResults('TIMEOUT')
-        }
-        await axios
-          .get(`/api/task?q=${taskId}`)
-          .then((response) => {
-            const res = JSON.parse(response.data.result)
-            setResults(res.value)
-            if (res.state == 'SUCCESS') {
-              clearInterval(timer)
-              setIsLoading(false)
-              // revalidatePath('/task')
-              queryClient.invalidateQueries({
-                queryKey: ['authors'],
-                exact: true,
-              })
-            }
-          })
-          .catch((error) => {
-            setResults('FAILED')
-            setIsLoading(false)
-            console.error(error)
-          })
-      }, 5000)
-    }
-    console.log('startQuery taskId:', taskId)
-    if (taskId != '') {
-      startQuery()
-    }
-  }, [taskId])
 
   if (status === 'pending')
     return (
@@ -145,16 +86,18 @@ export default function Home() {
             placeholder='Input the youtube author'
           />
           <button
-            onClick={handleSearch}
+            onClick={() => {
+              handleAdd({ channelId: author })
+            }}
             className='border rounded-md p-1 font-semibold'>
             Search
           </button>
         </div>
 
-        {isLoading ? (
+        {isAddPending ? (
           <Loader2 className='mr-4 h-16 w-16 animate-spin' />
         ) : (
-          results
+          taskResult
         )}
       </div>
 
@@ -206,7 +149,7 @@ export default function Home() {
                           variant='ghost'
                           onClick={() => {
                             setAuthor(item.channelId)
-                            handleSearch()
+                            handleAdd({ channelId: item.channelId })
                           }}>
                           Update
                         </Button>
