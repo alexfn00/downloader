@@ -202,3 +202,57 @@ export const addChannel = async (channel: { channelId: string }) => {
     console.log(error)
   }
 }
+
+
+export const updateChannels = async () => {
+  try {
+    const { getUser } = getKindeServerSession()
+    const user = await getUser()
+
+    if (!user?.id || !user.email) {
+      return 'Forbidden'
+    }
+    const channels = await db.channel.findMany({
+      where: {
+        userId: user.id,
+      },
+
+    })
+
+    console.log(user.id)
+    console.log(channels)
+    channels.map(async (channel) => {
+      const data = {
+        name: 'youtube',
+        author: channel.channelId,
+        userId: user.id
+      }
+      const url = process.env.TASK_URL + '/task/'
+      const result = await axios.post(url, data)
+
+      const taskId = result.data['id']
+      let channelResult = ''
+
+      let counter = 0
+      const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
+      while (channelResult != 'SUCCESS') {
+        if (counter >= 10) {
+          channelResult = 'TIMEOUT'
+          break
+        }
+        counter++
+        await sleep(5000)
+        await axios.get(process.env.TASK_URL + `/task/${taskId}`).then((response) => {
+          channelResult = response.data.state
+        }).catch((error) => {
+          console.error(error)
+        })
+      }
+      console.log(channelResult)
+    })
+    return 'SUCCESS'
+  } catch (error) {
+    console.log(error)
+  }
+
+}

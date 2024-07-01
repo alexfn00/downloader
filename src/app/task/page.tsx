@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { SkeletonCard } from '@/components/skeletons'
 import {
@@ -17,10 +17,16 @@ import {
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query'
-import { addChannel, deleteChannel, fetchAuthors } from '../actions'
+import {
+  addChannel,
+  deleteChannel,
+  fetchAuthors,
+  updateChannels,
+} from '../actions'
 import { useInView } from 'react-intersection-observer'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { Input } from '@/components/ui/input'
 
 export default function Home() {
   const queryClient = useQueryClient()
@@ -33,6 +39,18 @@ export default function Home() {
   } = useMutation({
     mutationFn: addChannel,
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['authors'] })
+    },
+  })
+
+  const {
+    data: updateResult,
+    mutateAsync: handleUpdateAll,
+    isPending: isUpdatePending,
+  } = useMutation({
+    mutationFn: updateChannels,
+    onSuccess: () => {
+      console.log('updateResult:', updateResult)
       queryClient.invalidateQueries({ queryKey: ['authors'] })
     },
   })
@@ -74,31 +92,33 @@ export default function Home() {
   if (status === 'error') return <div>{error.message}</div>
 
   return (
-    <main className='md:max-w-6xl md:px-4 mx-auto md:w-2/3 border'>
-      <div className='flex flex-col items-center min-h-[200px] justify-center border bg-indigo-400 rounded-md text-white'>
-        <h3 className=' w-11/12 text-center'>Search Authors</h3>
-        <div className='mt-4 space-x-2 w-full flex justify-center p-4'>
-          <input
-            type='text'
-            value={author}
-            onChange={(e) => setAuthor(e.target.value)}
-            className='p-2 w-[60%] outline-none text-black'
-            placeholder='Input the youtube author'
-          />
-          <button
-            onClick={() => {
-              handleAdd({ channelId: author })
-            }}
-            className='border rounded-md p-1 font-semibold'>
-            Search
-          </button>
-        </div>
-
-        {isAddPending ? (
-          <Loader2 className='mr-4 h-16 w-16 animate-spin' />
-        ) : (
-          taskResult
-        )}
+    <main className='md:max-w-6xl md:px-4 mx-auto md:w-2/3'>
+      <div className='flex w-full max-w-2xl justify-start items-start space-x-2 py-8'>
+        <Search className='mr-2 h-8 w-8' />
+        <Input
+          type='text'
+          placeholder='Input youtube channel name'
+          value={author}
+          onChange={(e) => setAuthor(e.target.value)}
+        />
+        {isAddPending && <Loader2 className='mr-4 h-8 w-8 animate-spin' />}
+        <Button
+          size='sm'
+          variant='ghost'
+          className='rounded-md '
+          onClick={() => {
+            handleAdd({ channelId: author })
+          }}>
+          Add
+        </Button>
+        <Button
+          size='sm'
+          variant='ghost'
+          onClick={() => {
+            handleUpdateAll()
+          }}>
+          Update All
+        </Button>
       </div>
 
       {isDeletePending && (
@@ -107,7 +127,7 @@ export default function Home() {
         </div>
       )}
 
-      <Table>
+      <Table className='mt-4'>
         <TableCaption>Your favourite authors</TableCaption>
         <TableHeader>
           <TableRow>
@@ -144,6 +164,9 @@ export default function Home() {
                         {new Date(item.updatedAt).toLocaleString()}
                       </TableCell>
                       <TableCell className='text-right'>
+                        {isUpdatePending && (
+                          <Loader2 className='mr-4 h-8 w-8 animate-spin' />
+                        )}
                         <Button
                           size='sm'
                           variant='ghost'
