@@ -94,7 +94,6 @@ export default function Home() {
   return (
     <main className='md:max-w-6xl md:px-4 mx-auto md:w-2/3'>
       <div className='flex w-full max-w-2xl justify-start items-start space-x-2 py-8'>
-        <Search className='mr-2 h-8 w-8' />
         <Input
           type='text'
           placeholder='Input youtube channel name'
@@ -121,7 +120,7 @@ export default function Home() {
         </Button>
       </div>
 
-      {isDeletePending && (
+      {(isDeletePending || isUpdatePending) && (
         <div className='flex items-center justify-center'>
           <Loader2 className='mr-4 h-8 w-8 animate-spin' />
         </div>
@@ -138,7 +137,7 @@ export default function Home() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.pages.map((page) => {
+          {data.pages.map((page, index) => {
             return (
               <>
                 {page.channels.map((item) => {
@@ -157,16 +156,13 @@ export default function Home() {
                       </TableCell>
                       <TableCell>
                         <Link href={`/dashboard/videos/${item.id}`}>
-                          {item.channelName}
+                          {item.channelName}, {item.id}
                         </Link>
                       </TableCell>
                       <TableCell>
                         {new Date(item.updatedAt).toLocaleString()}
                       </TableCell>
                       <TableCell className='text-right'>
-                        {isUpdatePending && (
-                          <Loader2 className='mr-4 h-8 w-8 animate-spin' />
-                        )}
                         <Button
                           size='sm'
                           variant='ghost'
