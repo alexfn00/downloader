@@ -52,7 +52,7 @@ export default function SideNav() {
           </div>
         </div>
       </Link>
-      <div className='flex grow flex-row overflow-auto justify-start space-x-2 md:flex-col md:space-x-0 md:space-y-2 border'>
+      <div className='flex grow flex-row overflow-auto justify-start space-x-2 md:flex-col md:space-x-0 md:space-y-2'>
         {data.pages.map((page) => {
           return (
             <>
@@ -62,7 +62,7 @@ export default function SideNav() {
                     key={item.id}
                     href={`/dashboard/videos/${item.id}`}
                     className={clsx(
-                      'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3',
+                      'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3 my-2',
                       {
                         'bg-sky-100 text-blue-600': pathname === item.id,
                       },
@@ -74,7 +74,9 @@ export default function SideNav() {
                       width={48}
                       src={item.channelAvatar}
                     />
-                    <p className='hidden md:block'>{item.channelName}</p>
+                    <p className='hidden md:block overflow-ellipsis overflow-hidden whitespace-nowrap'>
+                      {item.channelName}
+                    </p>
                   </Link>
                 )
               })}
