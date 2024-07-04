@@ -156,7 +156,7 @@ export default function Home() {
                       </TableCell>
                       <TableCell>
                         <Link href={`/dashboard/videos/${item.id}`}>
-                          {item.channelName}, {item.id}
+                          {item.channelName}
                         </Link>
                       </TableCell>
                       <TableCell>
