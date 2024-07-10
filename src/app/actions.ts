@@ -171,9 +171,10 @@ export const runTask = async (channel: string, userId: string) => {
       author: channel,
       userId: userId
     }
+    console.log('runTask enter')
     const url = process.env.TASK_URL + '/task/'
     const result = await axios.post(url, data)
-
+    console.log('post result:', result.data)
     const taskId = result.data['id']
     let channelResult = ''
 
@@ -191,6 +192,7 @@ export const runTask = async (channel: string, userId: string) => {
         console.error(error)
       })
     }
+    console.log('channelResult:', channelResult)
     return channelResult
   } catch (error) {
     console.log(error)
@@ -208,7 +210,7 @@ export const addChannel = async (channel: { channelId: string }) => {
     }
     return runTask(channel.channelId, user.id)
   } catch (error) {
-    console.log(error)
+    console.log('addChannel error:', error)
   }
 }
 
@@ -226,5 +228,47 @@ export const updateChannels = async () => {
   })
   for (let channel of channels) {
     await runTask(channel.channelId, user.id)
+  }
+}
+
+
+export const startDownload = async (downloadURL: string | null) => {
+  try {
+    const { getUser } = getKindeServerSession()
+    const user = await getUser()
+
+    if (!user?.id || !user.email) {
+      return 'Forbidden'
+    }
+
+    const data = {
+      url: downloadURL,
+      userId: user.id
+    }
+    const url = process.env.TASK_URL + '/download/'
+    const result = await axios.post(url, data)
+    console.log('post result:', result.data)
+    const taskId = result.data['id']
+    let channelResult = ''
+
+    let counter = 0
+    while (channelResult != 'SUCCESS') {
+      if (counter >= 10) {
+        channelResult = 'TIMEOUT'
+        break
+      }
+      counter++
+      await sleep(5000)
+      await axios.get(process.env.TASK_URL + `/task/${taskId}`).then((response) => {
+        channelResult = response.data.state
+        console.log(response.data)
+      }).catch((error) => {
+        console.error(error)
+      })
+    }
+    console.log('startDownload:', channelResult)
+    return channelResult
+  } catch (error) {
+    console.log('startDownload error:', error)
   }
 }

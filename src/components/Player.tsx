@@ -8,22 +8,32 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useSearchParams } from 'next/navigation'
-import { useQuery } from '@tanstack/react-query'
-import { parseURL } from '@/app/actions'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { parseURL, startDownload } from '@/app/actions'
 import { Loader2 } from 'lucide-react'
 import { Button } from './ui/button'
 
 const Player = () => {
   const searchParams = useSearchParams()
   const search = searchParams.get('url')
-  console.log('search:', search)
+
   const [currentOption, setCurrentOption] = useState('0')
 
-  console.log('search=', search)
   const { data: todos, isLoading } = useQuery({
     queryFn: () => parseURL(search),
     queryKey: ['parseURL', { search }],
     gcTime: 0,
+  })
+
+  const {
+    data: taskResult,
+    mutateAsync: handleDownload,
+    isPending: isDownloading,
+  } = useMutation({
+    mutationFn: startDownload,
+    onSuccess: () => {
+      console.log('taskResult', taskResult)
+    },
   })
 
   if (!isLoading) {
@@ -103,7 +113,12 @@ const Player = () => {
                           ))}
                         </SelectContent>
                       </Select>
-                      <Button size='sm' variant='ghost'>
+                      <Button
+                        size='sm'
+                        variant='ghost'
+                        onClick={() => {
+                          handleDownload(search)
+                        }}>
                         Download
                       </Button>
                     </div>
