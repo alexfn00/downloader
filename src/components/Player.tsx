@@ -19,6 +19,8 @@ const Player = () => {
 
   const [currentOption, setCurrentOption] = useState('0')
 
+  const [filename, setFilename] = useState('')
+
   const { data: todos, isLoading } = useQuery({
     queryFn: () => parseURL(search),
     queryKey: ['parseURL', { search }],
@@ -26,18 +28,26 @@ const Player = () => {
   })
 
   const {
-    data: taskResult,
+    // data: taskResult,
     mutateAsync: handleDownload,
     isPending: isDownloading,
   } = useMutation({
     mutationFn: startDownload,
-    onSuccess: () => {
-      console.log('taskResult', taskResult)
+    onSuccess: (data) => {
+      console.log('data', data.value)
+      const url = `http://138.128.218.249:26880/download?filename=${data.value.uid}.mp4`
+      download(url, data.value.filename)
     },
   })
 
-  if (!isLoading) {
-    console.log(todos)
+  function download(fileUrl: string, filename: string) {
+    const anchor = document.createElement('a')
+    anchor.href = fileUrl
+    anchor.download = filename
+    document.body.appendChild(anchor)
+    anchor.click()
+    document.body.removeChild(anchor)
+    URL.revokeObjectURL(fileUrl)
   }
 
   function getCurrent() {
@@ -119,6 +129,9 @@ const Player = () => {
                         onClick={() => {
                           handleDownload(search)
                         }}>
+                        {isDownloading && (
+                          <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                        )}
                         Download
                       </Button>
                     </div>

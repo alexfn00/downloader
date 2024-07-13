@@ -167,6 +167,7 @@ const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
 export const runTask = async (channel: string, userId: string) => {
   try {
     const data = {
+      task_type: 'crawl',
       name: 'youtube',
       author: channel,
       userId: userId
@@ -242,18 +243,23 @@ export const startDownload = async (downloadURL: string | null) => {
     }
 
     const data = {
+      task_type: 'download',
+      userId: user.id,
+
       url: downloadURL,
-      userId: user.id
+      option: 'video_audio'
+
     }
-    const url = process.env.TASK_URL + '/download/'
+    const url = process.env.TASK_URL + '/task/'
     const result = await axios.post(url, data)
     console.log('post result:', result.data)
+    let res = result.data
     const taskId = result.data['id']
     let channelResult = ''
 
     let counter = 0
     while (channelResult != 'SUCCESS') {
-      if (counter >= 10) {
+      if (counter >= 20) {
         channelResult = 'TIMEOUT'
         break
       }
@@ -261,13 +267,15 @@ export const startDownload = async (downloadURL: string | null) => {
       await sleep(5000)
       await axios.get(process.env.TASK_URL + `/task/${taskId}`).then((response) => {
         channelResult = response.data.state
+        res = response.data
         console.log(response.data)
       }).catch((error) => {
         console.error(error)
       })
     }
     console.log('startDownload:', channelResult)
-    return channelResult
+    console.log('res:', res)
+    return res
   } catch (error) {
     console.log('startDownload error:', error)
   }
