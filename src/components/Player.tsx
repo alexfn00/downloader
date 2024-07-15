@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Select,
   SelectContent,
@@ -12,6 +12,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { parseURL, startDownload } from '@/app/actions'
 import { Loader2 } from 'lucide-react'
 import { Button } from './ui/button'
+import YouTube, { YouTubeProps } from 'react-youtube'
 
 const Player = () => {
   const searchParams = useSearchParams()
@@ -20,6 +21,28 @@ const Player = () => {
   const [currentOption, setCurrentOption] = useState('0')
 
   const [filename, setFilename] = useState('')
+  const [videoId, setVideoId] = useState('')
+
+  const onPlayerReady: YouTubeProps['onReady'] = (event) => {
+    // access to player in all event handlers via event.target
+    event.target.pauseVideo()
+  }
+
+  const opts = {
+    // height: '390',
+    // width: '640',
+    playerVars: {
+      // https://developers.google.com/youtube/player_parameters
+      autoplay: 1,
+    },
+  }
+
+  useEffect(() => {
+    var n = search?.split('v=')
+    if (n !== undefined) {
+      setVideoId(n[1])
+    }
+  }, [])
 
   const { data: todos, isLoading } = useQuery({
     queryFn: () => parseURL(search),
@@ -72,15 +95,21 @@ const Player = () => {
             <div className='mt-4 w-full flex-row overflow-y-auto items-center justify-center'>
               <div className=' '>
                 <div className='flex flex-col sm:flex-row items-center my-4'>
-                  <div className='w-full sm:w-1/2 items-center justify-center px-4'>
-                    {getCurrent().video && (
+                  <div className='w-full items-center justify-center px-4'>
+                    <YouTube
+                      videoId={videoId}
+                      opts={opts}
+                      onReady={onPlayerReady}
+                    />
+
+                    {/* {getCurrent().video && (
                       <video src={getCurrent().url} controls autoPlay></video>
                     )}
                     {!getCurrent().video && (
                       <audio src={getCurrent().url} controls autoPlay></audio>
-                    )}
+                    )} */}
                   </div>
-                  <div className='flex flex-col w-full sm:w-1/2 mt-8 items-start px-4'>
+                  <div className='flex flex-col w-full  mt-8 items-start px-4'>
                     <h3>
                       <div>{todos?.filename}</div>
                     </h3>
