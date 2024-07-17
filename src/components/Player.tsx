@@ -58,7 +58,8 @@ const Player = () => {
     mutationFn: startDownload,
     onSuccess: (data) => {
       console.log('data', data.value)
-      const url = `http://138.128.218.249:26880/download?filename=${data.value.uid}.mp4`
+
+      const url = `https://r2.oecent.net/${data.value.filename}`
       download(url, data.value.filename)
     },
   })
