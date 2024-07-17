@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { parseURL, startDownload } from './actions'
-import { Loader2 } from 'lucide-react'
+import { Loader2, X } from 'lucide-react'
 import YouTube, { YouTubeProps } from 'react-youtube'
 import { useState } from 'react'
 
@@ -80,6 +80,17 @@ export default function Home() {
               }}
               placeholder='Paste video link here'
             />
+
+            <Button
+              size='sm'
+              variant='ghost'
+              className='rounded-md '
+              onClick={() => {
+                setUrl('')
+                setVideoId('')
+              }}>
+              <X className='h-4 w-4' />
+            </Button>
             <Button
               size='sm'
               variant='ghost'
@@ -99,9 +110,9 @@ export default function Home() {
               <Loader2 className='mr-4 h-8 w-8 animate-spin' />
             </div>
           )}
-          {!isLoading && (
+          {!isLoading && videoId.length > 0 && (
             <>
-              <div className='mt-4 w-full flex-row overflow-y-auto items-center justify-center'>
+              <div className='mt-4 w-full flex-row overflow-y-auto items-center justify-center border'>
                 <div className=' '>
                   <div className='flex flex-col sm:flex-row items-center my-4'>
                     <div className='w-full items-center justify-center px-4'>
