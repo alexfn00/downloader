@@ -67,14 +67,15 @@ export default function Home() {
   return (
     <div>
       <MaxWidthWrapper className='mb-12 mt-20 sm:mt-20 flex flex-col items-center justify-center text-center'>
-        <div className='max-w-6xl px-6 lg:px8 '>
+        <div className='max-w-6xl w-3/4 px-6 lg:px8'>
           <h1 className=' text-3xl font-semibold my-4 '>
             Free Online Video Downloader
           </h1>
-          <div className='flex w-full max-w-2xl justify-start items-start space-x-2 py-8'>
+          <div className='flex w-full justify-start items-start space-x-2 py-8'>
             <Input
               type='text'
               value={url}
+              className='w-full'
               onChange={(e) => {
                 setUrl(e.target.value)
               }}

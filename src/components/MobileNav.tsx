@@ -37,6 +37,16 @@ const MobileNav = ({ isAuth }: { isAuth: boolean }) => {
       {isOpen && (
         <div className='fixed animate-in slide-in-from-top-5 fade-in-20 inset-0 z-0 w-full'>
           <ul className='absolute bg-white border-b border-zinc-200 shadow-xl grid w-full gap-3 px-10 pt-20 pb-8'>
+            <li>
+              <Link
+                onClick={() => {
+                  closeOnCurrent('/')
+                }}
+                className='flex items-center w-full font-semibold'
+                href='/'>
+                Home
+              </Link>
+            </li>
             {!isAuth ? (
               <>
                 <li>
