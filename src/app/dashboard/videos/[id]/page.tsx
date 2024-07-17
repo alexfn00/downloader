@@ -124,7 +124,7 @@ const VideoPage = ({ params }: { params: { id: string } }) => {
       <Tabs defaultValue='videos' className='w-full'>
         <TabsList className='grid w-[400px] grid-cols-3'>
           <TabsTrigger value='videos'>Videos</TabsTrigger>
-          <TabsTrigger value='streams'>Streams</TabsTrigger>
+          <TabsTrigger value='streams'>Alive</TabsTrigger>
           <TabsTrigger value='shorts'>Shorts</TabsTrigger>
         </TabsList>
         <TabsContent value='videos'>

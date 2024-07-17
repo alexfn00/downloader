@@ -51,23 +51,23 @@ const MobileNav = ({ isAuth }: { isAuth: boolean }) => {
                 </li>
                 <li className='my-3 h-px w-full bg-gray-300' />
                 <li>
-                  <RegisterLink
+                  <LoginLink
                     onClick={() => {
                       closeOnCurrent('/sign-in')
                     }}
                     className='flex items-center w-full font-semibold'>
                     Sign in
-                  </RegisterLink>
+                  </LoginLink>
                 </li>
                 <li className='my-3 h-px w-full bg-gray-300' />
                 <li>
-                  <LoginLink
+                  <RegisterLink
                     onClick={() => {
                       closeOnCurrent('/sign-up')
                     }}
                     className='flex items-center w-full font-semibold text-green-600'>
                     Get started <ArrowRight className='ml-2 h-5 w-5' />
-                  </LoginLink>
+                  </RegisterLink>
                 </li>
               </>
             ) : (
