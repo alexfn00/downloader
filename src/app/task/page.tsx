@@ -31,29 +31,25 @@ import { Input } from '@/components/ui/input'
 export default function Home() {
   const queryClient = useQueryClient()
   const [author, setAuthor] = useState<string>('')
+  const [currentChannel, setCurrentChannel] = useState('')
 
-  const {
-    data: taskResult,
-    mutateAsync: handleAdd,
-    isPending: isAddPending,
-  } = useMutation({
+  const { mutateAsync: handleAdd, isPending: isAddPending } = useMutation({
     mutationFn: addChannel,
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log(data)
+      setCurrentChannel('')
       queryClient.invalidateQueries({ queryKey: ['authors'] })
     },
   })
 
-  const {
-    data: updateResult,
-    mutateAsync: handleUpdateAll,
-    isPending: isUpdatePending,
-  } = useMutation({
-    mutationFn: updateChannels,
-    onSuccess: () => {
-      console.log('updateResult:', updateResult)
-      queryClient.invalidateQueries({ queryKey: ['authors'] })
-    },
-  })
+  const { mutateAsync: handleUpdateAll, isPending: isUpdatePending } =
+    useMutation({
+      mutationFn: updateChannels,
+      onSuccess: (data) => {
+        console.log('updateResult:', data)
+        queryClient.invalidateQueries({ queryKey: ['authors'] })
+      },
+    })
 
   const { data, error, status, fetchNextPage, isFetchingNextPage } =
     useInfiniteQuery({
@@ -127,7 +123,7 @@ export default function Home() {
       )}
 
       <Table className='mt-4'>
-        <TableCaption>Your favourite authors</TableCaption>
+        <TableCaption>Your favourite channels</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead className='w-[100px]'></TableHead>
@@ -168,8 +164,12 @@ export default function Home() {
                           variant='ghost'
                           onClick={() => {
                             setAuthor(item.channelId)
+                            setCurrentChannel(item.channelId)
                             handleAdd({ channelId: item.channelId })
                           }}>
+                          {currentChannel == item.channelId && (
+                            <Loader2 className='mr-4 h-8 w-8 animate-spin' />
+                          )}
                           Update
                         </Button>
                         <Button
