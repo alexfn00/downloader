@@ -92,7 +92,7 @@ export default function Home() {
             Free Online Video Downloader
           </h1>
           <div className='flex w-full justify-start items-start space-x-2 py-8 flex-col sm:flex-row'>
-            <div className='flex sm:w-3/4 w-full rounded border-4 border-green-700 ml-2'>
+            <div className='flex sm:w-3/4 w-full rounded border-4 border-green-700 mr-2'>
               <input
                 type='text'
                 value={url}
