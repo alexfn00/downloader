@@ -87,12 +87,12 @@ export default function Home() {
   return (
     <div>
       <MaxWidthWrapper className='mb-12 mt-20 sm:mt-20 flex flex-col items-center justify-center text-center'>
-        <div className='max-w-6xl w-3/4 px-6 lg:px8' ref={boxRef}>
-          <h1 className='text-3xl font-semibold my-4 '>
+        <div className='max-w-6xl w-full sm:px-6 lg:px8' ref={boxRef}>
+          <h1 className='text-3xl font-semibold my-4'>
             Free Online Video Downloader
           </h1>
           <div className='flex w-full justify-start items-start space-x-2 py-8 flex-col sm:flex-row'>
-            <div className='flex w-3/4 rounded border-4 border-green-700 ml-2'>
+            <div className='flex sm:w-3/4 w-full rounded border-4 border-green-700 ml-2'>
               <input
                 type='text'
                 value={url}
@@ -114,19 +114,21 @@ export default function Home() {
                 <X className='h-4 w-4' />
               </Button>
             </div>
-            <Button
-              size='sm'
-              variant='ghost'
-              className='rounded-md py-6 m-1 bg-green-700 text-white hover:bg-green-600 hover:text-white'
-              onClick={() => {
-                var n = url?.split('v=')
-                if (n !== undefined) {
-                  setVideoId(n[1])
-                }
-                refetch()
-              }}>
-              Download
-            </Button>
+            <div className='sm:w-1/4 w-full flex flex-row items-center sm:justify-start justify-center mt-4 sm:mt-0'>
+              <Button
+                size='sm'
+                variant='ghost'
+                className='rounded-md py-6 m-1 bg-green-700 text-white hover:bg-green-600 hover:text-white'
+                onClick={() => {
+                  var n = url?.split('v=')
+                  if (n !== undefined) {
+                    setVideoId(n[1])
+                  }
+                  refetch()
+                }}>
+                Download
+              </Button>
+            </div>
           </div>
           {isLoading && (
             <div className='flex items-center justify-center'>
