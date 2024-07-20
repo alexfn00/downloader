@@ -19,7 +19,6 @@ export default function Home() {
   const [url, setUrl] = useState<string>('')
   const [videoId, setVideoId] = useState('')
   const [currentOption, setCurrentOption] = useState('0')
-
   const [boxSize, setBoxSize] = useState<{ width: number; height: number }>({
     width: 0,
     height: 0,
@@ -47,6 +46,7 @@ export default function Home() {
     isLoading,
   } = useQuery({
     queryFn: () => parseURL(url),
+
     queryKey: ['parseURL', { url }],
     enabled: false, // disable this query from automatically running
     gcTime: 0,
@@ -157,7 +157,6 @@ export default function Home() {
                   <Select
                     defaultValue={currentOption}
                     onValueChange={(value: any) => {
-                      console.log(value)
                       setCurrentOption(value)
                     }}>
                     <SelectTrigger className='w-[180px]'>
@@ -197,7 +196,14 @@ export default function Home() {
                     variant='ghost'
                     className='rounded-md py-4 m-1 bg-green-700 text-white hover:bg-green-600 hover:text-white'
                     onClick={() => {
-                      handleDownload(url)
+                      const itag =
+                        todos?.new_list[Number(currentOption)][
+                          'itag'
+                        ].toString()
+                      handleDownload({
+                        downloadURL: url,
+                        itag: itag ? itag : '',
+                      })
                     }}>
                     {isDownloading && (
                       <Loader2 className='mr-2 h-4 w-4 animate-spin' />

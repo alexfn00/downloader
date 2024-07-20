@@ -122,6 +122,7 @@ export const parseURL = async (search: string | null) => {
   if (search == null) {
     return
   }
+  console.log('parseURL:', search)
   const url = search
   try {
     let options = {}
@@ -132,6 +133,7 @@ export const parseURL = async (search: string | null) => {
     const info = await ytdl.getInfo(url, {
       requestOptions: options,
     })
+    console.log(info)
 
     const audio_formats = ytdl.filterFormats(info.formats, 'audio')
     const format = ytdl.chooseFormat(audio_formats, { quality: 'highest' })
@@ -233,7 +235,7 @@ export const updateChannels = async () => {
 }
 
 
-export const startDownload = async (downloadURL: string | null) => {
+export const startDownload = async (param: { downloadURL: string, itag: string }) => {
   try {
     const { getUser } = getKindeServerSession()
     const user = await getUser()
@@ -246,13 +248,15 @@ export const startDownload = async (downloadURL: string | null) => {
       task_type: 'download',
       userId: user.id,
 
-      url: downloadURL,
+      url: param.downloadURL,
+      itag: param.itag,
       option: 'video_audio'
 
     }
+    // console.log('data', data)
     const url = process.env.TASK_URL + '/task/'
     const result = await axios.post(url, data)
-    console.log('post result:', result.data)
+    // console.log('post result:', result.data)
     let res = result.data
     const taskId = result.data['id']
     let channelResult = ''
