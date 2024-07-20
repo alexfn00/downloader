@@ -159,7 +159,12 @@ const Player = () => {
                   variant='ghost'
                   className='rounded-md py-4 m-1 bg-green-700 text-white hover:bg-green-600 hover:text-white'
                   onClick={() => {
-                    handleDownload(search)
+                    const itag =
+                      todos?.new_list[Number(currentOption)]['itag'].toString()
+                    handleDownload({
+                      downloadURL: search ? search : '',
+                      itag: itag ? itag : '',
+                    })
                   }}>
                   {isDownloading && (
                     <Loader2 className='mr-2 h-4 w-4 animate-spin' />
