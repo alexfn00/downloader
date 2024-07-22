@@ -133,7 +133,7 @@ export const parseURL = async (search: string | null) => {
     const info = await ytdl.getInfo(url, {
       requestOptions: options,
     })
-    console.log(info)
+    // console.log(info)
 
     const audio_formats = ytdl.filterFormats(info.formats, 'audio')
     const format = ytdl.chooseFormat(audio_formats, { quality: 'highest' })
@@ -240,20 +240,22 @@ export const startDownload = async (param: { downloadURL: string, itag: string }
     const { getUser } = getKindeServerSession()
     const user = await getUser()
 
-    if (!user?.id || !user.email) {
-      return 'Forbidden'
-    }
+    // if (!user?.id || !user.email) {
+    //   console.log('Forbidden')
+    //   return 'Forbidden'
+    // }
 
     const data = {
       task_type: 'download',
-      userId: user.id,
+      // userId: user.id,
 
       url: param.downloadURL,
       itag: param.itag,
       option: 'video_audio'
 
     }
-    // console.log('data', data)
+    console.log('startDownload')
+    console.log('data', data)
     const url = process.env.TASK_URL + '/task/'
     const result = await axios.post(url, data)
     // console.log('post result:', result.data)
@@ -272,7 +274,7 @@ export const startDownload = async (param: { downloadURL: string, itag: string }
       await axios.get(process.env.TASK_URL + `/task/${taskId}`).then((response) => {
         channelResult = response.data.state
         res = response.data
-        console.log(response.data)
+        // console.log(response.data)
       }).catch((error) => {
         console.error(error)
       })

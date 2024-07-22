@@ -56,8 +56,12 @@ export default function Home() {
     {
       mutationFn: startDownload,
       onSuccess: (data) => {
-        const url = `https://r2.oecent.net/${data.value.filename}`
-        download(url, data.value.filename)
+        if (data.value.message != 'OK') {
+          console.log('Download failed, error:', data.value.message)
+        } else {
+          const url = `https://r2.oecent.net/${data.value.filename}`
+          download(url, data.value.filename)
+        }
       },
     },
   )
