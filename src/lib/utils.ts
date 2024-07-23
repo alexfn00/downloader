@@ -23,3 +23,13 @@ export function secondsToTimeFormat(seconds: number): string {
 
   return `${formattedHrs}:${formattedMins}:${formattedSecs}`;
 }
+
+export function download(fileUrl: string, filename: string) {
+  const anchor = document.createElement('a')
+  anchor.href = fileUrl
+  anchor.download = filename
+  document.body.appendChild(anchor)
+  anchor.click()
+  document.body.removeChild(anchor)
+  URL.revokeObjectURL(fileUrl)
+}

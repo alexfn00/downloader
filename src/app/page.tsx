@@ -14,7 +14,7 @@ import { getVideoInfo, startDownload } from './actions'
 import { Loader2, X } from 'lucide-react'
 import YouTube, { YouTubeProps } from 'react-youtube'
 import { useEffect, useRef, useState } from 'react'
-import { secondsToTimeFormat } from '@/lib/utils'
+import { download, secondsToTimeFormat } from '@/lib/utils'
 
 export default function Home() {
   const [url, setUrl] = useState<string>('')
@@ -31,7 +31,11 @@ export default function Home() {
       if (boxRef.current) {
         const width = boxRef.current.offsetWidth
         const height = boxRef.current.offsetHeight
-        setBoxSize({ width, height })
+        if (width > 640) {
+          setBoxSize({ width: width / 2, height: height / 2 })
+        } else {
+          setBoxSize({ width, height })
+        }
       }
     }
 
@@ -67,31 +71,18 @@ export default function Home() {
     },
   )
 
-  function download(fileUrl: string, filename: string) {
-    const anchor = document.createElement('a')
-    anchor.href = fileUrl
-    anchor.download = filename
-    document.body.appendChild(anchor)
-    anchor.click()
-    document.body.removeChild(anchor)
-    URL.revokeObjectURL(fileUrl)
-  }
   const onPlayerReady: YouTubeProps['onReady'] = (event) => {
     // access to player in all event handlers via event.target
     event.target.pauseVideo()
   }
   const opts = {
-    height: ((boxSize.width / 2 - 100) * 3) / 4,
-    width: boxSize.width / 2,
+    height: ((boxSize.width - 160) * 3) / 4,
+    width: boxSize.width - 10,
     playerVars: {
       // https://developers.google.com/youtube/player_parameters
       autoplay: 1,
     },
   }
-  {
-    !isLoading && console.log(todos)
-  }
-
   return (
     <div>
       <MaxWidthWrapper className='mb-12 mt-20 sm:mt-20 flex flex-col items-center justify-center text-center'>
@@ -99,6 +90,7 @@ export default function Home() {
           <h1 className='text-3xl font-semibold my-4'>
             Free Online Video Downloader
           </h1>
+          <div>{boxSize.width}</div>
           <div
             className='flex w-full justify-between items-center space-x-2 py-8 flex-col sm:flex-row border'
             ref={boxRef}>
@@ -144,15 +136,15 @@ export default function Home() {
           {!isLoading && videoId.length > 0 && (
             <>
               <div className='mt-4 w-full flex-row sm:flex-col overflow-y-auto items-center justify-center border'>
-                <div className='flex flex-row sm:flex-row items-center my-4'>
-                  <div className='sm:w-1/2 items-center justify-center mx-4'>
+                <div className='flex flex-col sm:flex-row items-center my-4'>
+                  <div className='sm:w-1/2 w-full items-center justify-center mx-4'>
                     <YouTube
                       videoId={videoId}
                       opts={opts}
                       onReady={onPlayerReady}
                     />
                   </div>
-                  <div className='sm:w-1/2 mx-4 '>
+                  <div className='sm:w-1/2 w-full mx-4 '>
                     <div className='text-2xl font-semibold mt-4 flex items-start'>
                       {todos?.title}
                     </div>

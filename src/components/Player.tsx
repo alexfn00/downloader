@@ -13,7 +13,7 @@ import { getVideoInfo, parseURL, startDownload } from '@/app/actions'
 import { Loader2 } from 'lucide-react'
 import { Button } from './ui/button'
 import YouTube, { YouTubeProps } from 'react-youtube'
-import { secondsToTimeFormat } from '@/lib/utils'
+import { download, secondsToTimeFormat } from '@/lib/utils'
 
 const Player = () => {
   const searchParams = useSearchParams()
@@ -31,7 +31,11 @@ const Player = () => {
       if (boxRef.current) {
         const width = boxRef.current.offsetWidth
         const height = boxRef.current.offsetHeight
-        setBoxSize({ width, height })
+        if (width > 640) {
+          setBoxSize({ width: width / 2, height: height / 2 })
+        } else {
+          setBoxSize({ width, height })
+        }
       }
     }
 
@@ -46,8 +50,8 @@ const Player = () => {
   }
 
   const opts = {
-    height: ((boxSize.width - 140) * 3) / 4,
-    width: boxSize.width - 120,
+    height: ((boxSize.width - 100) * 3) / 4,
+    width: boxSize.width - 20,
     playerVars: {
       autoplay: 1,
     },
@@ -78,18 +82,8 @@ const Player = () => {
     },
   )
 
-  function download(fileUrl: string, filename: string) {
-    const anchor = document.createElement('a')
-    anchor.href = fileUrl
-    anchor.download = filename
-    document.body.appendChild(anchor)
-    anchor.click()
-    document.body.removeChild(anchor)
-    URL.revokeObjectURL(fileUrl)
-  }
-
   return (
-    <main className='mx-auto max-w-full sm:max-w-6xl mt-12'>
+    <main className='mx-auto max-w-full sm:max-w-6xl sm:mt-12'>
       <div
         className='flex flex-col items-center min-h-[300px] justify-center rounded-md'
         ref={boxRef}>
@@ -101,22 +95,22 @@ const Player = () => {
         {!isLoading && videoId.length > 0 && (
           <>
             <div className='mt-4 w-full flex-row sm:flex-col overflow-y-auto items-center justify-center border'>
-              <div className='flex flex-row sm:flex-row items-center my-4'>
-                <div className='sm:w-1/2 items-center justify-center mx-4'>
+              <div className='flex flex-col sm:flex-row items-center my-4'>
+                <div className='sm:w-1/2 w-full items-center justify-center pl-4'>
                   <YouTube
                     videoId={videoId}
                     opts={opts}
                     onReady={onPlayerReady}
                   />
                 </div>
-                <div className='sm:w-1/2 mx-4 '>
-                  <div className='text-2xl font-semibold mt-4 flex items-start'>
+                <div className='sm:w-1/2 w-full mx-4 '>
+                  <div className='text-2xl font-semibold mt-4 flex items-start px-4'>
                     {todos?.title}
                   </div>
-                  <div className=' text-gray-500 my-4 flex items-start'>
+                  <div className=' text-gray-500 my-4 flex items-start pl-4'>
                     {secondsToTimeFormat(todos?.duration)}
                   </div>
-                  <div className='py-4 w-full flex items-center'>
+                  <div className='py-4 w-full flex items-center pl-4'>
                     <Select
                       defaultValue={currentOption}
                       onValueChange={(value: any) => {
