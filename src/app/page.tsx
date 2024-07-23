@@ -10,10 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { parseURL, startDownload } from './actions'
+import { getVideoInfo, startDownload } from './actions'
 import { Loader2, X } from 'lucide-react'
 import YouTube, { YouTubeProps } from 'react-youtube'
 import { useEffect, useRef, useState } from 'react'
+import { secondsToTimeFormat } from '@/lib/utils'
 
 export default function Home() {
   const [url, setUrl] = useState<string>('')
@@ -45,7 +46,7 @@ export default function Home() {
     refetch,
     isLoading,
   } = useQuery({
-    queryFn: () => parseURL(url),
+    queryFn: () => getVideoInfo(url),
 
     queryKey: ['parseURL', { url }],
     enabled: false, // disable this query from automatically running
@@ -80,23 +81,28 @@ export default function Home() {
     event.target.pauseVideo()
   }
   const opts = {
-    height: ((boxSize.width - 80) * 3) / 4,
-    width: boxSize.width - 80,
+    height: ((boxSize.width / 2 - 100) * 3) / 4,
+    width: boxSize.width / 2,
     playerVars: {
       // https://developers.google.com/youtube/player_parameters
       autoplay: 1,
     },
   }
+  {
+    !isLoading && console.log(todos)
+  }
 
   return (
     <div>
       <MaxWidthWrapper className='mb-12 mt-20 sm:mt-20 flex flex-col items-center justify-center text-center'>
-        <div className='max-w-6xl w-full sm:px-6 lg:px8' ref={boxRef}>
+        <div className='max-w-6xl w-full sm:px-6 lg:px8'>
           <h1 className='text-3xl font-semibold my-4'>
             Free Online Video Downloader
           </h1>
-          <div className='flex w-full justify-start items-start space-x-2 py-8 flex-col sm:flex-row'>
-            <div className='flex sm:w-3/4 w-full rounded border-4 border-green-700 mr-2'>
+          <div
+            className='flex w-full justify-between items-center space-x-2 py-8 flex-col sm:flex-row border'
+            ref={boxRef}>
+            <div className='flex w-full items-end rounded border-4 border-green-700 mx-4'>
               <input
                 type='text'
                 value={url}
@@ -106,7 +112,6 @@ export default function Home() {
                 }}
                 placeholder='Paste video link here'
               />
-
               <Button
                 size='sm'
                 variant='ghost'
@@ -118,11 +123,11 @@ export default function Home() {
                 <X className='h-4 w-4' />
               </Button>
             </div>
-            <div className='sm:w-1/4 w-full flex flex-row items-center sm:justify-start justify-center mt-4 sm:mt-0'>
+            <div className='sm:w-1/4 w-full flex flex-row items-end sm:justify-end justify-end mt-4 sm:mt-0'>
               <Button
                 size='sm'
                 variant='ghost'
-                className='rounded-md py-6 m-1 bg-green-700 text-white hover:bg-green-600 hover:text-white'
+                className='rounded-md py-6 mr-4 bg-green-700 text-white hover:bg-green-600 hover:text-white'
                 onClick={() => {
                   var n = url?.split('v=')
                   if (n !== undefined) {
@@ -130,90 +135,93 @@ export default function Home() {
                   }
                   refetch()
                 }}>
+                {isLoading && <Loader2 className='mr-4 h-8 w-8 animate-spin' />}
                 Download
               </Button>
             </div>
           </div>
-          {isLoading && (
-            <div className='flex items-center justify-center'>
-              <Loader2 className='mr-4 h-8 w-8 animate-spin' />
-            </div>
-          )}
+
           {!isLoading && videoId.length > 0 && (
             <>
-              <div className='mt-4 w-full flex-row overflow-y-auto items-center justify-center'>
-                <div className=' '>
-                  <div className='flex flex-row sm:flex-row items-center my-4'>
-                    <div className='w-full items-center justify-center px-4'>
-                      <YouTube
-                        videoId={videoId}
-                        opts={opts}
-                        onReady={onPlayerReady}
-                      />
+              <div className='mt-4 w-full flex-row sm:flex-col overflow-y-auto items-center justify-center border'>
+                <div className='flex flex-row sm:flex-row items-center my-4'>
+                  <div className='sm:w-1/2 items-center justify-center mx-4'>
+                    <YouTube
+                      videoId={videoId}
+                      opts={opts}
+                      onReady={onPlayerReady}
+                    />
+                  </div>
+                  <div className='sm:w-1/2 mx-4 '>
+                    <div className='text-2xl font-semibold mt-4 flex items-start'>
+                      {todos?.title}
+                    </div>
+                    <div className=' text-gray-500 my-4 flex items-start'>
+                      {secondsToTimeFormat(todos?.duration)}
+                    </div>
+                    <div className='py-4 w-full flex items-center'>
+                      <Select
+                        defaultValue={currentOption}
+                        onValueChange={(value: any) => {
+                          setCurrentOption(value)
+                        }}>
+                        <SelectTrigger className='w-3/4 border-4 border-green-700 py-4'>
+                          <SelectValue placeholder='Qualitiy' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {todos?.formats.map((todo, index) => (
+                            <SelectItem
+                              className='hover:bg-green-600 hover:text-white'
+                              value={index.toString()}
+                              key={todo.lastModified}>
+                              <span className='px-2'>
+                                {todo['ext'].toUpperCase()}
+                              </span>
+                              <span className='px-2'>{todo['code']}</span>
+                              {todo['format_note']}
+
+                              {/* <span className='px-2'>{todo['format_note']}</span> */}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <div className='sm:w-1/4 w-full flex flex-row items-end sm:justify-end justify-end mt-4 sm:mt-0 mr-4'>
+                        <Button
+                          size='sm'
+                          variant='ghost'
+                          className='rounded-md py-4 ml-4 bg-green-700 text-white hover:bg-green-600 hover:text-white'
+                          onClick={() => {
+                            const code =
+                              todos?.formats[Number(currentOption)][
+                                'code'
+                              ].toString()
+
+                            const itag =
+                              todos?.formats[Number(currentOption)][
+                                'format_id'
+                              ].toString()
+
+                            const dimension =
+                              todos?.formats[Number(currentOption)]['dimension']
+
+                            handleDownload({
+                              downloadURL: url,
+                              type:
+                                code == 'Video and Audio'
+                                  ? 'dimension'
+                                  : 'itag',
+                              value:
+                                code == 'Video and Audio' ? dimension : itag,
+                            })
+                          }}>
+                          {isDownloading && (
+                            <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                          )}
+                          Download
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-
-              <div className='flex flex-col w-full  mt-8 items-start px-4'>
-                <div className='text-2xl font-semibold '>{todos?.filename}</div>
-                <div className='py-4 flex items-center'>
-                  <Select
-                    defaultValue={currentOption}
-                    onValueChange={(value: any) => {
-                      setCurrentOption(value)
-                    }}>
-                    <SelectTrigger className='w-[180px]'>
-                      <SelectValue placeholder='Qualitiy' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {todos?.new_list.map((todo, index) => (
-                        <SelectItem
-                          value={index.toString()}
-                          key={todo.lastModified}>
-                          <span className='px-2'>
-                            {todo.hasAudio && todo.hasVideo && (
-                              <span>Video and Audio</span>
-                            )}
-                            {todo.hasAudio && !todo.hasVideo && (
-                              <span>Audio</span>
-                            )}
-                            {!todo.hasAudio && todo.hasVideo && (
-                              <span>Video</span>
-                            )}
-
-                            {todo.container}
-                          </span>
-                          <span className='px-2'>{todo.codecs}</span>
-                          <span className='px-2'>
-                            {todo.hasVideo && todo.qualityLabel}
-                          </span>
-                          <span className='px-2'>
-                            {Number(todo.bitrate) / 1000}
-                          </span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    size='sm'
-                    variant='ghost'
-                    className='rounded-md py-4 m-1 bg-green-700 text-white hover:bg-green-600 hover:text-white'
-                    onClick={() => {
-                      const itag =
-                        todos?.new_list[Number(currentOption)][
-                          'itag'
-                        ].toString()
-                      handleDownload({
-                        downloadURL: url,
-                        itag: itag ? itag : '',
-                      })
-                    }}>
-                    {isDownloading && (
-                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                    )}
-                    Download
-                  </Button>
                 </div>
               </div>
             </>

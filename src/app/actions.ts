@@ -118,11 +118,21 @@ export const deleteChannel = async (channel: { channelId: string }) => {
   })
 }
 
+export const getVideoInfo = async (url: string | null) => {
+  try {
+    const response = await axios.get(process.env.TASK_URL + `/video?url=${url}`)
+    const result = { "id": response.data['id'], 'title': response.data['title'], 'duration': response.data['duration'], formats: [...response.data['formats']] }
+    console.log('getVideoInfo', result)
+    return result
+  } catch (error) {
+    console.log('getVideoInfo error:', error)
+  }
+}
+
 export const parseURL = async (search: string | null) => {
   if (search == null) {
     return
   }
-  console.log('parseURL:', search)
   const url = search
   try {
     let options = {}
@@ -235,27 +245,15 @@ export const updateChannels = async () => {
 }
 
 
-export const startDownload = async (param: { downloadURL: string, itag: string }) => {
+export const startDownload = async (param: { downloadURL: string, type: string, value: string }) => {
   try {
-    const { getUser } = getKindeServerSession()
-    const user = await getUser()
-
-    // if (!user?.id || !user.email) {
-    //   console.log('Forbidden')
-    //   return 'Forbidden'
-    // }
-
     const data = {
       task_type: 'download',
-      // userId: user.id,
-
       url: param.downloadURL,
-      itag: param.itag,
-      option: 'video_audio'
-
+      download_type: param.type,
+      download_value: param.value
     }
-    console.log('startDownload')
-    console.log('data', data)
+    console.log('startDownload data', data)
     const url = process.env.TASK_URL + '/task/'
     const result = await axios.post(url, data)
     // console.log('post result:', result.data)
