@@ -193,7 +193,7 @@ export const runTask = async (channel: string, userId: string) => {
 
     let counter = 0
     while (channelResult != 'SUCCESS') {
-      if (counter >= 10) {
+      if (counter >= 60) {
         channelResult = 'TIMEOUT'
         break
       }

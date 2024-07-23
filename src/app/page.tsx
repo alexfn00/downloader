@@ -90,7 +90,6 @@ export default function Home() {
           <h1 className='text-3xl font-semibold my-4'>
             Free Online Video Downloader
           </h1>
-          <div>{boxSize.width}</div>
           <div
             className='flex w-full justify-between items-center space-x-2 py-8 flex-col sm:flex-row border'
             ref={boxRef}>
