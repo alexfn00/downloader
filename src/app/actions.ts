@@ -184,10 +184,8 @@ export const runTask = async (channel: string, userId: string) => {
       author: channel,
       userId: userId
     }
-    console.log('runTask enter')
     const url = process.env.TASK_URL + '/task/'
     const result = await axios.post(url, data)
-    console.log('post result:', result.data)
     const taskId = result.data['id']
     let channelResult = ''
 
@@ -205,7 +203,6 @@ export const runTask = async (channel: string, userId: string) => {
         console.error(error)
       })
     }
-    console.log('channelResult:', channelResult)
     return channelResult
   } catch (error) {
     console.log(error)

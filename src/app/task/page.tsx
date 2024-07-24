@@ -27,17 +27,22 @@ import { useInView } from 'react-intersection-observer'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Input } from '@/components/ui/input'
+import { useToast } from '@/components/ui/use-toast'
 
 export default function Home() {
   const queryClient = useQueryClient()
   const [author, setAuthor] = useState<string>('')
   const [currentChannel, setCurrentChannel] = useState('')
+  const { toast } = useToast()
 
   const { mutateAsync: handleAdd, isPending: isAddPending } = useMutation({
     mutationFn: addChannel,
     onSuccess: (data) => {
-      console.log(data)
       setCurrentChannel('')
+      toast({
+        title: 'Update',
+        description: 'Channel updated successfully',
+      })
       queryClient.invalidateQueries({ queryKey: ['authors'] })
     },
   })
@@ -46,7 +51,10 @@ export default function Home() {
     useMutation({
       mutationFn: updateChannels,
       onSuccess: (data) => {
-        console.log('updateResult:', data)
+        toast({
+          title: 'Update',
+          description: 'Updated all channels',
+        })
         queryClient.invalidateQueries({ queryKey: ['authors'] })
       },
     })
@@ -73,6 +81,10 @@ export default function Home() {
     {
       mutationFn: deleteChannel,
       onSuccess: () => {
+        toast({
+          title: 'Remove',
+          description: 'Channel has been removed',
+        })
         queryClient.invalidateQueries({ queryKey: ['authors'] })
       },
     },
