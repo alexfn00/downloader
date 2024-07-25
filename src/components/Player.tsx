@@ -14,6 +14,8 @@ import { Loader2 } from 'lucide-react'
 import { Button } from './ui/button'
 import YouTube, { YouTubeProps } from 'react-youtube'
 import { download, secondsToTimeFormat } from '@/lib/utils'
+import { toast } from './ui/use-toast'
+import { ToastAction } from '@radix-ui/react-toast'
 
 const Player = () => {
   const searchParams = useSearchParams()
@@ -74,10 +76,24 @@ const Player = () => {
     {
       mutationFn: startDownload,
       onSuccess: (data) => {
-        console.log('data', data.value)
-
-        const url = `https://r2.oecent.net/${data.value.filename}`
-        download(url, data.value.filename)
+        console.log('data', data)
+        if (data.state === 'PENDING') {
+          toast({
+            variant: 'destructive',
+            title: 'Uh oh! Something went wrong.',
+            description: 'Download timeout',
+          })
+        } else if (data.filename == null) {
+          toast({
+            variant: 'destructive',
+            title: 'Uh oh! Something went wrong.',
+            description: data.value.message,
+            action: <ToastAction altText='Try again'>Try again</ToastAction>,
+          })
+        } else {
+          const url = `https://r2.oecent.net/${data.value.filename}`
+          download(url, data.value.filename)
+        }
       },
     },
   )

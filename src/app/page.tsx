@@ -15,6 +15,8 @@ import { Loader2, X } from 'lucide-react'
 import YouTube, { YouTubeProps } from 'react-youtube'
 import { useEffect, useRef, useState } from 'react'
 import { download, secondsToTimeFormat } from '@/lib/utils'
+import { toast } from '@/components/ui/use-toast'
+import { ToastAction } from '@radix-ui/react-toast'
 
 export default function Home() {
   const [url, setUrl] = useState<string>('')
@@ -61,8 +63,19 @@ export default function Home() {
     {
       mutationFn: startDownload,
       onSuccess: (data) => {
-        if (data.value.message != 'OK') {
-          console.log('Download failed, error:', data.value.message)
+        if (data.state === 'PENDING') {
+          toast({
+            variant: 'destructive',
+            title: 'Uh oh! Something went wrong.',
+            description: 'Download timeout',
+          })
+        } else if (data.filename == null) {
+          toast({
+            variant: 'destructive',
+            title: 'Uh oh! Something went wrong.',
+            description: data.value.message,
+            action: <ToastAction altText='Try again'>Try again</ToastAction>,
+          })
         } else {
           const url = `https://r2.oecent.net/${data.value.filename}`
           download(url, data.value.filename)
