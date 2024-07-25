@@ -253,7 +253,7 @@ export const startDownload = async (param: { downloadURL: string, type: string, 
     console.log('startDownload data', data)
     const url = process.env.TASK_URL + '/task/'
     const result = await axios.post(url, data)
-    // console.log('post result:', result.data)
+    console.log('post result:', result.data)
     let res = result.data
     const taskId = result.data['id']
     let channelResult = ''
@@ -269,7 +269,7 @@ export const startDownload = async (param: { downloadURL: string, type: string, 
       await axios.get(process.env.TASK_URL + `/task/${taskId}`).then((response) => {
         channelResult = response.data.state
         res = response.data
-        // console.log(response.data)
+        console.log(response.data)
       }).catch((error) => {
         console.error(error)
       })
