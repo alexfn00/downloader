@@ -33,10 +33,17 @@ export default function Home() {
       if (boxRef.current) {
         const width = boxRef.current.offsetWidth
         const height = boxRef.current.offsetHeight
-        if (width > 640) {
-          setBoxSize({ width: width / 2, height: height / 2 })
+
+        if (window.innerWidth < 640) {
+          setBoxSize({
+            width: width - 32,
+            height: height,
+          })
         } else {
-          setBoxSize({ width, height })
+          setBoxSize({
+            width: (width * 3) / 4 - 8,
+            height: height,
+          })
         }
       }
     }
@@ -89,8 +96,8 @@ export default function Home() {
     event.target.pauseVideo()
   }
   const opts = {
-    height: ((boxSize.width - 160) * 3) / 4,
-    width: boxSize.width - 10,
+    height: (boxSize.width * 2) / 3,
+    width: boxSize.width,
     playerVars: {
       // https://developers.google.com/youtube/player_parameters
       autoplay: 1,
@@ -98,13 +105,13 @@ export default function Home() {
   }
   return (
     <div>
-      <MaxWidthWrapper className='mb-12 mt-20 sm:mt-20 flex flex-col items-center justify-center text-center'>
+      <MaxWidthWrapper className='sm:mb-12 mt-4 sm:mt-10 flex flex-col items-center justify-center text-center'>
         <div className='max-w-6xl w-full sm:px-6 lg:px8'>
-          <h1 className='text-3xl font-semibold my-4'>
+          <h1 className='text-xl sm:text-3xl font-semibold sm:my-4'>
             Free Online Video Downloader
           </h1>
           <div
-            className='flex w-full justify-between items-center space-x-2 py-8 flex-col sm:flex-row border'
+            className='flex w-full justify-between items-center space-x-2 py-2 sm:py-8 flex-col sm:flex-row border'
             ref={boxRef}>
             <div className='flex w-full items-end rounded border-4 border-green-700 mx-4'>
               <input
@@ -148,15 +155,15 @@ export default function Home() {
           {!isLoading && videoId.length > 0 && (
             <>
               <div className='mt-4 w-full flex-row sm:flex-col overflow-y-auto items-center justify-center border'>
-                <div className='flex flex-col sm:flex-row items-center my-4'>
-                  <div className='sm:w-1/2 w-full items-center justify-center mx-4'>
+                <div className='flex flex-col items-center my-4'>
+                  <div className='w-full items-center justify-center pl-4'>
                     <YouTube
                       videoId={videoId}
                       opts={opts}
                       onReady={onPlayerReady}
                     />
                   </div>
-                  <div className='sm:w-1/2 w-full mx-4 '>
+                  <div className='w-full pl-4'>
                     <div className='text-2xl font-semibold mt-4 flex items-start'>
                       {todos?.title}
                     </div>
@@ -189,7 +196,7 @@ export default function Home() {
                           ))}
                         </SelectContent>
                       </Select>
-                      <div className='sm:w-1/4 w-full flex flex-row items-end sm:justify-end justify-end mt-4 sm:mt-0 mr-4'>
+                      <div className='flex flex-row items-end sm:justify-end justify-end mr-4'>
                         <Button
                           size='sm'
                           variant='ghost'

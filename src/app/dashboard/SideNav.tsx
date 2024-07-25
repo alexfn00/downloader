@@ -41,17 +41,11 @@ export default function SideNav() {
 
   return (
     <div className='flex max-full flex-col px-3 md:px-2 md:h-[calc(100vh-6rem)] '>
-      <Link
-        className='mb-2 flex h-20 items-end justify-start rounded-md bg-blue-600 p-4 md:h-30'
-        href='/'>
-        <div className='w-32 text-white md:w-40'>
-          <div
-            className={` flex flex-row items-center leading-none text-white`}>
-            <Globe className='h-12 w-12 rotate-[15deg]' />
-            <p className='text-[20px] ml-2'>Authors</p>
-          </div>
-        </div>
-      </Link>
+      <div className='hidden md:block '>
+        <h1 className='flex items-center justify-center sm:text-3xl font-semibold mb-2'>
+          Channels
+        </h1>
+      </div>
       <div className='flex grow flex-row overflow-auto justify-start space-x-2 md:flex-col md:space-x-0 md:space-y-2'>
         {data.pages.map((page) => {
           return (
@@ -84,7 +78,7 @@ export default function SideNav() {
           )
         })}
       </div>
-      <div ref={ref} className='flex flex-col items-center'>
+      <div ref={ref} className='flex flex-col items-center border-2'>
         {isFetchingNextPage && (
           <Loader2 className='mr-4 h-16 w-16 animate-spin' />
         )}

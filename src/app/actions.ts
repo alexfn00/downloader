@@ -122,7 +122,7 @@ export const getVideoInfo = async (url: string | null) => {
   try {
     const response = await axios.get(process.env.TASK_URL + `/video?url=${url}`)
     const result = { "id": response.data['id'], 'title': response.data['title'], 'duration': response.data['duration'], formats: [...response.data['formats']] }
-    console.log('getVideoInfo', result)
+    // console.log('getVideoInfo', result)
     return result
   } catch (error) {
     console.log('getVideoInfo error:', error)

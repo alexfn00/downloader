@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/select'
 import { useSearchParams } from 'next/navigation'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { getVideoInfo, parseURL, startDownload } from '@/app/actions'
+import { getVideoInfo, startDownload } from '@/app/actions'
 import { Loader2 } from 'lucide-react'
 import { Button } from './ui/button'
 import YouTube, { YouTubeProps } from 'react-youtube'
@@ -33,10 +33,17 @@ const Player = () => {
       if (boxRef.current) {
         const width = boxRef.current.offsetWidth
         const height = boxRef.current.offsetHeight
-        if (width > 640) {
-          setBoxSize({ width: width / 2, height: height / 2 })
+
+        if (window.innerWidth < 640) {
+          setBoxSize({
+            width: width - 32,
+            height: height,
+          })
         } else {
-          setBoxSize({ width, height })
+          setBoxSize({
+            width: (width * 3) / 4 - 8,
+            height: height,
+          })
         }
       }
     }
@@ -52,8 +59,8 @@ const Player = () => {
   }
 
   const opts = {
-    height: ((boxSize.width - 100) * 3) / 4,
-    width: boxSize.width - 20,
+    height: (boxSize.width * 2) / 3,
+    width: boxSize.width,
     playerVars: {
       autoplay: 1,
     },
@@ -99,9 +106,13 @@ const Player = () => {
 
   return (
     <main className='mx-auto max-w-full sm:max-w-6xl sm:mt-12'>
+      <h1 className='flex items-center justify-center text-xl sm:text-3xl font-semibold my-4'>
+        Free Online Video Downloader
+      </h1>
       <div
         className='flex flex-col items-center min-h-[300px] justify-center rounded-md'
         ref={boxRef}>
+        {/* {boxSize.width}, {boxSize.height} */}
         {isLoading && (
           <div className='flex items-center justify-center'>
             <Loader2 className='mr-4 h-8 w-8 animate-spin' />
@@ -110,15 +121,15 @@ const Player = () => {
         {!isLoading && videoId.length > 0 && (
           <>
             <div className='mt-4 w-full flex-row sm:flex-col overflow-y-auto items-center justify-center border'>
-              <div className='flex flex-col sm:flex-row items-center my-4'>
-                <div className='sm:w-1/2 w-full items-center justify-center pl-4'>
+              <div className='flex flex-col sm:flex-col items-center my-4'>
+                <div className='w-full items-center justify-center pl-4'>
                   <YouTube
                     videoId={videoId}
                     opts={opts}
                     onReady={onPlayerReady}
                   />
                 </div>
-                <div className='sm:w-1/2 w-full mx-4 '>
+                <div className=' w-full mx-4 '>
                   <div className='text-2xl font-semibold mt-4 flex items-start px-4'>
                     {todos?.title}
                   </div>
@@ -151,11 +162,11 @@ const Player = () => {
                         ))}
                       </SelectContent>
                     </Select>
-                    <div className='sm:w-1/4 w-full flex flex-row items-end sm:justify-end justify-end mt-4 sm:mt-0 mr-4'>
+                    <div className='flex flex-row items-end sm:justify-end justify-end sm:mt-0 mr-4 border'>
                       <Button
                         size='sm'
                         variant='ghost'
-                        className='rounded-md py-4 ml-4 bg-green-700 text-white hover:bg-green-600 hover:text-white'
+                        className='rounded-md ml-4 bg-green-700 text-white hover:bg-green-600 hover:text-white'
                         onClick={() => {
                           const code =
                             todos?.formats[Number(currentOption)][
