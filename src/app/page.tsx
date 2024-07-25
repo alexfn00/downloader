@@ -69,7 +69,7 @@ export default function Home() {
             title: 'Uh oh! Something went wrong.',
             description: 'Download timeout',
           })
-        } else if (data.filename == null) {
+        } else if (data.value.filename == null) {
           toast({
             variant: 'destructive',
             title: 'Uh oh! Something went wrong.',
