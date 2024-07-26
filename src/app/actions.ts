@@ -255,26 +255,26 @@ export const startDownload = async (param: { downloadURL: string, type: string, 
     const result = await axios.post(url, data)
     console.log('post result:', result.data)
     let res = result.data
-    const taskId = result.data['id']
-    let channelResult = ''
+    // const taskId = result.data['id']
+    // let channelResult = ''
 
-    let counter = 0
-    while (channelResult != 'SUCCESS') {
-      if (counter >= 20) {
-        channelResult = 'TIMEOUT'
-        break
-      }
-      counter++
-      await sleep(15000)
-      await axios.get(process.env.TASK_URL + `/task/${taskId}`).then((response) => {
-        channelResult = response.data.state
-        res = response.data
-        console.log(response.data)
-      }).catch((error) => {
-        console.error(error)
-      })
-    }
-    console.log('startDownload:', channelResult)
+    // let counter = 0
+    // while (channelResult != 'SUCCESS') {
+    //   if (counter >= 20) {
+    //     channelResult = 'TIMEOUT'
+    //     break
+    //   }
+    //   counter++
+    //   await sleep(15000)
+    //   await axios.get(process.env.TASK_URL + `/task/${taskId}`).then((response) => {
+    //     channelResult = response.data.state
+    //     res = response.data
+    //     console.log(response.data)
+    //   }).catch((error) => {
+    //     console.error(error)
+    //   })
+    // }
+    // console.log('startDownload:', channelResult)
     console.log('res:', res)
     return res
   } catch (error) {
