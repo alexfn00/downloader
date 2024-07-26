@@ -88,6 +88,17 @@ export default function Home() {
           download(url, data.value.filename)
         }
       },
+      onError: (error, variables, context) => {
+        console.log('onError error', error)
+        console.log('onError variables', variables)
+        console.log('onError context', context)
+      },
+      onSettled: (data, error, variables, context) => {
+        console.log('onSettled error', error)
+        console.log('onSettled variables', variables)
+        console.log('onSettled context', context)
+        console.log('onSettled data', data)
+      },
     },
   )
 
@@ -156,13 +167,13 @@ export default function Home() {
             <>
               <div className='mt-4 w-full flex-row sm:flex-col overflow-y-auto items-center justify-center border'>
                 <div className='flex flex-col items-center my-4'>
-                  <div className='w-full items-center justify-center pl-4'>
+                  {/* <div className='w-full items-center justify-center pl-4'>
                     <YouTube
                       videoId={videoId}
                       opts={opts}
                       onReady={onPlayerReady}
                     />
-                  </div>
+                  </div> */}
                   <div className='w-full pl-4'>
                     <div className='text-2xl font-semibold mt-4 flex items-start'>
                       {todos?.title}

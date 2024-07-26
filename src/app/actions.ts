@@ -265,21 +265,30 @@ export const startDownload = async (param: { downloadURL: string, type: string, 
         break
       }
       counter++
-      await sleep(15000)
-      const response = await fetch(process.env.TASK_URL + `/task/${taskId}`);
-      res = response
-      // await axios.get(process.env.TASK_URL + `/task/${taskId}`).then((response) => {
-      //   channelResult = response.data.state
-      //   res = response.data
-      //   console.log(response.data)
-      // }).catch((error) => {
-      //   console.error(error)
-      // })
+      await sleep(5000)
+      // const response = await fetch(process.env.TASK_URL + `/task/${taskId}`);
+      // res = response
+      // console.log('task result', response)
+      await axios.get(process.env.TASK_URL + `/task/${taskId}`).then((response) => {
+        channelResult = response.data.state
+        res = response.data
+        console.log(response.data)
+      }).catch((error) => {
+        console.error(error)
+      })
     }
     console.log('startDownload:', channelResult)
     console.log('res:', res)
     return res
   } catch (error) {
     console.log('startDownload error:', error)
+  }
+}
+
+export const getTaskInfo = async (taskId: string | null) => {
+  try {
+    return await axios.get(process.env.TASK_URL + `/task/${taskId}`)
+  } catch (error) {
+    console.log('getTaskInfo error:', error)
   }
 }
