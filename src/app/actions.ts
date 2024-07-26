@@ -265,7 +265,7 @@ export const startDownload = async (param: { downloadURL: string, type: string, 
         break
       }
       counter++
-      await sleep(5000)
+      await sleep(15000)
       await axios.get(process.env.TASK_URL + `/task/${taskId}`).then((response) => {
         channelResult = response.data.state
         res = response.data
