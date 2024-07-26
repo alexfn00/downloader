@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { getVideoInfo, startDownload } from './actions'
+import { getTaskInfo, getVideoInfo, startDownload } from './actions'
 import { Loader2, X } from 'lucide-react'
 import YouTube, { YouTubeProps } from 'react-youtube'
 import { useEffect, useRef, useState } from 'react'
@@ -19,9 +19,13 @@ import { toast } from '@/components/ui/use-toast'
 import { ToastAction } from '@radix-ui/react-toast'
 
 export default function Home() {
+  let intervalId = 0
+
+  const [isTaskRunning, setIsTaskRunning] = useState(false)
   const [url, setUrl] = useState<string>('')
   const [videoId, setVideoId] = useState('')
   const [currentOption, setCurrentOption] = useState('0')
+  const [taskId, setTaskId] = useState<string>('')
   const [boxSize, setBoxSize] = useState<{ width: number; height: number }>({
     width: 0,
     height: 0,
@@ -54,6 +58,14 @@ export default function Home() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
+  const { refetch: fetchtask } = useQuery({
+    queryFn: () => getTaskInfo(taskId),
+
+    queryKey: ['taskInfo', { taskId }],
+    enabled: false, // disable this query from automatically running
+    gcTime: 0,
+  })
+
   const {
     data: todos,
     refetch,
@@ -66,39 +78,39 @@ export default function Home() {
     gcTime: 0,
   })
 
+  function task_complete(data: any) {
+    if (data.state == 'SUCCESS') {
+      clearInterval(intervalId)
+      setIsTaskRunning(false)
+      if (data.value.filename == null) {
+        toast({
+          variant: 'destructive',
+          title: 'Uh oh! Something went wrong.',
+          description: data.value.message,
+          action: <ToastAction altText='Try again'>Try again</ToastAction>,
+        })
+      } else {
+        const url = `https://r2.oecent.net/${data.value.filename}`
+        download(url, data.value.filename)
+      }
+    }
+  }
+
+  function intervalFunction(callback: (result: string) => void) {
+    fetchtask().then((data) => {
+      callback(data.data)
+    })
+  }
+
   const { mutateAsync: handleDownload, isPending: isDownloading } = useMutation(
     {
       mutationFn: startDownload,
       onSuccess: (data) => {
-        if (data.state === 'PENDING') {
-          toast({
-            variant: 'destructive',
-            title: 'Uh oh! Something went wrong.',
-            description: 'Download timeout',
-          })
-        } else if (data.value.filename == null) {
-          toast({
-            variant: 'destructive',
-            title: 'Uh oh! Something went wrong.',
-            description: data.value.message,
-            action: <ToastAction altText='Try again'>Try again</ToastAction>,
-          })
-        } else {
-          const url = `https://r2.oecent.net/${data.value.filename}`
-          download(url, data.value.filename)
-        }
+        setTaskId(data.id)
+        intervalId = window.setInterval(intervalFunction, 5000, task_complete)
       },
-      onError: (error, variables, context) => {
-        console.log('onError error', error)
-        console.log('onError variables', variables)
-        console.log('onError context', context)
-      },
-      onSettled: (data, error, variables, context) => {
-        console.log('onSettled error', error)
-        console.log('onSettled variables', variables)
-        console.log('onSettled context', context)
-        console.log('onSettled data', data)
-      },
+      onError: (error, variables, context) => {},
+      onSettled: (data, error, variables, context) => {},
     },
   )
 
@@ -167,13 +179,13 @@ export default function Home() {
             <>
               <div className='mt-4 w-full flex-row sm:flex-col overflow-y-auto items-center justify-center border'>
                 <div className='flex flex-col items-center my-4'>
-                  {/* <div className='w-full items-center justify-center pl-4'>
+                  <div className='w-full items-center justify-center pl-4'>
                     <YouTube
                       videoId={videoId}
                       opts={opts}
                       onReady={onPlayerReady}
                     />
-                  </div> */}
+                  </div>
                   <div className='w-full pl-4'>
                     <div className='text-2xl font-semibold mt-4 flex items-start'>
                       {todos?.title}
@@ -235,8 +247,9 @@ export default function Home() {
                               value:
                                 code == 'Video and Audio' ? dimension : itag,
                             })
+                            setIsTaskRunning(true)
                           }}>
-                          {isDownloading && (
+                          {isTaskRunning && (
                             <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                           )}
                           Download

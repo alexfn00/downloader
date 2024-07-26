@@ -23,7 +23,7 @@ const DashboardLayout = async ({ children }: ChatLayoutProps) => {
 
   return (
     <div className='flex h-[calc(100vh-4rem)] flex-col md:flex-row md:overflow-hidden'>
-      <div className='w-full flex-none md:w-96 py-6 md:py-12 border-r-2'>
+      <div className='w-full flex-none md:w-80 py-6 md:py-12 border-r-2 mb-2 '>
         <SideNav />
       </div>
       <div className='flex-grow md:overflow-y-auto'>{children}</div>

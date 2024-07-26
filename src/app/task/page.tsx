@@ -15,12 +15,14 @@ import { SkeletonCard } from '@/components/skeletons'
 import {
   useInfiniteQuery,
   useMutation,
+  useQuery,
   useQueryClient,
 } from '@tanstack/react-query'
 import {
   addChannel,
   deleteChannel,
   fetchAuthors,
+  getTaskInfo,
   updateChannels,
 } from '../actions'
 import { useInView } from 'react-intersection-observer'
@@ -30,20 +32,46 @@ import { Input } from '@/components/ui/input'
 import { useToast } from '@/components/ui/use-toast'
 
 export default function Home() {
+  let intervalId = 0
+  const [isTaskRunning, setIsTaskRunning] = useState(false)
+  const [taskId, setTaskId] = useState<string>('')
   const queryClient = useQueryClient()
   const [author, setAuthor] = useState<string>('')
   const [currentChannel, setCurrentChannel] = useState('')
   const { toast } = useToast()
 
-  const { mutateAsync: handleAdd, isPending: isAddPending } = useMutation({
-    mutationFn: addChannel,
-    onSuccess: (data) => {
-      setCurrentChannel('')
+  const { refetch: fetchtask } = useQuery({
+    queryFn: () => getTaskInfo(taskId),
+
+    queryKey: ['taskInfo', { taskId }],
+    enabled: false, // disable this query from automatically running
+    gcTime: 0,
+  })
+
+  function task_complete(data: any) {
+    if (data.state == 'SUCCESS') {
+      clearInterval(intervalId)
+      setIsTaskRunning(false)
       toast({
         title: 'Update',
         description: 'Channel updated successfully',
       })
+      setCurrentChannel('')
       queryClient.invalidateQueries({ queryKey: ['authors'] })
+    }
+  }
+
+  function intervalFunction(callback: (result: string) => void) {
+    fetchtask().then((data) => {
+      callback(data.data)
+    })
+  }
+
+  const { mutateAsync: handleAdd } = useMutation({
+    mutationFn: addChannel,
+    onSuccess: (data) => {
+      setTaskId(data.id)
+      intervalId = window.setInterval(intervalFunction, 5000, task_complete)
     },
   })
 
@@ -53,7 +81,7 @@ export default function Home() {
       onSuccess: (data) => {
         toast({
           title: 'Update',
-          description: 'Updated all channels',
+          description: 'All channels updated',
         })
         queryClient.invalidateQueries({ queryKey: ['authors'] })
       },
@@ -108,7 +136,7 @@ export default function Home() {
           value={author}
           onChange={(e) => setAuthor(e.target.value)}
         />
-        {isAddPending && <Loader2 className='mr-4 h-8 w-8 animate-spin' />}
+        {isTaskRunning && <Loader2 className='mr-4 h-8 w-8 animate-spin' />}
         <Button
           size='sm'
           variant='ghost'

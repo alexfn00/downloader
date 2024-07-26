@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/select'
 import { useSearchParams } from 'next/navigation'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { getVideoInfo, startDownload } from '@/app/actions'
+import { getTaskInfo, getVideoInfo, startDownload } from '@/app/actions'
 import { Loader2 } from 'lucide-react'
 import { Button } from './ui/button'
 import YouTube, { YouTubeProps } from 'react-youtube'
@@ -20,6 +20,9 @@ import { ToastAction } from '@radix-ui/react-toast'
 const Player = () => {
   const searchParams = useSearchParams()
   const search = searchParams.get('url')
+  let intervalId = 0
+  const [isTaskRunning, setIsTaskRunning] = useState(false)
+  const [taskId, setTaskId] = useState<string>('')
   const [currentOption, setCurrentOption] = useState('0')
   const [videoId, setVideoId] = useState('')
   const [boxSize, setBoxSize] = useState<{ width: number; height: number }>({
@@ -73,36 +76,52 @@ const Player = () => {
     }
   }, [])
 
+  const { refetch: fetchtask } = useQuery({
+    queryFn: () => getTaskInfo(taskId),
+
+    queryKey: ['taskInfo', { taskId }],
+    enabled: false, // disable this query from automatically running
+    gcTime: 0,
+  })
+
   const { data: todos, isLoading } = useQuery({
     queryFn: () => getVideoInfo(search),
     queryKey: ['parseURL', { search }],
     gcTime: 0,
   })
 
-  const { mutateAsync: handleDownload, isPending: isDownloading } = useMutation(
-    {
-      mutationFn: startDownload,
-      onSuccess: (data) => {
-        if (data.state === 'PENDING') {
-          toast({
-            variant: 'destructive',
-            title: 'Uh oh! Something went wrong.',
-            description: 'Download timeout',
-          })
-        } else if (data.value.filename == null) {
-          toast({
-            variant: 'destructive',
-            title: 'Uh oh! Something went wrong.',
-            description: data.value.message,
-            action: <ToastAction altText='Try again'>Try again</ToastAction>,
-          })
-        } else {
-          const url = `https://r2.oecent.net/${data.value.filename}`
-          download(url, data.value.filename)
-        }
-      },
+  function task_complete(data: any) {
+    console.log('task_complete data', data)
+    if (data.state == 'SUCCESS') {
+      clearInterval(intervalId)
+      setIsTaskRunning(false)
+      if (data.value.filename == null) {
+        toast({
+          variant: 'destructive',
+          title: 'Uh oh! Something went wrong.',
+          description: data.value.message,
+          action: <ToastAction altText='Try again'>Try again</ToastAction>,
+        })
+      } else {
+        const url = `https://r2.oecent.net/${data.value.filename}`
+        download(url, data.value.filename)
+      }
+    }
+  }
+
+  function intervalFunction(callback: (result: string) => void) {
+    fetchtask().then((data) => {
+      callback(data.data)
+    })
+  }
+
+  const { mutateAsync: handleDownload } = useMutation({
+    mutationFn: startDownload,
+    onSuccess: (data) => {
+      setTaskId(data.id)
+      intervalId = window.setInterval(intervalFunction, 5000, task_complete)
     },
-  )
+  })
 
   return (
     <main className='mx-auto max-w-full sm:max-w-6xl sm:mt-12'>
@@ -187,8 +206,9 @@ const Player = () => {
                               code == 'Video and Audio' ? 'dimension' : 'itag',
                             value: code == 'Video and Audio' ? dimension : itag,
                           })
+                          setIsTaskRunning(true)
                         }}>
-                        {isDownloading && (
+                        {isTaskRunning && (
                           <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                         )}
                         Download

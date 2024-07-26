@@ -186,24 +186,7 @@ export const runTask = async (channel: string, userId: string) => {
     }
     const url = process.env.TASK_URL + '/task/'
     const result = await axios.post(url, data)
-    const taskId = result.data['id']
-    let channelResult = ''
-
-    let counter = 0
-    while (channelResult != 'SUCCESS') {
-      if (counter >= 60) {
-        channelResult = 'TIMEOUT'
-        break
-      }
-      counter++
-      await sleep(5000)
-      await axios.get(process.env.TASK_URL + `/task/${taskId}`).then((response) => {
-        channelResult = response.data.state
-      }).catch((error) => {
-        console.error(error)
-      })
-    }
-    return channelResult
+    return result.data
   } catch (error) {
     console.log(error)
   }
@@ -254,32 +237,7 @@ export const startDownload = async (param: { downloadURL: string, type: string, 
     const url = process.env.TASK_URL + '/task/'
     const result = await axios.post(url, data)
     console.log('post result:', result.data)
-    let res = result.data
-    const taskId = result.data['id']
-    let channelResult = ''
-
-    let counter = 0
-    while (channelResult != 'SUCCESS') {
-      if (counter >= 20) {
-        channelResult = 'TIMEOUT'
-        break
-      }
-      counter++
-      await sleep(5000)
-      // const response = await fetch(process.env.TASK_URL + `/task/${taskId}`);
-      // res = response
-      // console.log('task result', response)
-      await axios.get(process.env.TASK_URL + `/task/${taskId}`).then((response) => {
-        channelResult = response.data.state
-        res = response.data
-        console.log(response.data)
-      }).catch((error) => {
-        console.error(error)
-      })
-    }
-    console.log('startDownload:', channelResult)
-    console.log('res:', res)
-    return res
+    return result.data
   } catch (error) {
     console.log('startDownload error:', error)
   }
@@ -287,7 +245,10 @@ export const startDownload = async (param: { downloadURL: string, type: string, 
 
 export const getTaskInfo = async (taskId: string | null) => {
   try {
-    return await axios.get(process.env.TASK_URL + `/task/${taskId}`)
+    const response = await axios.get(process.env.TASK_URL + `/task/${taskId}`)
+    const result = response.data
+    console.log('getTaskInfo', result)
+    return result
   } catch (error) {
     console.log('getTaskInfo error:', error)
   }
