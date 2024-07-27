@@ -1,8 +1,15 @@
+import ChannelPage from '@/components/Channel'
+
 const Page = () => {
   return (
-    <main>
-      <h1 className={`mb-4 text-xl md:text-2xl`}>Dashboard</h1>
-    </main>
+    <>
+      <div className='text-3xl font-semibold p-4'>All Channels </div>
+      <ChannelPage
+        params={{
+          id: '',
+        }}
+      />
+    </>
   )
 }
 
