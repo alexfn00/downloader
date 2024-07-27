@@ -5,10 +5,18 @@ import { Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import ChannelSection from './ChannelSection'
+import ChannelTitle from './ChannelTitle'
 
 const ChannelPage = ({ params }: { params: { id: string } }) => {
   return (
     <>
+      <div className='text-3xl font-semibold p-4'>
+        <ChannelTitle
+          params={{
+            id: params.id,
+          }}
+        />
+      </div>
       <div className='m-auto flex w-full max-w-sm items-center space-x-2 py-4'>
         <Search />
         <Input type='text' placeholder='Search' />
@@ -18,7 +26,7 @@ const ChannelPage = ({ params }: { params: { id: string } }) => {
       <Tabs defaultValue='videos' className='w-full'>
         <TabsList className='grid w-[400px] grid-cols-3'>
           <TabsTrigger value='videos'>Videos</TabsTrigger>
-          <TabsTrigger value='streams'>Alive</TabsTrigger>
+          <TabsTrigger value='streams'>Alives</TabsTrigger>
           <TabsTrigger value='shorts'>Shorts</TabsTrigger>
         </TabsList>
         <TabsContent value='videos'>

@@ -6,11 +6,13 @@ import axios from 'axios'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import ytdl from 'ytdl-core'
 
-export const getUser = async ({ userId }: { userId: string }) => {
-  const authors = await db.channel.findMany({
-    take: 10,
+export const getChannelNameById = async ({ id }: { id: string }) => {
+  const data = await db.channel.findFirst({
+    where: {
+      id,
+    }
   })
-  return authors
+  return data
 }
 
 export const setUser = async ({ userId }: { userId: string }) => {
