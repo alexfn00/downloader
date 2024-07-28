@@ -11,14 +11,19 @@ import { useInView } from 'react-intersection-observer'
 const ChannelSection = ({
   params,
 }: {
-  params: { id: string; type: string }
+  params: { id: string; type: string; search: string }
 }) => {
   const queryClient = useQueryClient()
   const { data, error, status, fetchNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ['items'],
       queryFn: ({ pageParam }) =>
-        fetchVideos({ channel: params.id, type: params.type, pageParam }),
+        fetchVideos({
+          channel: params.id,
+          type: params.type,
+          search: params.search,
+          pageParam,
+        }),
       initialPageParam: 0,
       getNextPageParam: (lastPage) => {
         return lastPage.nextPage
@@ -29,7 +34,7 @@ const ChannelSection = ({
 
   useEffect(() => {
     queryClient.resetQueries({ queryKey: ['items'], exact: true })
-  }, [params.id, queryClient])
+  }, [params.id, params.search, queryClient])
 
   useEffect(() => {
     if (inView) {

@@ -24,23 +24,35 @@ const LIMIT = 10
 export const fetchVideos = async ({
   channel,
   type,
+  search,
   pageParam,
 }: {
   channel: string
   type: string
+  search: string
   pageParam: number | 0
 }) => {
-  const totalCount = channel == '' ? await db.video.count({}) : await db.video.count({
-    where: {
-      channelId: channel,
-    },
-  })
   const where = channel == '' ? {
-    videoType: type,
+    AND: {
+      videoType: type,
+      videoTitle: {
+        contains: search
+      }
+    }
+
   } : {
-    channelId: channel,
-    videoType: type,
+    AND: {
+      channelId: channel,
+      videoType: type,
+      videoTitle: {
+        contains: search
+      }
+    }
   }
+
+  const totalCount = await db.video.count({
+    where: where
+  })
   const data = await db.video.findMany({
     skip: pageParam * LIMIT,
     where: where,
