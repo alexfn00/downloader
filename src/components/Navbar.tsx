@@ -36,6 +36,14 @@ const Navbar = async () => {
               })}>
               Home
             </Link>
+            <Link
+              href='/contact'
+              className={buttonVariants({
+                variant: 'ghost',
+                size: 'sm',
+              })}>
+              Contact Us
+            </Link>
             {!user ? (
               <>
                 <Link

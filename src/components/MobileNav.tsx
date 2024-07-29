@@ -47,6 +47,16 @@ const MobileNav = ({ isAuth }: { isAuth: boolean }) => {
                 Home
               </Link>
             </li>
+            <li>
+              <Link
+                onClick={() => {
+                  closeOnCurrent('/contact')
+                }}
+                className='flex items-center w-full font-semibold'
+                href='/contact'>
+                Contact Us
+              </Link>
+            </li>
             <li className='my-3 h-px w-full bg-gray-300' />
             {!isAuth ? (
               <>
@@ -112,6 +122,7 @@ const MobileNav = ({ isAuth }: { isAuth: boolean }) => {
                 </li>
               </>
             )}
+            <li className='my-3 h-px w-full bg-gray-300' />
           </ul>
         </div>
       )}

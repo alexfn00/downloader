@@ -40,6 +40,7 @@
     "https-proxy-agent": "^7.0.4",
     "ioredis": "^5.4.1",
     "lucide-react": "^0.365.0",
+    "mailtrap": "^3.4.0",
     "net": "^1.0.2",
     "next": "14.1.4",
     "node-celery": "^0.2.8",

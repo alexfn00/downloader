@@ -102,17 +102,15 @@ export default function Home() {
     })
   }
 
-  const { mutateAsync: handleDownload, isPending: isDownloading } = useMutation(
-    {
-      mutationFn: startDownload,
-      onSuccess: (data) => {
-        setTaskId(data.id)
-        intervalId = window.setInterval(intervalFunction, 5000, task_complete)
-      },
-      onError: (error, variables, context) => {},
-      onSettled: (data, error, variables, context) => {},
+  const { mutateAsync: handleDownload } = useMutation({
+    mutationFn: startDownload,
+    onSuccess: (data) => {
+      setTaskId(data.id)
+      intervalId = window.setInterval(intervalFunction, 5000, task_complete)
     },
-  )
+    onError: (error, variables, context) => {},
+    onSettled: (data, error, variables, context) => {},
+  })
 
   const onPlayerReady: YouTubeProps['onReady'] = (event) => {
     // access to player in all event handlers via event.target

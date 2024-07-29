@@ -5,6 +5,8 @@ import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import axios from 'axios'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import ytdl from 'ytdl-core'
+import { MailtrapClient } from "mailtrap"
+
 
 export const getChannelNameById = async ({ id }: { id: string }) => {
   const data = await db.channel.findFirst({
@@ -268,5 +270,32 @@ export const getTaskInfo = async (taskId: string | null) => {
     return result
   } catch (error) {
     console.log('getTaskInfo error:', error)
+  }
+}
+
+
+export const sendEmail = async (param: { firstName: string, lastName: string, email: string, message: string }) => {
+  try {
+    const client = new MailtrapClient({ token: process.env.MAILTRAP_API_TOKEN || '' })
+
+    const sender = {
+      email: "mailtrap@oecent.net",
+      name: "Mailtrap Contact Us",
+    }
+    const recipients = [
+      {
+        email: "alexfn00@gmail.com",
+      }
+    ]
+    client.send({
+      from: sender,
+      to: recipients,
+      subject: "Contact us",
+      text: 'from: ' + param.firstName + ' ' + param.lastName + ' ' + param.message,
+      category: "contact us",
+    }).then(console.log, console.error)
+    return 'ok'
+  } catch (error) {
+    console.log('sendEmail error:', error)
   }
 }
