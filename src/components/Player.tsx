@@ -13,7 +13,7 @@ import { getTaskInfo, getVideoInfo, startDownload } from '@/app/actions'
 import { Loader2 } from 'lucide-react'
 import { Button } from './ui/button'
 import YouTube, { YouTubeProps } from 'react-youtube'
-import { download, secondsToTimeFormat } from '@/lib/utils'
+import { bytesToReadableSize, download, secondsToTimeFormat } from '@/lib/utils'
 import { toast } from './ui/use-toast'
 import { ToastAction } from '@radix-ui/react-toast'
 
@@ -175,6 +175,8 @@ const Player = () => {
                             </span>
                             <span className='px-2'>{todo['code']}</span>
                             {todo['format_note']}
+                            <span className='px-2'>{todo['code']}</span>
+                            {bytesToReadableSize(todo['filesize'])}
 
                             {/* <span className='px-2'>{todo['format_note']}</span> */}
                           </SelectItem>

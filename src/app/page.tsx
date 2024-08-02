@@ -14,7 +14,7 @@ import { getTaskInfo, getVideoInfo, startDownload } from './actions'
 import { Loader2, X } from 'lucide-react'
 import YouTube, { YouTubeProps } from 'react-youtube'
 import { useEffect, useRef, useState } from 'react'
-import { download, secondsToTimeFormat } from '@/lib/utils'
+import { bytesToReadableSize, download, secondsToTimeFormat } from '@/lib/utils'
 import { toast } from '@/components/ui/use-toast'
 import { ToastAction } from '@radix-ui/react-toast'
 
@@ -211,6 +211,8 @@ export default function Home() {
                               </span>
                               <span className='px-2'>{todo['code']}</span>
                               {todo['format_note']}
+                              <span className='px-2'>{todo['code']}</span>
+                              {bytesToReadableSize(todo['filesize'])}
 
                               {/* <span className='px-2'>{todo['format_note']}</span> */}
                             </SelectItem>

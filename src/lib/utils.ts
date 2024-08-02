@@ -33,3 +33,22 @@ export function download(fileUrl: string, filename: string) {
   document.body.removeChild(anchor)
   URL.revokeObjectURL(fileUrl)
 }
+
+export function bytesToReadableSize(byteSize: number): string {
+  const BYTES_IN_KB = 1024;
+  const BYTES_IN_MB = 1024 * 1024;
+  const BYTES_IN_GB = 1024 * 1024 * 1024;
+
+  if (byteSize >= BYTES_IN_GB) {
+    const gbSize = byteSize / BYTES_IN_GB;
+    return `${gbSize.toFixed(2)} GB`;
+  } else if (byteSize >= BYTES_IN_MB) {
+    const mbSize = byteSize / BYTES_IN_MB;
+    return `${mbSize.toFixed(2)} MB`;
+  } else if (byteSize >= BYTES_IN_KB) {
+    const kbSize = byteSize / BYTES_IN_KB;
+    return `${kbSize.toFixed(2)} KB`;
+  } else {
+    return `${byteSize} Bytes`;
+  }
+}
