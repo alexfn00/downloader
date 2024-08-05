@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Loader2, Search } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { SkeletonCard } from '@/components/skeletons'
 import {
@@ -48,19 +48,6 @@ export default function Home() {
     gcTime: 0,
   })
 
-  function task_complete(data: any) {
-    if (data.state == 'SUCCESS') {
-      clearInterval(intervalId)
-      setIsTaskRunning(false)
-      toast({
-        title: 'Update',
-        description: 'Channel updated successfully',
-      })
-      setCurrentChannel('')
-      queryClient.invalidateQueries({ queryKey: ['authors'] })
-    }
-  }
-
   function intervalFunction(callback: (result: string) => void) {
     fetchtask().then((data) => {
       callback(data.data)
@@ -71,7 +58,18 @@ export default function Home() {
     mutationFn: addChannel,
     onSuccess: (data) => {
       setTaskId(data.id)
-      intervalId = window.setInterval(intervalFunction, 5000, task_complete)
+      intervalId = window.setInterval(intervalFunction, 5000, (data: any) => {
+        if (data.state == 'SUCCESS') {
+          clearInterval(intervalId)
+          setIsTaskRunning(false)
+          toast({
+            title: 'Update',
+            description: 'Channel updated successfully',
+          })
+          setCurrentChannel('')
+          queryClient.invalidateQueries({ queryKey: ['authors'] })
+        }
+      })
     },
   })
 
@@ -79,11 +77,18 @@ export default function Home() {
     useMutation({
       mutationFn: updateChannels,
       onSuccess: (data) => {
-        toast({
-          title: 'Update',
-          description: 'All channels updated',
+        setTaskId(data.id)
+        intervalId = window.setInterval(intervalFunction, 5000, (data: any) => {
+          if (data.state == 'SUCCESS') {
+            clearInterval(intervalId)
+            setIsTaskRunning(false)
+            toast({
+              title: 'Update',
+              description: 'All channels updated',
+            })
+            queryClient.invalidateQueries({ queryKey: ['authors'] })
+          }
         })
-        queryClient.invalidateQueries({ queryKey: ['authors'] })
       },
     })
 

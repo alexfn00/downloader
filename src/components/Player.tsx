@@ -7,10 +7,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { getTaskInfo, getVideoInfo, startDownload } from '@/app/actions'
-import { Loader2 } from 'lucide-react'
+import { ArrowLeft, Loader2 } from 'lucide-react'
 import { Button } from './ui/button'
 import YouTube, { YouTubeProps } from 'react-youtube'
 import { bytesToReadableSize, download, secondsToTimeFormat } from '@/lib/utils'
@@ -18,6 +18,7 @@ import { toast } from './ui/use-toast'
 import { ToastAction } from '@radix-ui/react-toast'
 
 const Player = () => {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const search = searchParams.get('url')
   let intervalId = 0
@@ -125,6 +126,11 @@ const Player = () => {
 
   return (
     <main className='mx-auto max-w-full sm:max-w-6xl sm:mt-12'>
+      <Button className='ml-4' onClick={() => router.back()}>
+        <ArrowLeft />
+        <span className='pl-2'></span>
+        Back
+      </Button>
       <h1 className='flex items-center justify-center text-xl sm:text-3xl font-semibold my-4'>
         Free Online Video Downloader
       </h1>

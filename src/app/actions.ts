@@ -196,22 +196,6 @@ export const parseURL = async (search: string | null) => {
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
 
-export const runTask = async (channel: string, userId: string) => {
-  try {
-    const data = {
-      task_type: 'crawl',
-      name: 'youtube',
-      author: channel,
-      userId: userId
-    }
-    const url = process.env.TASK_URL + '/task/'
-    const result = await axios.post(url, data)
-    return result.data
-  } catch (error) {
-    console.log(error)
-  }
-}
-
 
 export const addChannel = async (channel: { channelId: string }) => {
   try {
@@ -221,26 +205,64 @@ export const addChannel = async (channel: { channelId: string }) => {
     if (!user?.id || !user.email) {
       return 'Forbidden'
     }
-    return runTask(channel.channelId, user.id)
+    console.log('ChannelId:', channel.channelId)
+    let channels = []
+    if (channel.channelId == '') {
+      const channel_list = await db.channel.findMany({
+        where: {
+          userId: user.id,
+        },
+        select: {
+          channelId: true,
+        },
+      })
+      channels = [...channel_list.map((item) => item['channelId'])]
+    } else {
+      channels = [channel.channelId]
+    }
+    const data = {
+      task_type: 'crawl',
+      name: 'youtube',
+      channels: channels,
+      userId: user.id
+    }
+    console.log('data', data)
+    const result = await axios.post(process.env.TASK_URL + '/task/', data)
+    return result.data
   } catch (error) {
     console.log('addChannel error:', error)
   }
 }
 
 export const updateChannels = async () => {
-  const { getUser } = getKindeServerSession()
-  const user = await getUser()
+  try {
+    const { getUser } = getKindeServerSession()
+    const user = await getUser()
 
-  if (!user?.id || !user.email) {
-    return 'Forbidden'
-  }
-  const channels = await db.channel.findMany({
-    where: {
-      userId: user.id,
-    },
-  })
-  for (let channel of channels) {
-    await runTask(channel.channelId, user.id)
+    if (!user?.id || !user.email) {
+      return 'Forbidden'
+    }
+    const channels = await db.channel.findMany({
+      where: {
+        userId: user.id,
+      },
+      select: {
+        channelId: true,
+      },
+    })
+
+    const data = {
+      task_type: 'crawl',
+      name: 'youtube',
+      channels: [...channels.map((item) => item['channelId'])],
+      userId: user.id
+    }
+    console.log(data)
+
+    const result = await axios.post(process.env.TASK_URL + '/task/', data)
+    return result.data
+  } catch (error) {
+    console.log('updateChannels error:', error)
   }
 }
 
