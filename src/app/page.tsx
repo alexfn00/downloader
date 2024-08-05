@@ -203,7 +203,7 @@ export default function Home() {
                         <SelectContent>
                           {todos?.formats.map((todo, index) => (
                             <SelectItem
-                              className=' hover:text-white flex items-center'
+                              className='flex items-center'
                               value={index.toString()}
                               key={todo.lastModified}>
                               <div className='flex items-end justify-end'>
