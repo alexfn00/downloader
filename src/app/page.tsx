@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { getTaskInfo, getVideoInfo, startDownload } from './actions'
-import { Loader2, X } from 'lucide-react'
+import { Loader2, VolumeX, X } from 'lucide-react'
 import YouTube, { YouTubeProps } from 'react-youtube'
 import { useEffect, useRef, useState } from 'react'
 import { bytesToReadableSize, download, secondsToTimeFormat } from '@/lib/utils'
@@ -203,18 +203,26 @@ export default function Home() {
                         <SelectContent>
                           {todos?.formats.map((todo, index) => (
                             <SelectItem
-                              className='hover:bg-green-600 hover:text-white'
+                              className=' hover:text-white flex items-center'
                               value={index.toString()}
                               key={todo.lastModified}>
-                              <span className='px-2'>
-                                {todo['ext'].toUpperCase()}
-                              </span>
-                              <span className='px-2'>{todo['code']}</span>
-                              {todo['format_note']}
-                              <span className='px-2'>{todo['code']}</span>
-                              {bytesToReadableSize(todo['filesize'])}
+                              <div className='flex items-end justify-end'>
+                                <div className='pl-2 pr-4'>
+                                  {todo['ext'].toUpperCase()}
+                                </div>
 
-                              {/* <span className='px-2'>{todo['format_note']}</span> */}
+                                {todo['code'] == 'Video' ? (
+                                  <VolumeX className='text-red-500 w-8' />
+                                ) : (
+                                  <span className='pl-8'></span>
+                                )}
+                                <span className='px-2 w-20'>
+                                  {todo['format_note']}
+                                </span>
+                                <span className='pl-2'>
+                                  {bytesToReadableSize(todo['filesize'])}
+                                </span>
+                              </div>
                             </SelectItem>
                           ))}
                         </SelectContent>

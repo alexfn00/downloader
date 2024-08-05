@@ -10,7 +10,7 @@ import {
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { getTaskInfo, getVideoInfo, startDownload } from '@/app/actions'
-import { ArrowLeft, Loader2 } from 'lucide-react'
+import { ArrowLeft, Loader2, VolumeX } from 'lucide-react'
 import { Button } from './ui/button'
 import YouTube, { YouTubeProps } from 'react-youtube'
 import { bytesToReadableSize, download, secondsToTimeFormat } from '@/lib/utils'
@@ -105,7 +105,8 @@ const Player = () => {
         })
       } else {
         const url = `https://r2.oecent.net/${data.value.filename}`
-        download(url, data.value.filename)
+        console.log('download url', url)
+        // download(url, data.value.filename)
       }
     }
   }
@@ -123,6 +124,9 @@ const Player = () => {
       intervalId = window.setInterval(intervalFunction, 5000, task_complete)
     },
   })
+  if (!isLoading) {
+    console.log(todos)
+  }
 
   return (
     <main className='mx-auto max-w-full sm:max-w-6xl sm:mt-12'>
@@ -173,18 +177,26 @@ const Player = () => {
                       <SelectContent>
                         {todos?.formats.map((todo, index) => (
                           <SelectItem
-                            className='hover:bg-green-600 hover:text-white'
+                            className=' hover:text-white flex items-center'
                             value={index.toString()}
                             key={todo.lastModified}>
-                            <span className='px-2'>
-                              {todo['ext'].toUpperCase()}
-                            </span>
-                            <span className='px-2'>{todo['code']}</span>
-                            {todo['format_note']}
-                            <span className='px-2'>{todo['code']}</span>
-                            {bytesToReadableSize(todo['filesize'])}
+                            <div className='flex items-end justify-end'>
+                              <div className='pl-2 pr-4'>
+                                {todo['ext'].toUpperCase()}
+                              </div>
 
-                            {/* <span className='px-2'>{todo['format_note']}</span> */}
+                              {todo['code'] == 'Video' ? (
+                                <VolumeX className='text-red-500 w-8' />
+                              ) : (
+                                <span className='pl-8'></span>
+                              )}
+                              <span className='px-2 w-20'>
+                                {todo['format_note']}
+                              </span>
+                              <span className='pl-2'>
+                                {bytesToReadableSize(todo['filesize'])}
+                              </span>
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
