@@ -10,17 +10,18 @@ import {
 import { Loader2, VolumeX } from 'lucide-react'
 import YouTube, { YouTubeProps } from 'react-youtube'
 import { useEffect, useRef, useState } from 'react'
-import { bytesToReadableSize, secondsToTimeFormat } from '@/lib/utils'
+import { bytesToReadableSize, download, secondsToTimeFormat } from '@/lib/utils'
 import { toast } from '@/components/ui/use-toast'
 import { ToastAction } from '@radix-ui/react-toast'
 import { getTaskInfo, startDownload } from '@/app/actions'
+import { VideoInfo } from '@/lib/type'
 
 const Downloader = ({
   params,
 }: {
   params: {
     url: string
-    data: any
+    data: VideoInfo
   }
 }) => {
   let intervalId = 0
@@ -107,7 +108,7 @@ const Downloader = ({
               })
             } else {
               const url = `https://r2.oecent.net/${data.value.filename}`
-              // download(url, data.value.filename)
+              download(url, data.value.filename)
             }
           }
           console.log(data)
@@ -141,7 +142,7 @@ const Downloader = ({
           )}
         </div>
         <div className='w-full pl-4'>
-          <div className='text-2xl font-semibold mt-4 flex items-start'>
+          <div className='text-xl font-semibold my-4 flex items-start'>
             {todos?.title}
           </div>
           <div className=' text-gray-500 my-4 flex items-start'>
@@ -161,7 +162,7 @@ const Downloader = ({
                   <SelectItem
                     className='flex items-center'
                     value={index.toString()}
-                    key={todo.lastModified}>
+                    key={index.toString()}>
                     <div className='flex items-end justify-end'>
                       <div className='pl-2 pr-4'>
                         {todo['ext'].toUpperCase()}

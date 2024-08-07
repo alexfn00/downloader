@@ -69,7 +69,7 @@ export default function Home() {
               </Button>
             </div>
           </div>
-          {!isLoading && videoId.length > 0 && (
+          {!isLoading && videoId.length > 0 && todos && (
             <Downloader
               params={{
                 url: url,

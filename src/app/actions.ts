@@ -4,8 +4,9 @@ import { db } from '@/db'
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import axios from 'axios'
 import { HttpsProxyAgent } from 'https-proxy-agent'
-import ytdl from 'ytdl-core'
+import ytdl, { videoInfo } from 'ytdl-core'
 import { MailtrapClient } from "mailtrap"
+import { VideoInfo } from '@/lib/type'
 
 
 export const getChannelNameById = async ({ id }: { id: string }) => {
@@ -142,8 +143,13 @@ export const getVideoInfo = async (url: string | null) => {
     const response = await axios.post(process.env.TASK_URL + '/video', {
       url: url,
     })
-    const result = { "id": response.data['id'], 'title': response.data['title'], 'duration': response.data['duration'], formats: [...response.data['formats']] }
-    return result
+    const videoInfo: VideoInfo = {
+      id: response.data['id'],
+      title: response.data['title'],
+      duration: response.data['duration'],
+      formats: [...response.data['formats']]
+    }
+    return videoInfo
   } catch (error) {
     console.log('getVideoInfo error:', error)
   }

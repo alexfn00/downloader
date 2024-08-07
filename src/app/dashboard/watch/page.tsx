@@ -36,7 +36,7 @@ const Page = () => {
               <Loader2 className='mr-4 h-8 w-8 animate-spin' />
             </div>
           )}
-          {!isLoading && url && (
+          {!isLoading && url && todos && (
             <Downloader
               params={{
                 url: url,
