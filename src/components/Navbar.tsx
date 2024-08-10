@@ -37,6 +37,14 @@ const Navbar = async () => {
               Home
             </Link>
             <Link
+              href='/instagram'
+              className={buttonVariants({
+                variant: 'ghost',
+                size: 'sm',
+              })}>
+              Instagram
+            </Link>
+            <Link
               href='/contact'
               className={buttonVariants({
                 variant: 'ghost',

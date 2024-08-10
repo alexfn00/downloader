@@ -17,3 +17,26 @@ export interface VideoInfo {
   duration: number
   formats: VideoFormat[]
 }
+
+
+interface InstagramPost {
+  profile: string
+  url: string
+  caption: string
+  is_video: boolean
+  video_url: string
+  video_view_count: number
+  likes: number
+  comments: number
+  caption_hashtags: string[]
+}
+export interface InstagramInfo {
+  username: string
+  userid: number
+  mediacount: number
+  followers: number
+  followees: number
+  biography: string
+  external_url: string
+  posts: InstagramPost[]
+}

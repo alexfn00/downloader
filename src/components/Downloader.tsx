@@ -29,7 +29,8 @@ const Downloader = ({
   const todos = params.data
   const [videoId, setVideoId] = useState('')
   const [isTaskRunning, setIsTaskRunning] = useState(false)
-  const [progress, setProgress] = useState<number>(0)
+  const [progress, setProgress] = useState('')
+  const [state, setState] = useState('')
   const [currentOption, setCurrentOption] = useState('0')
   const [taskId, setTaskId] = useState<string>('')
   const [boxSize, setBoxSize] = useState<{ width: number; height: number }>({
@@ -92,9 +93,11 @@ const Downloader = ({
         5000,
         (data: any) => {
           if (data.state == 'PROGRESS') {
-            setProgress(data.value.current)
+            setProgress(data.value.percent)
+            setState(data.value.status)
           } else if (data.state == 'SUCCESS') {
-            setProgress(100)
+            setProgress('100%')
+            setState('')
             clearInterval(intervalId)
             setIsTaskRunning(false)
             if (data.value.filename == null) {
@@ -204,14 +207,16 @@ const Downloader = ({
                     type: code == 'Video and Audio' ? 'dimension' : 'itag',
                     value: code == 'Video and Audio' ? dimension : itag,
                   })
-                  setProgress(0)
+                  setProgress('0%')
                   setIsTaskRunning(true)
                 }}>
                 {isTaskRunning ? (
                   <>
-                    <span className='pr-2'>{progress} %</span>
+                    <span className='pr-2'>{progress}</span>
                     <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                    Downloading
+                    {state == 'download' && <>Downloading</>}
+                    {state == 'upload' && <>Saving</>}
+                    {state == '' && <>Download</>}
                   </>
                 ) : (
                   <>Download</>

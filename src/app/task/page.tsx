@@ -34,6 +34,7 @@ import { useToast } from '@/components/ui/use-toast'
 export default function Home() {
   let intervalId = 0
   const [isTaskRunning, setIsTaskRunning] = useState(false)
+  const [isAllTaskRunning, setIsAllTaskRunning] = useState(false)
   const [taskId, setTaskId] = useState<string>('')
   const queryClient = useQueryClient()
   const [author, setAuthor] = useState<string>('')
@@ -48,49 +49,58 @@ export default function Home() {
     gcTime: 0,
   })
 
-  function intervalFunction(callback: (result: string) => void) {
-    fetchtask().then((data) => {
-      callback(data.data)
-    })
-  }
-
   const { mutateAsync: handleAdd } = useMutation({
     mutationFn: addChannel,
     onSuccess: (data) => {
       setTaskId(data.id)
-      intervalId = window.setInterval(intervalFunction, 5000, (data: any) => {
-        if (data.state == 'SUCCESS') {
-          clearInterval(intervalId)
-          setIsTaskRunning(false)
-          toast({
-            title: 'Update',
-            description: 'Channel updated successfully',
+      intervalId = window.setInterval(
+        (callback: (result: string) => void) => {
+          fetchtask().then((data) => {
+            callback(data.data)
           })
-          setCurrentChannel('')
-          queryClient.invalidateQueries({ queryKey: ['authors'] })
-        }
-      })
-    },
-  })
-
-  const { mutateAsync: handleUpdateAll, isPending: isUpdatePending } =
-    useMutation({
-      mutationFn: updateChannels,
-      onSuccess: (data) => {
-        setTaskId(data.id)
-        intervalId = window.setInterval(intervalFunction, 5000, (data: any) => {
+        },
+        5000,
+        (data: any) => {
           if (data.state == 'SUCCESS') {
             clearInterval(intervalId)
             setIsTaskRunning(false)
+            toast({
+              title: 'Update',
+              description: 'Channel updated successfully',
+            })
+            setCurrentChannel('')
+            queryClient.invalidateQueries({ queryKey: ['authors'] })
+          }
+        },
+      )
+    },
+  })
+
+  const { mutateAsync: handleUpdateAll } = useMutation({
+    mutationFn: updateChannels,
+    onSuccess: (data) => {
+      setTaskId(data.id)
+      intervalId = window.setInterval(
+        (callback: (result: string) => void) => {
+          fetchtask().then((data) => {
+            callback(data.data)
+          })
+        },
+        5000,
+        (data: any) => {
+          if (data.state == 'SUCCESS') {
+            clearInterval(intervalId)
+            setIsAllTaskRunning(false)
             toast({
               title: 'Update',
               description: 'All channels updated',
             })
             queryClient.invalidateQueries({ queryKey: ['authors'] })
           }
-        })
-      },
-    })
+        },
+      )
+    },
+  })
 
   const { data, error, status, fetchNextPage, isFetchingNextPage } =
     useInfiniteQuery({
@@ -147,6 +157,7 @@ export default function Home() {
           variant='ghost'
           className='rounded-md '
           onClick={() => {
+            setIsTaskRunning(true)
             handleAdd({ channelId: author })
           }}>
           Add
@@ -155,13 +166,19 @@ export default function Home() {
           size='sm'
           variant='ghost'
           onClick={() => {
+            setIsAllTaskRunning(true)
             handleUpdateAll()
           }}>
           Update All
         </Button>
       </div>
 
-      {(isDeletePending || isUpdatePending) && (
+      {isDeletePending && (
+        <div className='flex items-center justify-center'>
+          <Loader2 className='mr-4 h-8 w-8 animate-spin' />
+        </div>
+      )}
+      {isAllTaskRunning && (
         <div className='flex items-center justify-center'>
           <Loader2 className='mr-4 h-8 w-8 animate-spin' />
         </div>

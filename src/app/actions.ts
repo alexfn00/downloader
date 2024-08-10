@@ -6,7 +6,7 @@ import axios from 'axios'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import ytdl, { videoInfo } from 'ytdl-core'
 import { MailtrapClient } from "mailtrap"
-import { VideoInfo } from '@/lib/type'
+import { InstagramInfo, VideoInfo } from '@/lib/type'
 
 
 export const getChannelNameById = async ({ id }: { id: string }) => {
@@ -326,5 +326,26 @@ export const sendEmail = async (param: { firstName: string, lastName: string, em
     return 'ok'
   } catch (error) {
     console.log('sendEmail error:', error)
+  }
+}
+
+export const getInstagramInfo = async (userId: string | null) => {
+  try {
+    const response = await axios.post(process.env.TASK_URL + '/instagram', {
+      userId: userId,
+    })
+    const videoInfo: InstagramInfo = {
+      username: response.data['username'],
+      userid: response.data['userid'],
+      mediacount: response.data['mediacount'],
+      followers: response.data['followers'],
+      followees: response.data['followees'],
+      biography: response.data['biography'],
+      external_url: response.data['external_url'],
+      posts: [...response.data['posts']]
+    }
+    return videoInfo
+  } catch (error) {
+    console.log('getInstagramInfo error:', error)
   }
 }
