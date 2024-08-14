@@ -60,8 +60,79 @@ const Page = () => {
           </div>
           {!isLoading && userId.length > 0 && data && (
             <>
-              <div>{data.username}</div>
-              <div>{data.userid}</div>
+              <div className='flex items-center justify-center border'>
+                <div className='rounded-lg shadow-lg w-full'>
+                  <div className='h-24 bg-blue-600 rounded-t-lg' />
+                  <img
+                    src='/placeholder.svg'
+                    height='100'
+                    width='100'
+                    className='rounded-full mt-12 border-4 border-white mx-auto'
+                    alt='User avatar'
+                    style={{ aspectRatio: '100/100', objectFit: 'cover' }}
+                  />
+                  <div className='text-center mt-2'>
+                    <h2 className='text-lg font-semibold'>{data.username}</h2>
+                    <p className='text-gray-500'>{data.biography}</p>
+                  </div>
+                  <div className='flex justify-around my-4'>
+                    <div className='text-center'>
+                      <h3 className='font-semibold text-lg'>
+                        {data.mediacount}
+                      </h3>
+                      <p className='text-gray-500'>Posts</p>
+                    </div>
+                    <div className='text-center'>
+                      <h3 className='font-semibold text-lg'>
+                        {data.followers}
+                      </h3>
+                      <p className='text-gray-500'>Followers</p>
+                    </div>
+                    <div className='text-center'>
+                      <h3 className='font-semibold text-lg'>
+                        {data.followees}
+                      </h3>
+                      <p className='text-gray-500'>Following</p>
+                    </div>
+                  </div>
+                  <section className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 md:p-6'>
+                    <>
+                      {data.posts.map((item, index) => {
+                        return (
+                          <div
+                            key={index}
+                            className='relative group overflow-hidden rounded-lg'>
+                            {item.is_video && (
+                              <video
+                                width='320'
+                                height='240'
+                                controls
+                                preload='none'>
+                                <source src={item.video_url} type='video/mp4' />
+                                Your browser does not support the video tag.
+                              </video>
+                            )}
+
+                            <div className='bg-white p-4 dark:bg-gray-950'>
+                              <h3 className=' font-semibold text-sm md:text-md line-clamp-2'>
+                                {item.caption}
+                              </h3>
+                              <div className='flex items-center justify-between text-sm text-gray-500 dark:text-gray-400'>
+                                <span>viewed count</span>
+                                <span>{item.video_view_count}</span>
+                              </div>
+                              <div className='flex items-center justify-between text-sm text-gray-500 dark:text-gray-400'>
+                                <span>likes</span>
+                                <span>{item.likes}</span>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </>
+                  </section>
+                </div>
+              </div>
             </>
           )}
         </div>
