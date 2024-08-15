@@ -2,19 +2,52 @@
 
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Button } from '@/components/ui/button'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Loader2, X } from 'lucide-react'
 import React, { useState } from 'react'
-import { getInstagramInfo } from '../actions'
+import { getInstagramInfo, getTaskInfo } from '../actions'
+import Iframe from 'react-iframe'
+import { InstagramInfo } from '@/lib/type'
 
 const Page = () => {
+  let intervalId = 0
   const [userId, setUserId] = useState('')
-  const { data, refetch, isLoading } = useQuery({
-    queryFn: () => getInstagramInfo(userId),
+  const [taskId, setTaskId] = useState<string>('')
+  const [isTaskRunning, setIsTaskRunning] = useState(false)
+  const [instagramInfo, setInstagramInfo] = useState<InstagramInfo>()
 
-    queryKey: ['InstagramInfo', { userId }],
+  const { refetch: fetchtask } = useQuery({
+    queryFn: () => getTaskInfo(taskId),
+
+    queryKey: ['taskInfo', { taskId }],
     enabled: false, // disable this query from automatically running
     gcTime: 0,
+  })
+
+  const { mutateAsync: handleInstagramInfo } = useMutation({
+    mutationFn: getInstagramInfo,
+    onSuccess: (data) => {
+      setTaskId(data.id)
+      intervalId = window.setInterval(
+        (callback: (result: string) => void) => {
+          fetchtask().then((data) => {
+            callback(data.data)
+          })
+        },
+        5000,
+        (data: any) => {
+          console.log('data', data)
+          if (data.state == 'SUCCESS') {
+            setInstagramInfo(data.value)
+            clearInterval(intervalId)
+            setIsTaskRunning(false)
+          }
+          console.log(data)
+        },
+      )
+    },
+    onError: (error, variables, context) => {},
+    onSettled: (data, error, variables, context) => {},
   })
 
   return (
@@ -51,14 +84,17 @@ const Page = () => {
                 variant='ghost'
                 className='rounded-md py-6 mr-4 bg-green-700 text-white hover:bg-green-600 hover:text-white'
                 onClick={() => {
-                  refetch()
+                  setIsTaskRunning(true)
+                  handleInstagramInfo(userId)
                 }}>
-                {isLoading && <Loader2 className='mr-4 h-8 w-8 animate-spin' />}
+                {isTaskRunning && (
+                  <Loader2 className='mr-4 h-8 w-8 animate-spin' />
+                )}
                 Download
               </Button>
             </div>
           </div>
-          {!isLoading && userId.length > 0 && data && (
+          {!isTaskRunning && userId.length > 0 && instagramInfo && (
             <>
               <div className='flex items-center justify-center border'>
                 <div className='rounded-lg shadow-lg w-full'>
@@ -71,33 +107,43 @@ const Page = () => {
                     alt='User avatar'
                     style={{ aspectRatio: '100/100', objectFit: 'cover' }}
                   />
+                  <Iframe
+                    url={instagramInfo.pic_url}
+                    width='100px'
+                    height='100px'
+                    className='rounded-full mt-12 border-4 border-white mx-auto'
+                    display='block'
+                    position='relative'
+                  />
                   <div className='text-center mt-2'>
-                    <h2 className='text-lg font-semibold'>{data.username}</h2>
-                    <p className='text-gray-500'>{data.biography}</p>
+                    <h2 className='text-lg font-semibold'>
+                      {instagramInfo.username}
+                    </h2>
+                    <p className='text-gray-500'>{instagramInfo.biography}</p>
                   </div>
                   <div className='flex justify-around my-4'>
                     <div className='text-center'>
                       <h3 className='font-semibold text-lg'>
-                        {data.mediacount}
+                        {instagramInfo.mediacount}
                       </h3>
                       <p className='text-gray-500'>Posts</p>
                     </div>
                     <div className='text-center'>
                       <h3 className='font-semibold text-lg'>
-                        {data.followers}
+                        {instagramInfo.followers}
                       </h3>
                       <p className='text-gray-500'>Followers</p>
                     </div>
                     <div className='text-center'>
                       <h3 className='font-semibold text-lg'>
-                        {data.followees}
+                        {instagramInfo.followees}
                       </h3>
                       <p className='text-gray-500'>Following</p>
                     </div>
                   </div>
                   <section className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 md:p-6'>
                     <>
-                      {data.posts.map((item, index) => {
+                      {instagramInfo.posts.map((item, index) => {
                         return (
                           <div
                             key={index}
@@ -113,10 +159,22 @@ const Page = () => {
                               </video>
                             )}
 
+                            {!item.is_video && (
+                              <Iframe
+                                url={item.url}
+                                width='100px'
+                                height='100px'
+                                className='rounded-full mt-12 border-4 border-white mx-auto'
+                                display='block'
+                                position='relative'
+                              />
+                            )}
+
                             <div className='bg-white p-4 dark:bg-gray-950'>
                               <h3 className=' font-semibold text-sm md:text-md line-clamp-2'>
                                 {item.caption}
                               </h3>
+
                               <div className='flex items-center justify-between text-sm text-gray-500 dark:text-gray-400'>
                                 <span>viewed count</span>
                                 <span>{item.video_view_count}</span>

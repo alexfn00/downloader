@@ -329,23 +329,17 @@ export const sendEmail = async (param: { firstName: string, lastName: string, em
   }
 }
 
+
 export const getInstagramInfo = async (userId: string | null) => {
   try {
-    const response = await axios.post(process.env.TASK_URL + '/instagram', {
+    const data = {
       userId: userId,
-    })
-    const videoInfo: InstagramInfo = {
-      username: response.data['username'],
-      userid: response.data['userid'],
-      mediacount: response.data['mediacount'],
-      followers: response.data['followers'],
-      followees: response.data['followees'],
-      biography: response.data['biography'],
-      external_url: response.data['external_url'],
-      posts: [...response.data['posts']]
     }
-    return videoInfo
+    const url = process.env.TASK_URL + '/task/instagram'
+    const result = await axios.post(url, data)
+    console.log('post result:', result.data)
+    return result.data
   } catch (error) {
-    console.log('getInstagramInfo error:', error)
+    console.log('run task getInstagramInfo error:', error)
   }
 }

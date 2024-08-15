@@ -31,6 +31,7 @@ interface InstagramPost {
   caption_hashtags: string[]
 }
 export interface InstagramInfo {
+  pic_url: string
   username: string
   userid: number
   mediacount: number
