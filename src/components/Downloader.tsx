@@ -110,7 +110,7 @@ const Downloader = ({
                 ),
               })
             } else {
-              const url = `https://r2.oecent.net/${data.value.filename}`
+              const url = `https://r2.oecent.net/${data.value.unique}`
               download(url, data.value.filename)
             }
           }
