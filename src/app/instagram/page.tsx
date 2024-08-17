@@ -6,7 +6,6 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { Loader2, X } from 'lucide-react'
 import React, { useState } from 'react'
 import { getInstagramInfo, getTaskInfo } from '../actions'
-import Iframe from 'react-iframe'
 import { InstagramInfo } from '@/lib/type'
 
 const Page = () => {
@@ -107,14 +106,7 @@ const Page = () => {
                     alt='User avatar'
                     style={{ aspectRatio: '100/100', objectFit: 'cover' }}
                   />
-                  <Iframe
-                    url={instagramInfo.pic_url}
-                    width='100px'
-                    height='100px'
-                    className='rounded-full mt-12 border-4 border-white mx-auto'
-                    display='block'
-                    position='relative'
-                  />
+
                   <div className='text-center mt-2'>
                     <h2 className='text-lg font-semibold'>
                       {instagramInfo.username}
@@ -158,21 +150,17 @@ const Page = () => {
                                 Your browser does not support the video tag.
                               </video>
                             )}
-
-                            {!item.is_video && (
-                              <Iframe
-                                url={item.url}
-                                width='100px'
-                                height='100px'
-                                className='rounded-full mt-12 border-4 border-white mx-auto'
-                                display='block'
-                                position='relative'
-                              />
-                            )}
-
                             <div className='bg-white p-4 dark:bg-gray-950'>
                               <h3 className=' font-semibold text-sm md:text-md line-clamp-2'>
-                                {item.caption}
+                                {!item.is_video ? (
+                                  <a
+                                    href={item.url}
+                                    className='rounded-full mt-12 border-4 border-white mx-auto'>
+                                    {item.caption}
+                                  </a>
+                                ) : (
+                                  item.caption
+                                )}
                               </h3>
 
                               <div className='flex items-center justify-between text-sm text-gray-500 dark:text-gray-400'>
