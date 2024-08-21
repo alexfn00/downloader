@@ -34,6 +34,16 @@ export function download(fileUrl: string, filename: string) {
   URL.revokeObjectURL(fileUrl)
 }
 
+
+export function absoluteUrl(path: string) {
+  if (typeof window !== 'undefined') return path
+
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}${path}`
+
+  return `http://localhost:${process.env.PORT ?? 3000}${path}`
+}
+
+
 export function bytesToReadableSize(byteSize: number): string {
   const BYTES_IN_KB = 1024;
   const BYTES_IN_MB = 1024 * 1024;
@@ -50,5 +60,30 @@ export function bytesToReadableSize(byteSize: number): string {
     return `${kbSize.toFixed(2)} KB`;
   } else {
     return `${byteSize} Bytes`;
+  }
+}
+
+
+export function b64toBlob(b64Data: string, contentType = '', sliceSize = 512) {
+  try {
+    const byteCharacters = atob(b64Data)
+    const byteArrays = []
+
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+      const slice = byteCharacters.slice(offset, offset + sliceSize)
+
+      const byteNumbers = new Array(slice.length)
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i)
+      }
+
+      const byteArray = new Uint8Array(byteNumbers)
+      byteArrays.push(byteArray)
+    }
+
+    const blob = new Blob(byteArrays, { type: contentType })
+    return blob
+  } catch (error) {
+    console.log('b64toBlob error:', error)
   }
 }

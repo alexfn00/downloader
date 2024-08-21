@@ -4,9 +4,12 @@ import { db } from '@/db'
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import axios from 'axios'
 import { HttpsProxyAgent } from 'https-proxy-agent'
-import ytdl, { videoInfo } from 'ytdl-core'
+import ytdl from 'ytdl-core'
 import { MailtrapClient } from "mailtrap"
-import { InstagramInfo, VideoInfo } from '@/lib/type'
+import { VideoInfo } from '@/lib/type'
+import { absoluteUrl } from '@/lib/utils'
+import { getUserSubscriptionPlan, stripe } from '@/lib/stripe'
+import { PLANS } from '@/config/stripe'
 
 
 export const getChannelNameById = async ({ id }: { id: string }) => {
@@ -342,4 +345,52 @@ export const getInstagramInfo = async (userId: string | null) => {
   } catch (error) {
     console.log('run task getInstagramInfo error:', error)
   }
+}
+
+
+export const createStripeSession = async () => {
+  const billingUrl = absoluteUrl('/dashboard/billing')
+
+  const { getUser } = getKindeServerSession()
+  const user = await getUser()
+
+  if (!user?.id || !user.email) {
+    throw new Error('403 Forbidden')
+  }
+
+  const dbUser = await db.user.findFirst({
+    where: {
+      id: user?.id,
+    },
+  })
+  if (!dbUser) {
+    throw new Error('401 UNAUTHORIZED')
+  }
+
+  const subscriptionPlan = await getUserSubscriptionPlan()
+  if (subscriptionPlan.isSubscribed && dbUser.stripeCustomerId) {
+    const stripeSession = await stripe.billingPortal.sessions.create({
+      customer: dbUser.stripeCustomerId,
+      return_url: billingUrl,
+    })
+
+    return { url: stripeSession.url }
+  }
+  const stripeSession = await stripe.checkout.sessions.create({
+    success_url: billingUrl,
+    cancel_url: billingUrl,
+    payment_method_types: ['card', 'paypal'],
+    mode: 'subscription',
+    billing_address_collection: 'auto',
+    line_items: [
+      {
+        price: PLANS.find((plan) => plan.name === 'Pro')?.price.priceIds.test,
+        quantity: 1,
+      },
+    ],
+    metadata: {
+      userId: user?.id,
+    },
+  })
+  return { url: stripeSession.url }
 }

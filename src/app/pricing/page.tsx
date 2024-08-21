@@ -10,7 +10,6 @@ import {
 import { PLANS } from '@/config/stripe'
 import { cn } from '@/lib/utils'
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
-import { hr } from 'date-fns/locale'
 import { ArrowRight, Check, HelpCircle, Minus } from 'lucide-react'
 import Link from 'next/link'
 
@@ -21,16 +20,19 @@ const Page = async () => {
   const pricingItems = [
     {
       plan: 'Free',
-      tagline: 'For small side projects.',
+      tagline: 'For personal or hobby.',
       quota: 10,
       features: [
         {
-          text: '5 pages per PDF',
-          footnote: 'The maximum amount of pages per PDF-file.',
+          text: 'Up to 1 channels',
+          footnote: 'Maximum number of channels.',
         },
         {
-          text: '4MB file size limit',
-          footnote: 'The maximum file size of a single PDF file.',
+          text: 'Unlimited downloads',
+        },
+        {
+          text: 'Videos in 720p or higher quality',
+          negative: true,
         },
         {
           text: 'Mobile-friendly interface',
@@ -52,12 +54,14 @@ const Page = async () => {
       quota: PLANS.find((p) => p.slug === 'pro')!.quota,
       features: [
         {
-          text: '25 pages per PDF',
-          footnote: 'The maximum amount of pages per PDF-file.',
+          text: 'Up to 10 channels',
+          footnote: 'Maximum number of channels.',
         },
         {
-          text: '16MB file size limit',
-          footnote: 'The maximum file size of a single PDF file.',
+          text: 'Unlimited downloads',
+        },
+        {
+          text: 'Videos in 720p or higher quality',
         },
         {
           text: 'Mobile-friendly interface',
@@ -103,7 +107,7 @@ const Page = async () => {
                 )}
                 <div className='p-5'>
                   <h3 className='my-3 text-center font-display text-3xl font-bold'>
-                    {plan}
+                    ${plan}
                   </h3>
                   <p className='text-gray-500'>{tagline}</p>
                   <p className='my-5 font-display text-6xl font-semibold'>
@@ -112,7 +116,7 @@ const Page = async () => {
                   <p className='text-gray-500'>per month</p>
                 </div>
 
-                <div className='flex h-20 items-center justify-center border-b border-t border-gray-200 bg-gray-50'>
+                {/* <div className='flex h-20 items-center justify-center border-b border-t border-gray-200 bg-gray-50'>
                   <div className='flex items-center space-x-1'>
                     <p>{quota.toLocaleString()} PDFs/mo included</p>
                     <Tooltip delayDuration={300}>
@@ -124,7 +128,7 @@ const Page = async () => {
                       </TooltipContent>
                     </Tooltip>
                   </div>
-                </div>
+                </div> */}
 
                 <ul className='my-10 space-y-5 px-8'>
                   {features.map(({ text, footnote, negative }) => (
@@ -139,18 +143,19 @@ const Page = async () => {
                       {footnote ? (
                         <div className='flex items-center space-x-1'>
                           <p
-                            className={cn('text-gray-400', {
-                              'text-gray-600': negative,
+                            className={cn('text-gray-600', {
+                              'text-gray-400': negative,
                             })}>
-                            <Tooltip delayDuration={300}>
-                              <TooltipTrigger className='cursor-default ml-1.5'>
-                                <HelpCircle className='h-4 w-5 text-zinc-500' />
-                              </TooltipTrigger>
-                              <TooltipContent className='w-80 p-2'>
-                                {footnote}
-                              </TooltipContent>
-                            </Tooltip>
+                            {text}
                           </p>
+                          <Tooltip delayDuration={300}>
+                            <TooltipTrigger className='cursor-default ml-1.5'>
+                              <HelpCircle className='h-4 w-4 text-zinc-500' />
+                            </TooltipTrigger>
+                            <TooltipContent className='w-80 p-2'>
+                              {footnote}
+                            </TooltipContent>
+                          </Tooltip>
                         </div>
                       ) : (
                         <p
