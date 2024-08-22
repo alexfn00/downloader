@@ -24,11 +24,8 @@ const Page = async () => {
       quota: 10,
       features: [
         {
-          text: 'Up to 1 channels',
+          text: 'Up to 3 channels',
           footnote: 'Maximum number of channels.',
-        },
-        {
-          text: 'Unlimited downloads',
         },
         {
           text: 'Videos in 720p or higher quality',
@@ -54,11 +51,8 @@ const Page = async () => {
       quota: PLANS.find((p) => p.slug === 'pro')!.quota,
       features: [
         {
-          text: 'Up to 10 channels',
+          text: 'Up to 20 channels',
           footnote: 'Maximum number of channels.',
-        },
-        {
-          text: 'Unlimited downloads',
         },
         {
           text: 'Videos in 720p or higher quality',
@@ -116,19 +110,19 @@ const Page = async () => {
                   <p className='text-gray-500'>per month</p>
                 </div>
 
-                {/* <div className='flex h-20 items-center justify-center border-b border-t border-gray-200 bg-gray-50'>
+                <div className='flex h-20 items-center justify-center border-b border-t border-gray-200 bg-gray-50'>
                   <div className='flex items-center space-x-1'>
-                    <p>{quota.toLocaleString()} PDFs/mo included</p>
+                    <p>{quota.toLocaleString()} Medias Download/mo included</p>
                     <Tooltip delayDuration={300}>
                       <TooltipTrigger className='cursor-default ml-1.5'>
                         <HelpCircle className='h-4 w-5 text-zinc-500' />
                       </TooltipTrigger>
                       <TooltipContent className='w-80 p-2'>
-                        How many PDFs you can upload per month.
+                        How many videos/audios you can download per month.
                       </TooltipContent>
                     </Tooltip>
                   </div>
-                </div> */}
+                </div>
 
                 <ul className='my-10 space-y-5 px-8'>
                   {features.map(({ text, footnote, negative }) => (

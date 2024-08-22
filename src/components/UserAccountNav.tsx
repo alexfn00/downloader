@@ -71,7 +71,7 @@ const UserAccountNav = async ({
 
         <DropdownMenuItem asChild>
           {subscriptionPlan?.isSubscribed ? (
-            <Link href='/dashboard/billing'>Manage Subscription</Link>
+            <Link href='/billing'>Manage Subscription</Link>
           ) : (
             <Link href='/pricing'>
               Upgrade <Gem className='text-blue-600 h-4 w-4 ml-1.5' />

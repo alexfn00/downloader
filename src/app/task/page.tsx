@@ -52,6 +52,16 @@ export default function Home() {
   const { mutateAsync: handleAdd } = useMutation({
     mutationFn: addChannel,
     onSuccess: (data) => {
+      if (data && data.state == 'Error') {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Your plan has exceeded the maximum number of channels',
+        })
+        setIsTaskRunning(false)
+        setCurrentChannel('')
+        return
+      }
       setTaskId(data.id)
       intervalId = window.setInterval(
         (callback: (result: string) => void) => {
@@ -182,6 +192,10 @@ export default function Home() {
         <div className='flex items-center justify-center'>
           <Loader2 className='mr-4 h-8 w-8 animate-spin' />
         </div>
+      )}
+
+      {data && data.pages.length > 0 && (
+        <div>Total: {data.pages[0].totalCount}</div>
       )}
 
       <Table className='mt-4'>

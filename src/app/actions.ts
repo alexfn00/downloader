@@ -116,8 +116,20 @@ export const fetchAuthors = async ({
 }: {
   pageParam: number | 0
 }) => {
-  const totalCount = await db.channel.count({})
+
+  const { getUser } = getKindeServerSession()
+  const user = await getUser()
+
+
+  const totalCount = await db.channel.count({
+    where: {
+      userId: user?.id,
+    }
+  })
   const data = await db.channel.findMany({
+    where: {
+      userId: user?.id,
+    },
     skip: pageParam * LIMIT,
     take: LIMIT,
   })
@@ -211,15 +223,30 @@ export const addChannel = async (channel: { channelId: string }) => {
     const { getUser } = getKindeServerSession()
     const user = await getUser()
 
-    if (!user?.id || !user.email) {
-      return 'Forbidden'
+    const channelCount = await db.channel.count({
+      where: {
+        userId: user?.id,
+      },
+    })
+    const subscriptionPlan = await getUserSubscriptionPlan()
+    const { isSubscribed } = subscriptionPlan
+
+    const isProExceeded =
+      channelCount > PLANS.find((plan) => plan.name === 'Pro')!.channelCount
+
+    const isFreeExceeded =
+      channelCount > PLANS.find((plan) => plan.name === 'Free')!.channelCount
+
+
+    if ((isSubscribed && isProExceeded) || (!isSubscribed && isFreeExceeded)) {
+      return { id: '', 'state': 'Error', value: 'PlanExceeded' }
     }
-    console.log('ChannelId:', channel.channelId)
+
     let channels = []
     if (channel.channelId == '') {
       const channel_list = await db.channel.findMany({
         where: {
-          userId: user.id,
+          userId: user?.id,
         },
         select: {
           channelId: true,
@@ -233,13 +260,13 @@ export const addChannel = async (channel: { channelId: string }) => {
       task_type: 'crawl',
       name: 'youtube',
       channels: channels,
-      userId: user.id
+      userId: user?.id
     }
     console.log('data', data)
     const result = await axios.post(process.env.TASK_URL + '/task/', data)
     return result.data
   } catch (error) {
-    console.log('addChannel error:', error)
+    return { id: '', 'state': 'Error', value: error }
   }
 }
 
@@ -248,12 +275,9 @@ export const updateChannels = async () => {
     const { getUser } = getKindeServerSession()
     const user = await getUser()
 
-    if (!user?.id || !user.email) {
-      return 'Forbidden'
-    }
     const channels = await db.channel.findMany({
       where: {
-        userId: user.id,
+        userId: user?.id,
       },
       select: {
         channelId: true,
@@ -264,7 +288,7 @@ export const updateChannels = async () => {
       task_type: 'crawl',
       name: 'youtube',
       channels: [...channels.map((item) => item['channelId'])],
-      userId: user.id
+      userId: user?.id
     }
     console.log(data)
 

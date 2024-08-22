@@ -9,7 +9,7 @@ const UpgradeButton = () => {
   const { mutateAsync: handleStripeSession } = useMutation({
     mutationFn: createStripeSession,
     onSuccess: ({ url }) => {
-      window.location.href = url ?? '/dashboard/billing'
+      window.location.href = url ?? '/billing'
     },
   })
   return (
