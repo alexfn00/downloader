@@ -300,9 +300,31 @@ export const updateChannels = async () => {
 }
 
 
-export const startDownload = async (param: { downloadURL: string, type: string, value: string }) => {
+export const startDownload = async (param: { downloadURL: string, type: string, value: string, userId: string | null }) => {
   try {
+    const { getUser } = getKindeServerSession()
+    const user = await getUser()
+
+    let userId = param.userId
+
+    if (!user?.id || !user.email) {
+      if (!param.userId || param.userId.trim() === '') {
+        throw new Error('403 Forbidden')
+      }
+    } else {
+      userId == user?.id
+    }
+
+    if (!param.userId || param.userId.trim() === '') {
+      userId == user?.id
+    } else {
+      if (!user?.id || !user.email) {
+        throw new Error('403 Forbidden')
+      }
+    }
+
     const data = {
+      userId: userId,
       task_type: 'download',
       url: param.downloadURL,
       download_type: param.type,

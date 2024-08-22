@@ -5,12 +5,23 @@ import { Button } from '@/components/ui/button'
 import { useQuery } from '@tanstack/react-query'
 import { getVideoInfo } from './actions'
 import { Loader2, X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Downloader from '@/components/Downloader'
+import { v4 as uuidv4 } from 'uuid'
+import { useKindeAuth } from '@kinde-oss/kinde-auth-nextjs'
 
 export default function Home() {
   const [url, setUrl] = useState<string>('')
   const [videoId, setVideoId] = useState('')
+  const { isAuthenticated, user } = useKindeAuth()
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      localStorage.setItem('anonymousSession', uuidv4())
+    } else {
+      localStorage.removeItem('anonymousSession')
+    }
+  }, [isAuthenticated])
 
   const {
     data: todos,
@@ -28,6 +39,10 @@ export default function Home() {
     <div>
       <MaxWidthWrapper className='sm:mb-12 mt-4 sm:mt-10 flex flex-col items-center justify-center text-center'>
         <div className='max-w-6xl w-full sm:px-6 lg:px8'>
+          {!isAuthenticated && (
+            <>Anonymous: {localStorage.getItem('anonymousSession')}</>
+          )}
+          {isAuthenticated && <>User:: {user?.id}</>}
           <h1 className='text-xl sm:text-3xl font-semibold sm:my-4'>
             Free Online Video Downloader
           </h1>

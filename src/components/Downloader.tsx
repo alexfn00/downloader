@@ -206,6 +206,7 @@ const Downloader = ({
                     downloadURL: url,
                     type: code == 'Video and Audio' ? 'dimension' : 'itag',
                     value: code == 'Video and Audio' ? dimension : itag,
+                    userId: localStorage.getItem('anonymousSession'),
                   })
                   setProgress('0%')
                   setIsTaskRunning(true)
