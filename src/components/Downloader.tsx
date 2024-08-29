@@ -144,7 +144,7 @@ const Downloader = ({
             <YouTube videoId={videoId} opts={opts} onReady={onPlayerReady} />
           )}
         </div>
-        <div className='w-full pl-4'>
+        <div className='w-full pl-4 border'>
           <div className='text-xl font-semibold my-4 flex items-start'>
             {todos?.title}
           </div>

@@ -15,8 +15,7 @@ model User {
   id    String @id @unique
   email String @unique
 
-  Channel   Channel[]
-  Downloads Downloads[]
+  Channel Channel[]
 
   stripeCustomerId       String?   @unique @map(name: "stripe_customer_id")
   stripeSubscriptionId   String?   @unique @map(name: "stripe_subscription_id")
@@ -62,14 +61,19 @@ model Task {
   updatedAt DateTime @updatedAt
 }
 
-model Downloads {
-  id       String @id @default(cuid())
-  fileName String @map(name: "filename")
-  url      String @map(name: "url")
+model Anonymous {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 
-  User   User?   @relation(fields: [userId], references: [id])
+model R2Bucket {
+  id     String  @id @default(cuid())
   userId String?
 
+  r2        String
+  fileName  String   @map(name: "filename")
+  size      Int?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

@@ -262,7 +262,6 @@ export const addChannel = async (channel: { channelId: string }) => {
       channels: channels,
       userId: user?.id
     }
-    console.log('data', data)
     const result = await axios.post(process.env.TASK_URL + '/task/', data)
     return result.data
   } catch (error) {
@@ -290,8 +289,6 @@ export const updateChannels = async () => {
       channels: [...channels.map((item) => item['channelId'])],
       userId: user?.id
     }
-    console.log(data)
-
     const result = await axios.post(process.env.TASK_URL + '/task/', data)
     return result.data
   } catch (error) {
@@ -305,22 +302,13 @@ export const startDownload = async (param: { downloadURL: string, type: string, 
     const { getUser } = getKindeServerSession()
     const user = await getUser()
 
+
     let userId = param.userId
-
-    if (!user?.id || !user.email) {
-      if (!param.userId || param.userId.trim() === '') {
-        throw new Error('403 Forbidden')
-      }
-    } else {
-      userId == user?.id
+    if (user?.id) {
+      userId = user?.id
     }
-
-    if (!param.userId || param.userId.trim() === '') {
-      userId == user?.id
-    } else {
-      if (!user?.id || !user.email) {
-        throw new Error('403 Forbidden')
-      }
+    if (!userId) {
+      throw new Error('403 Forbidden')
     }
 
     const data = {
@@ -330,10 +318,8 @@ export const startDownload = async (param: { downloadURL: string, type: string, 
       download_type: param.type,
       download_value: param.value
     }
-    console.log('startDownload data', data)
-    const url = process.env.TASK_URL + '/task/'
+    const url = process.env.TASK_URL + '/task/download'
     const result = await axios.post(url, data)
-    console.log('post result:', result.data)
     return result.data
   } catch (error) {
     console.log('startDownload error:', error)
@@ -439,4 +425,28 @@ export const createStripeSession = async () => {
     },
   })
   return { url: stripeSession.url }
+}
+
+
+export const fetchR2Buckets = async (userId: string | null) => {
+
+  const { getUser } = getKindeServerSession()
+  const user = await getUser()
+
+  let _userId = userId
+  if (user?.id) {
+    _userId = user?.id
+  }
+  if (!_userId) {
+    throw new Error('403 Forbidden')
+  }
+
+  const data = await db.r2Bucket.findMany({
+    where: {
+      userId: _userId,
+    }
+  })
+  return {
+    data: [...data]
+  }
 }
