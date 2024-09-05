@@ -1,3 +1,5 @@
+'use client'
+
 import { fetchR2Buckets } from '@/app/actions'
 import { useQuery } from '@tanstack/react-query'
 import {
@@ -9,19 +11,28 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import React from 'react'
-import { useKindeAuth } from '@kinde-oss/kinde-auth-nextjs'
+import React, { useEffect, useState } from 'react'
 
 const DownloadCounter = () => {
-  const anonymous = localStorage.getItem('anonymousSession')
-  const { isAuthenticated, user } = useKindeAuth()
-  const { data } = useQuery({
+  const [anonymous, setAnonymous] = useState<string | null>('')
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setAnonymous(localStorage.getItem('anonymousSession'))
+      refetch()
+    }
+  }, [])
+
+  const { data, refetch, isLoading } = useQuery({
     queryFn: () => fetchR2Buckets(anonymous),
     queryKey: ['r2buckets', { anonymous }],
     enabled: true, // disable this query from automatically running
     gcTime: 0,
   })
 
+  {
+    !isLoading && console.log(data)
+  }
   return (
     <>
       <div className='w-full mt-4'>

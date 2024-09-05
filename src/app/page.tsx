@@ -14,13 +14,15 @@ import DownloadCounter from '@/components/DownloadCounter'
 export default function Home() {
   const [url, setUrl] = useState<string>('')
   const [videoId, setVideoId] = useState('')
-  const { isAuthenticated, user } = useKindeAuth()
+  const { isAuthenticated } = useKindeAuth()
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      localStorage.setItem('anonymousSession', uuidv4())
-    } else {
-      localStorage.removeItem('anonymousSession')
+    if (typeof window !== 'undefined') {
+      if (!isAuthenticated) {
+        localStorage.setItem('anonymousSession', uuidv4())
+      } else {
+        localStorage.removeItem('anonymousSession')
+      }
     }
   }, [isAuthenticated])
 

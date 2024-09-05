@@ -21,8 +21,6 @@ const MobileNav = ({ isAuth }: { isAuth: boolean }) => {
   }, [pathname])
 
   const closeOnCurrent = (href: string) => {
-    console.log('href', href)
-    console.log('pathname', pathname)
     if (pathname === href) {
       toggoeOpen()
     }

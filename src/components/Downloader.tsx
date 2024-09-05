@@ -33,6 +33,8 @@ const Downloader = ({
   const [state, setState] = useState('')
   const [currentOption, setCurrentOption] = useState('0')
   const [taskId, setTaskId] = useState<string>('')
+  const [anonymous, setAnonymous] = useState<string | null>('')
+
   const [boxSize, setBoxSize] = useState<{ width: number; height: number }>({
     width: 0,
     height: 0,
@@ -43,6 +45,12 @@ const Downloader = ({
     var n = url?.split('v=')
     if (n !== undefined) {
       setVideoId(n[1])
+    }
+  }, [url])
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setAnonymous(localStorage.getItem('anonymousSession'))
     }
   }, [])
 
@@ -206,7 +214,7 @@ const Downloader = ({
                     downloadURL: url,
                     type: code == 'Video and Audio' ? 'dimension' : 'itag',
                     value: code == 'Video and Audio' ? dimension : itag,
-                    userId: localStorage.getItem('anonymousSession'),
+                    userId: anonymous,
                   })
                   setProgress('0%')
                   setIsTaskRunning(true)
