@@ -1,5 +1,5 @@
 import { ArrowRight } from 'lucide-react'
-
+import Image from 'next/image'
 import MaxWidthWrapper from './MaxWidthWrapper'
 import { buttonVariants } from './ui/button'
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
@@ -22,7 +22,7 @@ const Navbar = async () => {
       <MaxWidthWrapper>
         <div className='flex h-14 items-center justify-between border-b border-zinc-200'>
           <Link href='/' className='flex z-40 font-semibold'>
-            <span>Logo</span>
+            <Image src='/logo.png' width={32} height={32} alt='Logo' />
           </Link>
 
           <MobileNav isAuth={!!user} />
