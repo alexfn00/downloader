@@ -9,9 +9,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Loader2 } from 'lucide-react'
+import { ArrowLeft, Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { SkeletonCard } from '@/components/skeletons'
+import { useRouter } from 'next/navigation'
 import {
   useInfiniteQuery,
   useMutation,
@@ -24,7 +25,7 @@ import {
   fetchAuthors,
   getTaskInfo,
   updateChannels,
-} from '../actions'
+} from '../../actions'
 import { useInView } from 'react-intersection-observer'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -33,6 +34,7 @@ import { useToast } from '@/components/ui/use-toast'
 
 export default function Home() {
   let intervalId = 0
+  const router = useRouter()
   const [isTaskRunning, setIsTaskRunning] = useState(false)
   const [isAllTaskRunning, setIsAllTaskRunning] = useState(false)
   const [taskId, setTaskId] = useState<string>('')
@@ -153,7 +155,15 @@ export default function Home() {
   if (status === 'error') return <div>{error.message}</div>
 
   return (
-    <main className='md:max-w-6xl md:px-4 mx-auto md:w-2/3'>
+    <main className='md:max-w-6xl md:px-4 px-2 md:w-2/3'>
+      <h1 className='text-xl sm:text-3xl font-semibold sm:my-4'>
+        Channel Managment
+      </h1>
+      <Button className='ml-4' onClick={() => router.back()}>
+        <ArrowLeft />
+        <span className='pl-2'></span>
+        Back
+      </Button>
       <div className='flex w-full max-w-2xl justify-start items-start space-x-2 py-8'>
         <Input
           type='text'

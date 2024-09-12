@@ -68,6 +68,17 @@ const MobileNav = ({ isAuth }: { isAuth: boolean }) => {
               </Link>
             </li>
             <li className='my-3 h-px w-full bg-gray-300' />
+            <li>
+              <Link
+                onClick={() => {
+                  closeOnCurrent('/download')
+                }}
+                className='flex items-center w-full font-semibold'
+                href='/download'>
+                My files
+              </Link>
+            </li>
+            <li className='my-3 h-px w-full bg-gray-300' />
             {!isAuth ? (
               <>
                 <li>
@@ -110,18 +121,7 @@ const MobileNav = ({ isAuth }: { isAuth: boolean }) => {
                     }}
                     className='flex items-center w-full font-semibold'
                     href='/dashboard'>
-                    Dashboard
-                  </Link>
-                </li>
-                <li className='my-3 h-px w-full bg-gray-300' />
-                <li>
-                  <Link
-                    onClick={() => {
-                      closeOnCurrent('/task')
-                    }}
-                    className='flex items-center w-full font-semibold'
-                    href='/task'>
-                    Task
+                    My Channels
                   </Link>
                 </li>
                 <li className='my-3 h-px w-full bg-gray-300' />

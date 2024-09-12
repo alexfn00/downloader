@@ -1,6 +1,6 @@
 'use client'
 import { useRouter, useSearchParams } from 'next/navigation'
-import React, { Suspense, useEffect, useState } from 'react'
+import React, { Suspense } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getVideoInfo } from '@/app/actions'
 import Downloader from '@/components/Downloader'

@@ -52,6 +52,14 @@ const Navbar = async () => {
               })}>
               Contact Us
             </Link>
+            <Link
+              href='/download'
+              className={buttonVariants({
+                variant: 'ghost',
+                size: 'sm',
+              })}>
+              My files
+            </Link>
             {!user ? (
               <>
                 <Link
@@ -86,17 +94,8 @@ const Navbar = async () => {
                     variant: 'ghost',
                     size: 'sm',
                   })}>
-                  Dashboard
+                  My Channels
                 </Link>
-                <Link
-                  href='/task'
-                  className={buttonVariants({
-                    variant: 'ghost',
-                    size: 'sm',
-                  })}>
-                  Task
-                </Link>
-
                 <UserAccountNav
                   name={
                     !user.given_name || !user.family_name
