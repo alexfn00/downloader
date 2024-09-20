@@ -269,6 +269,30 @@ export const addChannel = async (channel: { channelId: string }) => {
   }
 }
 
+export const updateChannel = async (channel: { channelId: string }) => {
+  try {
+    const { getUser } = getKindeServerSession()
+    const user = await getUser()
+
+    let channels = []
+    if (channel.channelId == '') {
+      return { id: '', 'state': 'Error', value: 'channel id cannot be empty' }
+    } else {
+      channels = [channel.channelId]
+    }
+    const data = {
+      task_type: 'crawl',
+      name: 'youtube',
+      channels: channels,
+      userId: user?.id
+    }
+    const result = await axios.post(process.env.TASK_URL + '/task/', data)
+    return result.data
+  } catch (error) {
+    return { id: '', 'state': 'Error', value: error }
+  }
+}
+
 export const updateChannels = async () => {
   try {
     const { getUser } = getKindeServerSession()

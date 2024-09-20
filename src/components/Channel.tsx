@@ -11,7 +11,12 @@ import ChannelTitle from './ChannelTitle'
 import { useRef, useState } from 'react'
 import { useDebouncedCallback } from 'use-debounce'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { addChannel, getChannelNameById, getTaskInfo } from '@/app/actions'
+import {
+  addChannel,
+  getChannelNameById,
+  getTaskInfo,
+  updateChannel,
+} from '@/app/actions'
 import { toast } from './ui/use-toast'
 
 const ChannelPage = ({ params }: { params: { id: string } }) => {
@@ -54,10 +59,19 @@ const ChannelPage = ({ params }: { params: { id: string } }) => {
   }
 
   const { mutateAsync: handleUpdateChannel } = useMutation({
-    mutationFn: addChannel,
+    mutationFn: updateChannel,
     onSuccess: (data) => {
-      setTaskId(data.id)
-      intervalId = window.setInterval(intervalFunction, 5000, task_complete)
+      console.log('handleUpdateChannel success, data.id=', data)
+      if (data.id == '' || data.state == 'Error') {
+        toast({
+          title: data.state,
+          description: data.value,
+          variant: 'destructive',
+        })
+      } else {
+        setTaskId(data.id)
+        intervalId = window.setInterval(intervalFunction, 5000, task_complete)
+      }
     },
   })
 

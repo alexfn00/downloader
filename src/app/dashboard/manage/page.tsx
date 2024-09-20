@@ -24,6 +24,7 @@ import {
   deleteChannel,
   fetchAuthors,
   getTaskInfo,
+  updateChannel,
   updateChannels,
 } from '../../actions'
 import { useInView } from 'react-intersection-observer'
@@ -79,6 +80,43 @@ export default function Home() {
             toast({
               title: 'Update',
               description: 'Channel updated successfully',
+            })
+            setCurrentChannel('')
+            queryClient.invalidateQueries({ queryKey: ['authors'] })
+          }
+        },
+      )
+    },
+  })
+
+  const { mutateAsync: handleUpdate } = useMutation({
+    mutationFn: updateChannel,
+    onSuccess: (data) => {
+      if (data && data.state == 'Error') {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Your plan has exceeded the maximum number of channels',
+        })
+        setIsTaskRunning(false)
+        setCurrentChannel('')
+        return
+      }
+      setTaskId(data.id)
+      intervalId = window.setInterval(
+        (callback: (result: string) => void) => {
+          fetchtask().then((data) => {
+            callback(data.data)
+          })
+        },
+        5000,
+        (data: any) => {
+          if (data.state == 'SUCCESS') {
+            clearInterval(intervalId)
+            setIsTaskRunning(false)
+            toast({
+              title: 'Update',
+              description: 'Channel added successfully',
             })
             setCurrentChannel('')
             queryClient.invalidateQueries({ queryKey: ['authors'] })
@@ -251,7 +289,7 @@ export default function Home() {
                           onClick={() => {
                             setAuthor(item.channelId)
                             setCurrentChannel(item.channelId)
-                            handleAdd({ channelId: item.channelId })
+                            handleUpdate({ channelId: item.channelId })
                           }}>
                           {currentChannel == item.channelId && (
                             <Loader2 className='mr-4 h-8 w-8 animate-spin' />
