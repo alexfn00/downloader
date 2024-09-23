@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { customAlphabet } from 'nanoid'
+import { v4 as uuidv4 } from 'uuid'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -85,5 +86,22 @@ export function b64toBlob(b64Data: string, contentType = '', sliceSize = 512) {
     return blob
   } catch (error) {
     console.log('b64toBlob error:', error)
+  }
+}
+
+export function getAnonymousSession(isAuthenticated: boolean | null) {
+  if (typeof window !== 'undefined') {
+    const old_session = localStorage.getItem('anonymousSession')
+    if (!isAuthenticated && !old_session) {
+      localStorage.setItem('anonymousSession', uuidv4())
+    }
+
+    if (isAuthenticated) {
+      localStorage.removeItem('anonymousSession')
+    }
+
+    return localStorage.getItem('anonymousSession')
+  } else {
+    return null
   }
 }

@@ -10,11 +10,17 @@ import {
 import { Loader2, VolumeX } from 'lucide-react'
 import YouTube, { YouTubeProps } from 'react-youtube'
 import { useEffect, useRef, useState } from 'react'
-import { bytesToReadableSize, download, secondsToTimeFormat } from '@/lib/utils'
+import {
+  bytesToReadableSize,
+  download,
+  getAnonymousSession,
+  secondsToTimeFormat,
+} from '@/lib/utils'
 import { toast } from '@/components/ui/use-toast'
 import { ToastAction } from '@radix-ui/react-toast'
 import { getTaskInfo, startDownload } from '@/app/actions'
 import { VideoInfo } from '@/lib/type'
+import { useKindeAuth } from '@kinde-oss/kinde-auth-nextjs'
 
 const Downloader = ({
   params,
@@ -34,7 +40,7 @@ const Downloader = ({
   const [currentOption, setCurrentOption] = useState('0')
   const [taskId, setTaskId] = useState<string>('')
   const [anonymous, setAnonymous] = useState<string | null>('')
-
+  const { isAuthenticated } = useKindeAuth()
   const [boxSize, setBoxSize] = useState<{ width: number; height: number }>({
     width: 0,
     height: 0,
@@ -42,16 +48,15 @@ const Downloader = ({
   const boxRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    var n = url?.split('v=')
-    if (n !== undefined) {
-      setVideoId(n[1])
+    if (params.data.id && params.data.id.length > 0) {
+      setVideoId(params.data.id)
+      console.log('videoId=', videoId)
     }
   }, [url])
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setAnonymous(localStorage.getItem('anonymousSession'))
-    }
+    const session = getAnonymousSession(isAuthenticated)
+    setAnonymous(session)
   }, [])
 
   useEffect(() => {
@@ -148,7 +153,7 @@ const Downloader = ({
       ref={boxRef}>
       <div className='flex flex-col items-center my-4'>
         <div className='w-full items-center justify-center pl-4'>
-          {videoId && videoId.length > 0 && (
+          {videoId && videoId && videoId.length > 0 && (
             <YouTube videoId={videoId} opts={opts} onReady={onPlayerReady} />
           )}
         </div>

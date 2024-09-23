@@ -36,13 +36,21 @@ const Navbar = async () => {
               })}>
               Home
             </Link>
-            <Link
+            {/* <Link
               href='/instagram'
               className={buttonVariants({
                 variant: 'ghost',
                 size: 'sm',
               })}>
               Instagram
+            </Link> */}
+            <Link
+              href='/pricing'
+              className={buttonVariants({
+                variant: 'ghost',
+                size: 'sm',
+              })}>
+              Pricing
             </Link>
             <Link
               href='/contact'
@@ -62,14 +70,6 @@ const Navbar = async () => {
             </Link>
             {!user ? (
               <>
-                <Link
-                  href='/pricing'
-                  className={buttonVariants({
-                    variant: 'ghost',
-                    size: 'sm',
-                  })}>
-                  Pricing
-                </Link>
                 <LoginLink
                   postLoginRedirectURL='/dashboard'
                   className={buttonVariants({

@@ -158,6 +158,7 @@ export const getVideoInfo = async (url: string | null) => {
     const response = await axios.post(process.env.TASK_URL + '/video', {
       url: url,
     })
+
     const videoInfo: VideoInfo = {
       id: response.data['id'],
       title: response.data['title'],
@@ -323,20 +324,25 @@ export const updateChannels = async () => {
 
 export const startDownload = async (param: { downloadURL: string, type: string, value: string, userId: string | null }) => {
   try {
-    const { getUser } = getKindeServerSession()
-    const user = await getUser()
+    let _userId = null
 
-
-    let userId = param.userId
-    if (user?.id) {
-      userId = user?.id
+    if (param.userId && param.userId.length > 0) {
+      _userId = param.userId
+    } else {
+      const { getUser } = getKindeServerSession()
+      const user = await getUser()
+      if (user && user?.id) {
+        _userId = user?.id
+      }
     }
-    if (!userId) {
+
+    if (!_userId) {
+      console.log('UserId cannot be none')
       throw new Error('403 Forbidden')
     }
 
     const data = {
-      userId: userId,
+      userId: _userId,
       task_type: 'download',
       url: param.downloadURL,
       download_type: param.type,
@@ -454,14 +460,20 @@ export const createStripeSession = async () => {
 
 export const fetchR2Buckets = async (userId: string | null) => {
 
-  const { getUser } = getKindeServerSession()
-  const user = await getUser()
+  let _userId = null
 
-  let _userId = userId
-  if (user?.id) {
-    _userId = user?.id
+  if (userId && userId.length > 0) {
+    _userId = userId
+  } else {
+    const { getUser } = getKindeServerSession()
+    const user = await getUser()
+    if (user && user?.id) {
+      _userId = user?.id
+    }
   }
+
   if (!_userId) {
+    console.log('UserId cannot be none')
     throw new Error('403 Forbidden')
   }
 
@@ -470,7 +482,17 @@ export const fetchR2Buckets = async (userId: string | null) => {
       userId: _userId,
     }
   })
+
   return {
     data: [...data]
   }
+}
+
+
+export const deleteR2Bucket = async (r2: { id: string }) => {
+  await db.r2Bucket.delete({
+    where: {
+      id: r2.id,
+    },
+  })
 }
