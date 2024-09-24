@@ -41,7 +41,6 @@ const Downloader = ({
   const [currentOption, setCurrentOption] = useState('0')
   const [taskId, setTaskId] = useState<string>('')
   const [anonymous, setAnonymous] = useState<string | null>('')
-  const { isAuthenticated, isLoading } = useKindeBrowserClient()
 
   const [boxSize, setBoxSize] = useState<{ width: number; height: number }>({
     width: 0,
@@ -56,14 +55,8 @@ const Downloader = ({
   }, [url])
 
   useEffect(() => {
-    if (!isLoading) {
-      if (isAuthenticated) {
-        setAnonymous('')
-      } else {
-        setAnonymous(getAnonymousSession())
-      }
-    }
-  }, [isLoading])
+    setAnonymous(getAnonymousSession())
+  }, [])
 
   useEffect(() => {
     function handleResize() {
@@ -99,10 +92,6 @@ const Downloader = ({
     gcTime: 0,
   })
 
-  // const handleRedirect = () => {
-  //   router.push('/download')
-  // }
-
   const { mutateAsync: handleDownload } = useMutation({
     mutationFn: startDownload,
     onSuccess: (data) => {
@@ -133,9 +122,8 @@ const Downloader = ({
                 ),
               })
             } else {
-              // handleRedirect()
-              // const url = `https://r2.oecent.net/${data.value.unique}`
-              // download(url, data.value.filename)
+              const url = `https://r2.oecent.net/${data.value.unique}`
+              download(url, data.value.filename)
             }
           }
           console.log(data)
@@ -249,7 +237,7 @@ const Downloader = ({
               </Button>
             </div>
           </div>
-          <Link href='/download'>Go Files</Link>
+          <Link href='/download'>My Files</Link>
         </div>
       </div>
     </div>

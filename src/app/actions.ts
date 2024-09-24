@@ -326,21 +326,23 @@ export const startDownload = async (param: { downloadURL: string, type: string, 
   try {
     let _userId = null
 
-    if (param.userId && param.userId.length > 0) {
-      _userId = param.userId
+    const { getUser } = getKindeServerSession()
+    const user = await getUser()
+    if (user && user?.id) {
+      _userId = user?.id
     } else {
-      const { getUser } = getKindeServerSession()
-      const user = await getUser()
-      if (user && user?.id) {
-        _userId = user?.id
+      if (param.userId && param.userId.length > 0) {
+        _userId = param.userId
       }
     }
+
 
     if (!_userId) {
       console.log('UserId cannot be none')
       throw new Error('403 Forbidden')
     }
 
+    console.log('startDownload _userId', _userId)
     const data = {
       userId: _userId,
       task_type: 'download',
@@ -458,19 +460,19 @@ export const createStripeSession = async () => {
 }
 
 
-export const fetchR2Buckets = async (userId: string | null) => {
+export const fetch2buckets = async (userId: string | null) => {
 
   let _userId = null
-
-  if (userId && userId.length > 0) {
-    _userId = userId
+  const { getUser } = getKindeServerSession()
+  const user = await getUser()
+  if (user && user?.id) {
+    _userId = user?.id
   } else {
-    const { getUser } = getKindeServerSession()
-    const user = await getUser()
-    if (user && user?.id) {
-      _userId = user?.id
+    if (userId && userId.length > 0) {
+      _userId = userId
     }
   }
+
 
   if (!_userId) {
     console.log('UserId cannot be none')
@@ -482,7 +484,6 @@ export const fetchR2Buckets = async (userId: string | null) => {
       userId: _userId,
     }
   })
-
   return {
     data: [...data]
   }
