@@ -20,7 +20,8 @@ import { toast } from '@/components/ui/use-toast'
 import { ToastAction } from '@radix-ui/react-toast'
 import { getTaskInfo, startDownload } from '@/app/actions'
 import { VideoInfo } from '@/lib/type'
-import { useKindeAuth } from '@kinde-oss/kinde-auth-nextjs'
+import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs'
+import Link from 'next/link'
 
 const Downloader = ({
   params,
@@ -40,7 +41,8 @@ const Downloader = ({
   const [currentOption, setCurrentOption] = useState('0')
   const [taskId, setTaskId] = useState<string>('')
   const [anonymous, setAnonymous] = useState<string | null>('')
-  const { isAuthenticated } = useKindeAuth()
+  const { isAuthenticated, isLoading } = useKindeBrowserClient()
+
   const [boxSize, setBoxSize] = useState<{ width: number; height: number }>({
     width: 0,
     height: 0,
@@ -50,14 +52,18 @@ const Downloader = ({
   useEffect(() => {
     if (params.data.id && params.data.id.length > 0) {
       setVideoId(params.data.id)
-      console.log('videoId=', videoId)
     }
   }, [url])
 
   useEffect(() => {
-    const session = getAnonymousSession(isAuthenticated)
-    setAnonymous(session)
-  }, [])
+    if (!isLoading) {
+      if (isAuthenticated) {
+        setAnonymous('')
+      } else {
+        setAnonymous(getAnonymousSession())
+      }
+    }
+  }, [isLoading])
 
   useEffect(() => {
     function handleResize() {
@@ -93,6 +99,10 @@ const Downloader = ({
     gcTime: 0,
   })
 
+  // const handleRedirect = () => {
+  //   router.push('/download')
+  // }
+
   const { mutateAsync: handleDownload } = useMutation({
     mutationFn: startDownload,
     onSuccess: (data) => {
@@ -123,8 +133,9 @@ const Downloader = ({
                 ),
               })
             } else {
-              const url = `https://r2.oecent.net/${data.value.unique}`
-              download(url, data.value.filename)
+              // handleRedirect()
+              // const url = `https://r2.oecent.net/${data.value.unique}`
+              // download(url, data.value.filename)
             }
           }
           console.log(data)
@@ -238,6 +249,7 @@ const Downloader = ({
               </Button>
             </div>
           </div>
+          <Link href='/download'>Go Files</Link>
         </div>
       </div>
     </div>

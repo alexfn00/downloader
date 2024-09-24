@@ -14,28 +14,36 @@ import {
 import React, { useEffect, useState } from 'react'
 import { Button } from './ui/button'
 import { download, getAnonymousSession } from '@/lib/utils'
-import { useKindeAuth } from '@kinde-oss/kinde-auth-nextjs'
 import { useToast } from '@/components/ui/use-toast'
 import { Loader2 } from 'lucide-react'
+import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs'
 
 const DownloadCounter = () => {
   const [anonymous, setAnonymous] = useState<string | null>('')
   const [currentItem, setCurrentItem] = useState('')
 
-  const { isAuthenticated } = useKindeAuth()
+  const { isAuthenticated, isLoading } = useKindeBrowserClient()
   const { toast } = useToast()
   const queryClient = useQueryClient()
   useEffect(() => {
-    const session = getAnonymousSession(isAuthenticated)
-    setAnonymous(session)
-    console.log('DownloadCounter', session)
-    refetch()
-  }, [])
+    if (!isLoading) {
+      if (isAuthenticated) {
+        setAnonymous('')
+      } else {
+        setAnonymous(getAnonymousSession())
+      }
+      refetch()
+    }
+  }, [isLoading])
 
-  const { data, refetch } = useQuery({
+  const {
+    data,
+    refetch,
+    isLoading: isDataLoading,
+  } = useQuery({
     queryFn: () => fetchR2Buckets(anonymous),
     queryKey: ['r2buckets', { anonymous }],
-    enabled: true, // disable this query from automatically running
+    enabled: false, // disable this query from automatically running
     gcTime: 0,
   })
 
@@ -49,7 +57,6 @@ const DownloadCounter = () => {
       queryClient.invalidateQueries({ queryKey: ['r2buckets'] })
     },
   })
-
   return (
     <>
       <div className='w-full mt-4 '>
@@ -61,6 +68,11 @@ const DownloadCounter = () => {
           <span className='font-semibold'> 60 </span>
           minutes. Please save as soon as possible.
         </p>
+        {isDataLoading && (
+          <div className='flex items-center justify-center'>
+            <Loader2 className='mr-4 h-8 w-8 animate-spin' />
+          </div>
+        )}
         <div className='my-4 flex flex-row items-center text-left'>
           <div className='my-4'>Total: {data && data.data.length}</div>
         </div>
