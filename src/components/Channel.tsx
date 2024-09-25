@@ -11,12 +11,7 @@ import ChannelTitle from './ChannelTitle'
 import { useRef, useState } from 'react'
 import { useDebouncedCallback } from 'use-debounce'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import {
-  addChannel,
-  getChannelNameById,
-  getTaskInfo,
-  updateChannel,
-} from '@/app/actions'
+import { getChannelNameById, getTaskInfo, updateChannel } from '@/app/actions'
 import { toast } from './ui/use-toast'
 
 const ChannelPage = ({ params }: { params: { id: string } }) => {
@@ -61,7 +56,6 @@ const ChannelPage = ({ params }: { params: { id: string } }) => {
   const { mutateAsync: handleUpdateChannel } = useMutation({
     mutationFn: updateChannel,
     onSuccess: (data) => {
-      console.log('handleUpdateChannel success, data.id=', data)
       if (data.id == '' || data.state == 'Error') {
         toast({
           title: data.state,
@@ -99,11 +93,11 @@ const ChannelPage = ({ params }: { params: { id: string } }) => {
           }}
         />
       </div>
-      <div className='flex flex-col sm:flex-row sm:items-center items-start justify-around'>
-        <div className='flex w-full sm:w-1/2 items-center rounded-lg border-2 mx-4 px-4'>
+      <div className='flex flex-col sm:flex-row sm:items-center items-start '>
+        <div className='flex w-full sm:w-1/2 items-center rounded-lg border-2 px-4'>
           <Search className='h-8 w-8 ml-2' />
           <Input
-            className='w-full px-4 py-4 mr-4 border-none bg-transparent outline-none focus:outline-none focus-visible:ring-transparent '
+            className='w-full px-4 py-2 mr-4 border-none bg-transparent outline-none focus:outline-none focus-visible:ring-transparent '
             type='text'
             value={term}
             onChange={(e) => {
@@ -114,7 +108,7 @@ const ChannelPage = ({ params }: { params: { id: string } }) => {
           />
 
           <Button
-            size='sm'
+            size='lg'
             variant='ghost'
             className='rounded-md m-2'
             onClick={() => {
@@ -125,7 +119,7 @@ const ChannelPage = ({ params }: { params: { id: string } }) => {
         </div>
         {!isLoading && (
           <Button
-            size='sm'
+            size='lg'
             variant='ghost'
             className='rounded-md m-2'
             onClick={() => {

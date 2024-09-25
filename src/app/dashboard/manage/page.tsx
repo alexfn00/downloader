@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { ArrowLeft, Loader2 } from 'lucide-react'
+import { ArrowLeft, Loader2, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { SkeletonCard } from '@/components/skeletons'
 import { useRouter } from 'next/navigation'
@@ -42,6 +42,8 @@ export default function Home() {
   const queryClient = useQueryClient()
   const [author, setAuthor] = useState<string>('')
   const [currentChannel, setCurrentChannel] = useState('')
+  const [isAddDisabled, setIsAddDisabled] = useState(true)
+
   const { toast } = useToast()
 
   const { refetch: fetchtask } = useQuery({
@@ -202,18 +204,41 @@ export default function Home() {
         <span className='pl-2'></span>
         Back
       </Button>
-      <div className='flex w-full max-w-2xl justify-start items-start space-x-2 py-8'>
-        <Input
-          type='text'
-          placeholder='Input youtube channel name'
-          value={author}
-          onChange={(e) => setAuthor(e.target.value)}
-        />
+      <div className='flex w-full max-w-6xl justify-start items-start space-x-2 py-8'>
+        <div className='flex w-full items-center rounded-lg border-2 ml-2 px-4'>
+          <Input
+            className='w-full py-2 mr-4 border-none bg-transparent outline-none focus:outline-none focus-visible:ring-transparent '
+            type='text'
+            value={author}
+            onChange={(e) => {
+              setAuthor(e.target.value)
+              if (e.target.value.length > 0) {
+                setIsAddDisabled(false)
+              } else {
+                setIsAddDisabled(true)
+              }
+            }}
+            placeholder='Input youtube channel ID'
+          />
+
+          <Button
+            size='sm'
+            variant='ghost'
+            className='rounded-md m-2'
+            onClick={() => {
+              setAuthor('')
+              setIsAddDisabled(true)
+            }}>
+            <X className='h-4 w-4' />
+          </Button>
+        </div>
+
         {isTaskRunning && <Loader2 className='mr-4 h-8 w-8 animate-spin' />}
         <Button
-          size='sm'
+          size='lg'
           variant='ghost'
           className='rounded-md '
+          disabled={isAddDisabled}
           onClick={() => {
             setIsTaskRunning(true)
             handleAdd({ channelId: author })
@@ -221,8 +246,11 @@ export default function Home() {
           Add
         </Button>
         <Button
-          size='sm'
+          size='lg'
           variant='ghost'
+          disabled={
+            !(data && data.pages.length > 0 && data.pages[0].totalCount > 0)
+          }
           onClick={() => {
             setIsAllTaskRunning(true)
             handleUpdateAll()
@@ -243,17 +271,17 @@ export default function Home() {
       )}
 
       {data && data.pages.length > 0 && (
-        <div>Total: {data.pages[0].totalCount}</div>
+        <div className='pl-4'>Total: {data.pages[0].totalCount}</div>
       )}
-
       <Table className='mt-4'>
         <TableCaption>Your favourite channels</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead className='w-[100px]'></TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Last Update</TableHead>
-            <TableHead className='text-right'>Action</TableHead>
+            <TableHead className='w-[200px]'>Name</TableHead>
+            <TableHead className='w-[150px]'>ID</TableHead>
+            <TableHead className='w-[180px]'>Last Update</TableHead>
+            <TableHead className='w-[200px] text-right'>Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -279,6 +307,7 @@ export default function Home() {
                           {item.channelName}
                         </Link>
                       </TableCell>
+                      <TableCell>@{item.channelId}</TableCell>
                       <TableCell>
                         {new Date(item.updatedAt).toLocaleString()}
                       </TableCell>
