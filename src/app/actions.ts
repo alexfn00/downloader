@@ -38,9 +38,18 @@ export const fetchVideos = async ({
   search: string
   pageParam: number | 0
 }) => {
+
+  const { getUser } = getKindeServerSession()
+  const user = await getUser()
+
+  if (!user?.id || !user.email) {
+    throw new Error('403 Forbidden')
+  }
+
   const where = channel == '' ? {
     AND: {
       videoType: type,
+      userId: user?.id,
       videoTitle: {
         contains: search
       }
@@ -49,6 +58,7 @@ export const fetchVideos = async ({
   } : {
     AND: {
       channelId: channel,
+      userId: user?.id,
       videoType: type,
       videoTitle: {
         contains: search

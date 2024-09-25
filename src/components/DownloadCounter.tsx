@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/table'
 import React, { useEffect, useState } from 'react'
 import { Button } from './ui/button'
-import { download, getAnonymousSession } from '@/lib/utils'
+import { bytesToReadableSize, download, getAnonymousSession } from '@/lib/utils'
 import { useToast } from '@/components/ui/use-toast'
 import { Loader2 } from 'lucide-react'
 
@@ -73,8 +73,9 @@ const DownloadCounter = () => {
           <TableHeader>
             <TableRow>
               <TableHead className='w-[10px] text-left'>No.</TableHead>
-              <TableHead>File Name</TableHead>
-              <TableHead>File Type/Size</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Size</TableHead>
               <TableHead className='text-left'>Action</TableHead>
             </TableRow>
           </TableHeader>
@@ -90,7 +91,10 @@ const DownloadCounter = () => {
                   </div>
                 </TableCell>
                 <TableCell className='text-left'>
-                  <div>{item.size}</div>
+                  <div>{item.type}</div>
+                </TableCell>
+                <TableCell className='text-left'>
+                  <div>{item.size && bytesToReadableSize(item.size)}</div>
                 </TableCell>
                 <TableCell className='text-left'>
                   <Button
