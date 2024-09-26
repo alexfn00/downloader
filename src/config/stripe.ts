@@ -1,5 +1,18 @@
 export const PLANS = [
   {
+    name: 'Anonymous',
+    slug: 'anonymous',
+    quota: 3,
+    channelCount: 0,
+    price: {
+      amount: 0,
+      priceIds: {
+        test: '',
+        prouction: '',
+      },
+    },
+  },
+  {
     name: 'Free',
     slug: 'free',
     quota: 10,

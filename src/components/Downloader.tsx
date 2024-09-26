@@ -7,7 +7,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Loader2, VolumeX } from 'lucide-react'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { Info, Loader2, VolumeX } from 'lucide-react'
 import YouTube, { YouTubeProps } from 'react-youtube'
 import { useEffect, useRef, useState } from 'react'
 import {
@@ -18,9 +24,8 @@ import {
 } from '@/lib/utils'
 import { toast } from '@/components/ui/use-toast'
 import { ToastAction } from '@radix-ui/react-toast'
-import { getTaskInfo, startDownload } from '@/app/actions'
+import { fetch2buckets, getTaskInfo, startDownload } from '@/app/actions'
 import { VideoInfo } from '@/lib/type'
-import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs'
 import Link from 'next/link'
 
 const Downloader = ({
@@ -84,6 +89,13 @@ const Downloader = ({
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
+  const { data, refetch, isLoading } = useQuery({
+    queryFn: () => fetch2buckets(anonymous),
+    queryKey: ['r2buckets', { anonymous }],
+    enabled: true, // disable this query from automatically running
+    gcTime: 0,
+  })
+
   const { refetch: fetchtask } = useQuery({
     queryFn: () => getTaskInfo(taskId),
 
@@ -95,6 +107,15 @@ const Downloader = ({
   const { mutateAsync: handleDownload } = useMutation({
     mutationFn: startDownload,
     onSuccess: (data) => {
+      if (data && data.state == 'Error') {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: data.value,
+        })
+        setIsTaskRunning(false)
+        return
+      }
       setTaskId(data.id)
       intervalId = window.setInterval(
         (callback: (result: string) => void) => {
@@ -237,7 +258,33 @@ const Downloader = ({
               </Button>
             </div>
           </div>
-          <Link href='/download'>My Files</Link>
+          <div className='my-4'>
+            Total: {data && data.data.length}/
+            {data && data.subscriptionPlan.quota}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className='ml-4 h-4 w-4' />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>
+                    You are now on the{' '}
+                    <span className='font-semibold'>
+                      {data && data.subscriptionPlan.name}
+                    </span>{' '}
+                    Plan. Limited to{' '}
+                    <span className='font-semibold'>
+                      {data && data.subscriptionPlan.quota}
+                    </span>{' '}
+                    downloads per month
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <Link className='ml-4' href='/download'>
+              Goto My Files
+            </Link>
+          </div>
         </div>
       </div>
     </div>

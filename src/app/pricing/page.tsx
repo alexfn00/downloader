@@ -19,6 +19,33 @@ const Page = async () => {
 
   const pricingItems = [
     {
+      plan: 'Anonymous',
+      tagline: 'For anonymous.',
+      quota: 3,
+      features: [
+        {
+          text: 'Up to 0 channel',
+          footnote: 'Maximum number of channels.',
+        },
+        {
+          text: 'Videos in 720p or higher quality',
+          negative: false,
+        },
+        {
+          text: 'Mobile-friendly interface',
+        },
+        {
+          text: 'Higher-quality responses',
+          footnote: 'Better algorithmic responses for enhanced content quality',
+          negative: true,
+        },
+        {
+          text: 'Priority support',
+          negative: true,
+        },
+      ],
+    },
+    {
       plan: 'Free',
       tagline: 'For personal or hobby.',
       quota: 10,

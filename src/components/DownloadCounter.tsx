@@ -1,6 +1,6 @@
 'use client'
 
-import { deleteR2Bucket, fetch2buckets } from '@/app/actions'
+import { deleter2bucket, fetch2buckets } from '@/app/actions'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Table,
@@ -11,11 +11,17 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import React, { useEffect, useState } from 'react'
 import { Button } from './ui/button'
 import { bytesToReadableSize, download, getAnonymousSession } from '@/lib/utils'
 import { useToast } from '@/components/ui/use-toast'
-import { Loader2 } from 'lucide-react'
+import { Info, Loader2 } from 'lucide-react'
 
 const DownloadCounter = () => {
   const [anonymous, setAnonymous] = useState<string | null>('')
@@ -36,7 +42,7 @@ const DownloadCounter = () => {
   })
 
   const { mutateAsync: handleDelete, isPending } = useMutation({
-    mutationFn: deleteR2Bucket,
+    mutationFn: deleter2bucket,
     onSuccess: () => {
       toast({
         title: 'Remove',
@@ -55,7 +61,7 @@ const DownloadCounter = () => {
         <p className='mt-y text-lg text-gray-600'>
           File will be deleted within
           <span className='font-semibold'> 60 </span>
-          minutes. Please save as soon as possible.
+          minutes. Please save it as soon as possible.
         </p>
         {isLoading && (
           <div className='flex items-center justify-center'>
@@ -63,7 +69,30 @@ const DownloadCounter = () => {
           </div>
         )}
         <div className='my-4 flex flex-row items-center text-left'>
-          <div className='my-4'>Total: {data && data.data.length}</div>
+          <div className='my-4'>
+            Total: {data && data.data.length}/
+            {data && data.subscriptionPlan.quota}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className='ml-4 h-4 w-4' />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>
+                    You are now on the{' '}
+                    <span className='font-semibold'>
+                      {data && data.subscriptionPlan.name}
+                    </span>{' '}
+                    Plan. Limited to{' '}
+                    <span className='font-semibold'>
+                      {data && data.subscriptionPlan.quota}
+                    </span>{' '}
+                    downloads per month
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         </div>
       </div>
 

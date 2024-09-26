@@ -368,21 +368,36 @@ export const updateChannels = async () => {
 export const startDownload = async (param: { downloadURL: string, type: string, value: string, userId: string | null }) => {
   try {
     let _userId = null
+    let isAnonymous = true
 
     const { getUser } = getKindeServerSession()
     const user = await getUser()
     if (user && user?.id) {
       _userId = user?.id
+      isAnonymous = true
     } else {
       if (param.userId && param.userId.length > 0) {
         _userId = param.userId
       }
     }
 
-
     if (!_userId) {
       console.log('UserId cannot be none')
       throw new Error('403 Forbidden')
+    }
+
+    const fileCount = await db.r2Bucket.count({
+      where: {
+        userId: _userId,
+      }
+    })
+
+    const subscriptionPlan = await getUserSubscriptionPlan()
+
+    console.log('subscriptionPlan', subscriptionPlan)
+    console.log('fileCount', fileCount)
+    if (subscriptionPlan.quota && fileCount > subscriptionPlan.quota) {
+      return { id: '', state: 'Error', value: 'You cannot download files, You are limited to download ' + subscriptionPlan.quota + ' files' }
     }
 
     console.log('startDownload _userId', _userId)
@@ -405,6 +420,7 @@ export const getTaskInfo = async (taskId: string | null) => {
   try {
     const response = await axios.get(process.env.TASK_URL + `/task/${taskId}`)
     const result = response.data
+    console.log('getTaskInfo result:', result)
     return result
   } catch (error) {
     console.log('getTaskInfo error:', error)
@@ -521,18 +537,21 @@ export const fetch2buckets = async (userId: string | null) => {
     throw new Error('403 Forbidden')
   }
 
+  const subscriptionPlan = await getUserSubscriptionPlan()
+
   const data = await db.r2Bucket.findMany({
     where: {
       userId: _userId,
     }
   })
   return {
-    data: [...data]
+    data: [...data],
+    subscriptionPlan: subscriptionPlan
   }
 }
 
 
-export const deleteR2Bucket = async (r2: { id: string }) => {
+export const deleter2bucket = async (r2: { id: string }) => {
   await db.r2Bucket.delete({
     where: {
       id: r2.id,

@@ -10,8 +10,13 @@ import ChannelSection, { ChildComponentRef } from './ChannelSection'
 import ChannelTitle from './ChannelTitle'
 import { useRef, useState } from 'react'
 import { useDebouncedCallback } from 'use-debounce'
-import { useMutation, useQuery } from '@tanstack/react-query'
-import { getChannelNameById, getTaskInfo, updateChannel } from '@/app/actions'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  getChannelNameById,
+  getTaskInfo,
+  updateChannel,
+  updateChannels,
+} from '@/app/actions'
 import { toast } from './ui/use-toast'
 
 const ChannelPage = ({ params }: { params: { id: string } }) => {
@@ -21,7 +26,7 @@ const ChannelPage = ({ params }: { params: { id: string } }) => {
   const [term, setTerm] = useState<string>('')
   const [taskId, setTaskId] = useState<string>('')
   const [isTaskRunning, setIsTaskRunning] = useState(false)
-  // const router = useRouter()
+  const queryClient = useQueryClient()
 
   const handleSearch = useDebouncedCallback((term) => {
     setSearch(term)
@@ -35,24 +40,6 @@ const ChannelPage = ({ params }: { params: { id: string } }) => {
     gcTime: 0,
   })
 
-  function task_complete(data: any) {
-    if (data.state == 'SUCCESS') {
-      clearInterval(intervalId)
-      setIsTaskRunning(false)
-      toast({
-        title: 'Update',
-        description: 'Channel updated successfully',
-      })
-      handleButtonClick()
-    }
-  }
-
-  function intervalFunction(callback: (result: string) => void) {
-    fetchtask().then((data) => {
-      callback(data.data)
-    })
-  }
-
   const { mutateAsync: handleUpdateChannel } = useMutation({
     mutationFn: updateChannel,
     onSuccess: (data) => {
@@ -64,8 +51,61 @@ const ChannelPage = ({ params }: { params: { id: string } }) => {
         })
       } else {
         setTaskId(data.id)
-        intervalId = window.setInterval(intervalFunction, 5000, task_complete)
+        intervalId = window.setInterval(
+          (callback: (result: string) => void) => {
+            fetchtask().then((data) => {
+              callback(data.data)
+            })
+          },
+          5000,
+          (data: any) => {
+            if (data.state == 'SUCCESS') {
+              clearInterval(intervalId)
+              setIsTaskRunning(false)
+              toast({
+                title: 'Update',
+                description: 'Channel updated successfully',
+              })
+              handleButtonClick()
+            }
+          },
+        )
       }
+    },
+  })
+
+  const { mutateAsync: handleUpdateAll } = useMutation({
+    mutationFn: updateChannels,
+    onSuccess: (data) => {
+      if (data && data.state == 'Error') {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: data.value,
+        })
+        setIsTaskRunning(false)
+        return
+      }
+      setTaskId(data.id)
+      intervalId = window.setInterval(
+        (callback: (result: string) => void) => {
+          fetchtask().then((data) => {
+            callback(data.data)
+          })
+        },
+        5000,
+        (data: any) => {
+          if (data.state == 'SUCCESS') {
+            clearInterval(intervalId)
+            setIsTaskRunning(false)
+            toast({
+              title: 'Update',
+              description: 'All channels updated',
+            })
+            queryClient.invalidateQueries({ queryKey: ['taskInfo'] })
+          }
+        },
+      )
     },
   })
 
@@ -86,7 +126,7 @@ const ChannelPage = ({ params }: { params: { id: string } }) => {
 
   return (
     <>
-      <div className='text-3xl font-semibold p-4'>
+      <div className='p-4'>
         <ChannelTitle
           params={{
             id: params.id,
@@ -124,10 +164,15 @@ const ChannelPage = ({ params }: { params: { id: string } }) => {
             className='rounded-md m-2'
             onClick={() => {
               setIsTaskRunning(true)
-              handleUpdateChannel({ channelId: data?.channelId || '' })
+              if (data?.channelName) {
+                handleUpdateChannel({ channelId: data?.channelId || '' })
+              } else {
+                handleUpdateAll()
+              }
             }}>
             {isTaskRunning && <Loader2 className='mr-4 h-8 w-8 animate-spin' />}
-            Update Channel
+            {data?.channelName && <>Update Channel</>}
+            {!data?.channelName && <>Update All Channels</>}
           </Button>
         )}
       </div>
