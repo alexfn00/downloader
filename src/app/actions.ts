@@ -121,7 +121,7 @@ export const authCallback = async () => {
   }
 }
 
-export const fetchAuthors = async ({
+export const fetchChannels = async ({
   pageParam,
 }: {
   pageParam: number | 0
@@ -129,6 +129,8 @@ export const fetchAuthors = async ({
 
   const { getUser } = getKindeServerSession()
   const user = await getUser()
+
+  const subscriptionPlan = await getUserSubscriptionPlan()
 
 
   const totalCount = await db.channel.count({
@@ -142,6 +144,9 @@ export const fetchAuthors = async ({
     },
     skip: pageParam * LIMIT,
     take: LIMIT,
+    orderBy: {
+      createdAt: 'desc', // 'asc' for ascending order
+    }
   })
   const nextPage = pageParam + LIMIT < totalCount ? pageParam + 1 : null
   const totalPages = totalCount / LIMIT + (totalCount % LIMIT)
@@ -152,6 +157,7 @@ export const fetchAuthors = async ({
     totalPages: totalPages,
     currentPage: pageParam,
     nextPage: nextPage,
+    subscriptionPlan: subscriptionPlan
   }
 }
 
@@ -243,14 +249,17 @@ export const addChannel = async (channel: { channelId: string }) => {
     const { isSubscribed } = subscriptionPlan
 
     const isProExceeded =
-      channelCount > PLANS.find((plan) => plan.name === 'Pro')!.channelCount
+      channelCount >= PLANS.find((plan) => plan.name === 'Pro')!.channelCount
 
     const isFreeExceeded =
       channelCount > PLANS.find((plan) => plan.name === 'Free')!.channelCount
 
+    if (!isSubscribed && isFreeExceeded) {
+      return { id: '', 'state': 'Error', value: 'Free Plan Exceeded or Pro plan expired, Please Upgrade to Pro Plan to continue' }
+    }
 
-    if ((isSubscribed && isProExceeded) || (!isSubscribed && isFreeExceeded)) {
-      return { id: '', 'state': 'Error', value: 'PlanExceeded' }
+    if (isSubscribed && isProExceeded) {
+      return { id: '', 'state': 'Error', value: 'Pro Plan Exceeded' }
     }
 
     let channels = []
@@ -285,9 +294,21 @@ export const updateChannel = async (channel: { channelId: string }) => {
     const { getUser } = getKindeServerSession()
     const user = await getUser()
 
+    const channelCount = await db.channel.count({
+      where: {
+        userId: user?.id,
+      },
+    })
+
+    const subscriptionPlan = await getUserSubscriptionPlan()
+
+    if (subscriptionPlan.channelCount && channelCount > subscriptionPlan.channelCount) {
+      return { id: '', state: 'Error', value: 'You cannot update any channels, please delete channels to ensure the number of channels is less than ' + subscriptionPlan.channelCount }
+    }
+
     let channels = []
     if (channel.channelId == '') {
-      return { id: '', 'state': 'Error', value: 'channel id cannot be empty' }
+      return { id: '', state: 'Error', value: 'channel id cannot be empty' }
     } else {
       channels = [channel.channelId]
     }
@@ -308,6 +329,18 @@ export const updateChannels = async () => {
   try {
     const { getUser } = getKindeServerSession()
     const user = await getUser()
+
+    const channelCount = await db.channel.count({
+      where: {
+        userId: user?.id,
+      },
+    })
+
+    const subscriptionPlan = await getUserSubscriptionPlan()
+
+    if (subscriptionPlan.channelCount && channelCount > subscriptionPlan.channelCount) {
+      return { id: '', state: 'Error', value: 'You cannot update any channels, please delete channels to ensure the number of channels is less than ' + subscriptionPlan.channelCount }
+    }
 
     const channels = await db.channel.findMany({
       where: {
@@ -372,7 +405,6 @@ export const getTaskInfo = async (taskId: string | null) => {
   try {
     const response = await axios.get(process.env.TASK_URL + `/task/${taskId}`)
     const result = response.data
-    console.log('getTaskInfo', result)
     return result
   } catch (error) {
     console.log('getTaskInfo error:', error)

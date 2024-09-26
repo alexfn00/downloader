@@ -1,11 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { Globe, Loader2, Plus } from 'lucide-react'
+import { Loader2, Plus } from 'lucide-react'
 import clsx from 'clsx'
 import { usePathname } from 'next/navigation'
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { fetchAuthors } from '../actions'
+import { fetchChannels } from '../actions'
 import { SkeletonCard } from '@/components/skeletons'
 import { useEffect } from 'react'
 import { useInView } from 'react-intersection-observer'
@@ -15,7 +15,7 @@ export default function SideNav() {
   const { data, error, status, fetchNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ['authors'],
-      queryFn: ({ pageParam }) => fetchAuthors({ pageParam }),
+      queryFn: ({ pageParam }) => fetchChannels({ pageParam }),
       initialPageParam: 0,
       getNextPageParam: (lastPage) => {
         return lastPage.nextPage

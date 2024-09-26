@@ -9,7 +9,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { ArrowLeft, Loader2, X } from 'lucide-react'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+
+import { ArrowLeft, Info, Loader2, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { SkeletonCard } from '@/components/skeletons'
 import { useRouter } from 'next/navigation'
@@ -22,7 +29,7 @@ import {
 import {
   addChannel,
   deleteChannel,
-  fetchAuthors,
+  fetchChannels,
   getTaskInfo,
   updateChannel,
   updateChannels,
@@ -41,7 +48,8 @@ export default function Home() {
   const [taskId, setTaskId] = useState<string>('')
   const queryClient = useQueryClient()
   const [author, setAuthor] = useState<string>('')
-  const [currentChannel, setCurrentChannel] = useState('')
+  const [currentUpdateChannel, setCurrentUpdateChannel] = useState('')
+  const [currentDeleteChannel, setCurrentDeleteChannel] = useState('')
   const [isAddDisabled, setIsAddDisabled] = useState(true)
 
   const { toast } = useToast()
@@ -64,7 +72,6 @@ export default function Home() {
           description: 'Your plan has exceeded the maximum number of channels',
         })
         setIsTaskRunning(false)
-        setCurrentChannel('')
         return
       }
       setTaskId(data.id)
@@ -83,7 +90,6 @@ export default function Home() {
               title: 'Update',
               description: 'Channel updated successfully',
             })
-            setCurrentChannel('')
             queryClient.invalidateQueries({ queryKey: ['authors'] })
           }
         },
@@ -98,10 +104,10 @@ export default function Home() {
         toast({
           variant: 'destructive',
           title: 'Error',
-          description: 'Your plan has exceeded the maximum number of channels',
+          description: data.value,
         })
         setIsTaskRunning(false)
-        setCurrentChannel('')
+        setCurrentUpdateChannel('')
         return
       }
       setTaskId(data.id)
@@ -120,8 +126,8 @@ export default function Home() {
               title: 'Update',
               description: 'Channel added successfully',
             })
-            setCurrentChannel('')
             queryClient.invalidateQueries({ queryKey: ['authors'] })
+            setCurrentUpdateChannel('')
           }
         },
       )
@@ -131,6 +137,15 @@ export default function Home() {
   const { mutateAsync: handleUpdateAll } = useMutation({
     mutationFn: updateChannels,
     onSuccess: (data) => {
+      if (data && data.state == 'Error') {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: data.value,
+        })
+        setIsAllTaskRunning(false)
+        return
+      }
       setTaskId(data.id)
       intervalId = window.setInterval(
         (callback: (result: string) => void) => {
@@ -157,7 +172,7 @@ export default function Home() {
   const { data, error, status, fetchNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ['authors'],
-      queryFn: ({ pageParam }) => fetchAuthors({ pageParam }),
+      queryFn: ({ pageParam }) => fetchChannels({ pageParam }),
       initialPageParam: 0,
       getNextPageParam: (lastPage) => {
         return lastPage.nextPage
@@ -181,6 +196,7 @@ export default function Home() {
           description: 'Channel has been removed',
         })
         queryClient.invalidateQueries({ queryKey: ['authors'] })
+        setCurrentDeleteChannel('')
       },
     },
   )
@@ -243,19 +259,16 @@ export default function Home() {
             setIsTaskRunning(true)
             handleAdd({ channelId: author })
           }}>
-          Add
+          Add Channel
         </Button>
         <Button
           size='lg'
           variant='ghost'
-          disabled={
-            !(data && data.pages.length > 0 && data.pages[0].totalCount > 0)
-          }
           onClick={() => {
             setIsAllTaskRunning(true)
             handleUpdateAll()
           }}>
-          Update All
+          Update All Channels
         </Button>
       </div>
 
@@ -269,9 +282,33 @@ export default function Home() {
           <Loader2 className='mr-4 h-8 w-8 animate-spin' />
         </div>
       )}
-
       {data && data.pages.length > 0 && (
-        <div className='pl-4'>Total: {data.pages[0].totalCount}</div>
+        <>
+          <div className='pl-4'>
+            Total: {data.pages[0].totalCount}/
+            {data.pages[0].subscriptionPlan.channelCount}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className='ml-4 h-4 w-4' />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>
+                    You are now on the{' '}
+                    <span className='font-semibold'>
+                      {data.pages[0].subscriptionPlan.name}
+                    </span>{' '}
+                    Plan. Limited to{' '}
+                    <span className='font-semibold'>
+                      {data.pages[0].subscriptionPlan.channelCount}
+                    </span>{' '}
+                    channels
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        </>
       )}
       <Table className='mt-4'>
         <TableCaption>Your favourite channels</TableCaption>
@@ -317,10 +354,10 @@ export default function Home() {
                           variant='ghost'
                           onClick={() => {
                             setAuthor(item.channelId)
-                            setCurrentChannel(item.channelId)
+                            setCurrentUpdateChannel(item.channelId)
                             handleUpdate({ channelId: item.channelId })
                           }}>
-                          {currentChannel == item.channelId && (
+                          {currentUpdateChannel == item.channelId && (
                             <Loader2 className='mr-4 h-8 w-8 animate-spin' />
                           )}
                           Update
@@ -329,8 +366,12 @@ export default function Home() {
                           size='sm'
                           variant='destructive'
                           onClick={() => {
+                            setCurrentDeleteChannel(item.channelId)
                             handleDelete({ channelId: item.channelId })
                           }}>
+                          {currentDeleteChannel == item.channelId && (
+                            <Loader2 className='mr-4 h-8 w-8 animate-spin' />
+                          )}
                           Delete
                         </Button>
                       </TableCell>
