@@ -5,10 +5,8 @@ import { Button } from '@/components/ui/button'
 import { useQuery } from '@tanstack/react-query'
 import { getVideoInfo } from './actions'
 import { Loader2, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Downloader from '@/components/Downloader'
-import { v4 as uuidv4 } from 'uuid'
-import { useKindeAuth } from '@kinde-oss/kinde-auth-nextjs'
 import Image from 'next/image'
 
 export default function Home() {

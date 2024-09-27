@@ -16,7 +16,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 
-import { ArrowLeft, Info, Loader2, X } from 'lucide-react'
+import { ArrowLeft, CircleHelp, Info, Loader2, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { SkeletonCard } from '@/components/skeletons'
 import { useRouter } from 'next/navigation'
@@ -215,11 +215,11 @@ export default function Home() {
       <h1 className='text-xl sm:text-3xl font-semibold sm:my-4'>
         Channel Managment
       </h1>
-      <Button className='ml-4' onClick={() => router.back()}>
+      {/* <Button className='ml-4' onClick={() => router.back()}>
         <ArrowLeft />
         <span className='pl-2'></span>
         Back
-      </Button>
+      </Button> */}
       <div className='flex w-full max-w-6xl justify-start items-start space-x-2 py-8'>
         <div className='flex w-full items-center rounded-lg border-2 ml-2 px-4'>
           <Input
@@ -249,27 +249,33 @@ export default function Home() {
           </Button>
         </div>
 
-        {isTaskRunning && <Loader2 className='mr-4 h-8 w-8 animate-spin' />}
-        <Button
-          size='lg'
-          variant='ghost'
-          className='rounded-md '
-          disabled={isAddDisabled}
-          onClick={() => {
-            setIsTaskRunning(true)
-            handleAdd({ channelId: author })
-          }}>
-          Add Channel
-        </Button>
-        <Button
-          size='lg'
-          variant='ghost'
-          onClick={() => {
-            setIsAllTaskRunning(true)
-            handleUpdateAll()
-          }}>
-          Update All Channels
-        </Button>
+        <div className='flex w-full items-center rounded-lg ml-2 px-4'>
+          {isTaskRunning && <Loader2 className='mr-4 h-8 w-8 animate-spin' />}
+
+          <Button
+            size='lg'
+            variant='ghost'
+            className='rounded-md'
+            disabled={isAddDisabled}
+            onClick={() => {
+              setIsTaskRunning(true)
+              handleAdd({ channelId: author })
+            }}>
+            Add Channel
+          </Button>
+          <Link className='' href={`/dashboard/help`}>
+            <CircleHelp className=' text-red-500 h8 w-8 animate-pulse' />
+          </Link>
+          <Button
+            size='lg'
+            variant='ghost'
+            onClick={() => {
+              setIsAllTaskRunning(true)
+              handleUpdateAll()
+            }}>
+            Update All Channels
+          </Button>
+        </div>
       </div>
 
       {isDeletePending && (
