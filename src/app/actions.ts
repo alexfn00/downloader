@@ -394,13 +394,14 @@ export const startDownload = async (param: { downloadURL: string, type: string, 
 
     const subscriptionPlan = await getUserSubscriptionPlan()
 
-    console.log('subscriptionPlan', subscriptionPlan)
-    console.log('fileCount', fileCount)
     if (subscriptionPlan.quota && fileCount > subscriptionPlan.quota) {
       return { id: '', state: 'Error', value: 'You cannot download files, You are limited to download ' + subscriptionPlan.quota + ' files' }
     }
 
-    console.log('startDownload _userId', _userId)
+    if (param.type == 'dimension' && parseInt(param.value) >= 720 && !subscriptionPlan.hd) {
+      return { id: '', state: 'Error', value: 'You cannot download HD videos in 720p or above' }
+    }
+
     const data = {
       userId: _userId,
       task_type: 'download',
