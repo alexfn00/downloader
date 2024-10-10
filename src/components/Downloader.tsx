@@ -24,7 +24,12 @@ import {
 } from '@/lib/utils'
 import { toast } from '@/components/ui/use-toast'
 import { ToastAction } from '@radix-ui/react-toast'
-import { fetch2buckets, getTaskInfo, startDownload } from '@/app/actions'
+import {
+  doTranscript,
+  fetch2buckets,
+  getTaskInfo,
+  startDownload,
+} from '@/app/actions'
 import { VideoInfo } from '@/lib/type'
 import Link from 'next/link'
 
@@ -41,6 +46,8 @@ const Downloader = ({
   const todos = params.data
   const [videoId, setVideoId] = useState('')
   const [isTaskRunning, setIsTaskRunning] = useState(false)
+  const [isTranscripting, setIsTranscript] = useState(false)
+  const [transcription, settranscription] = useState<string>('')
   const [progress, setProgress] = useState('')
   const [state, setState] = useState('')
   const [currentOption, setCurrentOption] = useState('0')
@@ -155,6 +162,42 @@ const Downloader = ({
     onSettled: (data, error, variables, context) => {},
   })
 
+  const { mutateAsync: handleTranscript } = useMutation({
+    mutationFn: doTranscript,
+    onSuccess: (data) => {
+      console.log('data', data)
+      if (data && data.state == 'Error') {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: data.value,
+        })
+        setIsTranscript(false)
+        return
+      }
+      setIsTranscript(true)
+      setTaskId(data.id)
+      intervalId = window.setInterval(
+        (callback: (result: string) => void) => {
+          fetchtask().then((data) => {
+            callback(data.data)
+          })
+        },
+        5000,
+        (data: any) => {
+          if (data.state == 'SUCCESS') {
+            clearInterval(intervalId)
+            setIsTranscript(false)
+            settranscription(data.value)
+          }
+          console.log(data)
+        },
+      )
+    },
+    onError: (error, variables, context) => {},
+    onSettled: (data, error, variables, context) => {},
+  })
+
   const onPlayerReady: YouTubeProps['onReady'] = (event) => {
     // access to player in all event handlers via event.target
     event.target.pauseVideo()
@@ -258,6 +301,32 @@ const Downloader = ({
               </Button>
             </div>
           </div>
+          <div className='py-2 w-full flex items-center'>
+            <div className='flex flex-row items-end sm:justify-end justify-end '>
+              <Button
+                size='lg'
+                variant='ghost'
+                className='rounded-md py-4 ml-2 bg-green-700 text-white hover:bg-green-600 hover:text-white'
+                onClick={() => {
+                  settranscription('')
+                  handleTranscript(url)
+                }}>
+                {isTranscripting ? (
+                  <>
+                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                    Transcript
+                  </>
+                ) : (
+                  <>Transcript</>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          <div className='p-2 w-full flex items-center border mr-4'>
+            <p>{transcription}</p>
+          </div>
+
           <div className='my-4'>
             Total: {data && data.data.length}/
             {data && data.subscriptionPlan.quota}

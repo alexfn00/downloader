@@ -559,3 +559,18 @@ export const deleter2bucket = async (r2: { id: string }) => {
     },
   })
 }
+
+
+export const doTranscript = async (url: string | null) => {
+  try {
+    const data = {
+      userId: 'userId',
+      url: url
+    }
+    const task_url = process.env.TASK_URL + '/task/transcribe'
+    const response = await axios.post(task_url, data)
+    return response.data
+  } catch (error) {
+    console.log('doTranscript error:', error)
+  }
+}
