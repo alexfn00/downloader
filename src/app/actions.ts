@@ -13,7 +13,7 @@ import { PLANS } from '@/config/stripe'
 
 
 export const getChannelNameById = async ({ id }: { id: string }) => {
-  const data = await db.channel.findFirst({
+  const data = await db.channels.findFirst({
     where: {
       id,
     }
@@ -48,9 +48,9 @@ export const fetchVideos = async ({
 
   const where = channel == '' ? {
     AND: {
-      videoType: type,
+      type: type,
       userId: user?.id,
-      videoTitle: {
+      title: {
         contains: search
       }
     }
@@ -59,29 +59,30 @@ export const fetchVideos = async ({
     AND: {
       channelId: channel,
       userId: user?.id,
-      videoType: type,
-      videoTitle: {
+      type: type,
+      title: {
         contains: search
       }
     }
   }
 
-  const totalCount = await db.video.count({
+  const totalCount = await db.videos.count({
     where: where
   })
-  const data = await db.video.findMany({
+  const data = await db.videos.findMany({
     skip: pageParam * LIMIT,
     where: where,
     include: {
-      channel: true,
+      channels: true,
     },
     orderBy: [
       {
-        updatedAt: 'desc',
+        updated: 'asc',
       },
     ],
     take: LIMIT,
   })
+  console.log('video data', data)
   const nextPage = pageParam + LIMIT < totalCount ? pageParam + 1 : null
   const totalPages = totalCount / LIMIT + (totalCount % LIMIT)
   return {
@@ -133,21 +134,22 @@ export const fetchChannels = async ({
   const subscriptionPlan = await getUserSubscriptionPlan()
 
 
-  const totalCount = await db.channel.count({
+  const totalCount = await db.channels.count({
     where: {
       userId: user?.id,
     }
   })
-  const data = await db.channel.findMany({
+  const data = await db.channels.findMany({
     where: {
       userId: user?.id,
     },
     skip: pageParam * LIMIT,
     take: LIMIT,
     orderBy: {
-      createdAt: 'desc', // 'asc' for ascending order
+      created: 'desc', // 'asc' for ascending order
     }
   })
+  console.log('fetchChannels data', data)
   const nextPage = pageParam + LIMIT < totalCount ? pageParam + 1 : null
   const totalPages = totalCount / LIMIT + (totalCount % LIMIT)
 
@@ -162,9 +164,10 @@ export const fetchChannels = async ({
 }
 
 export const deleteChannel = async (channel: { channelId: string }) => {
-  await db.channel.delete({
+  console.log('channel', channel)
+  await db.channels.delete({
     where: {
-      channelId: channel.channelId,
+      id: channel.channelId,
     },
   })
 }
@@ -240,7 +243,7 @@ export const addChannel = async (channel: { channelId: string }) => {
     const { getUser } = getKindeServerSession()
     const user = await getUser()
 
-    const channelCount = await db.channel.count({
+    const channelCount = await db.channels.count({
       where: {
         userId: user?.id,
       },
@@ -264,15 +267,15 @@ export const addChannel = async (channel: { channelId: string }) => {
 
     let channels = []
     if (channel.channelId == '') {
-      const channel_list = await db.channel.findMany({
+      const channel_list = await db.channels.findMany({
         where: {
           userId: user?.id,
         },
         select: {
-          channelId: true,
+          id: true,
         },
       })
-      channels = [...channel_list.map((item) => item['channelId'])]
+      channels = [...channel_list.map((item) => item['id'])]
     } else {
       channels = [channel.channelId]
     }
@@ -283,6 +286,7 @@ export const addChannel = async (channel: { channelId: string }) => {
       userId: user?.id
     }
     const result = await axios.post(process.env.TASK_URL + '/task/', data)
+
     return result.data
   } catch (error) {
     return { id: '', 'state': 'Error', value: error }
@@ -294,7 +298,7 @@ export const updateChannel = async (channel: { channelId: string }) => {
     const { getUser } = getKindeServerSession()
     const user = await getUser()
 
-    const channelCount = await db.channel.count({
+    const channelCount = await db.channels.count({
       where: {
         userId: user?.id,
       },
@@ -330,7 +334,7 @@ export const updateChannels = async () => {
     const { getUser } = getKindeServerSession()
     const user = await getUser()
 
-    const channelCount = await db.channel.count({
+    const channelCount = await db.channels.count({
       where: {
         userId: user?.id,
       },
@@ -342,19 +346,19 @@ export const updateChannels = async () => {
       return { id: '', state: 'Error', value: 'You cannot update any channels, please delete channels to ensure the number of channels is less than ' + subscriptionPlan.channelCount }
     }
 
-    const channels = await db.channel.findMany({
+    const channels = await db.channels.findMany({
       where: {
         userId: user?.id,
       },
       select: {
-        channelId: true,
+        id: true,
       },
     })
 
     const data = {
       task_type: 'crawl',
       name: 'youtube',
-      channels: [...channels.map((item) => item['channelId'])],
+      channels: [...channels.map((item) => item['id'])],
       userId: user?.id
     }
     const result = await axios.post(process.env.TASK_URL + '/task/', data)
@@ -388,7 +392,7 @@ export const startDownload = async (param: { downloadURL: string, type: string, 
 
     const fileCount = await db.r2Bucket.count({
       where: {
-        userId: _userId,
+        user_id: _userId,
       }
     })
 
@@ -542,7 +546,7 @@ export const fetch2buckets = async (userId: string | null) => {
 
   const data = await db.r2Bucket.findMany({
     where: {
-      userId: _userId,
+      user_id: _userId,
     }
   })
   return {
@@ -555,7 +559,7 @@ export const fetch2buckets = async (userId: string | null) => {
 export const deleter2bucket = async (r2: { id: string }) => {
   await db.r2Bucket.delete({
     where: {
-      id: r2.id,
+      id: Number(r2.id),
     },
   })
 }

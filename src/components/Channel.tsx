@@ -164,15 +164,15 @@ const ChannelPage = ({ params }: { params: { id: string } }) => {
             className='rounded-md m-2'
             onClick={() => {
               setIsTaskRunning(true)
-              if (data?.channelName) {
-                handleUpdateChannel({ channelId: data?.channelId || '' })
+              if (data?.name) {
+                handleUpdateChannel({ channelId: data?.id || '' })
               } else {
                 handleUpdateAll()
               }
             }}>
             {isTaskRunning && <Loader2 className='mr-4 h-8 w-8 animate-spin' />}
-            {data?.channelName && <>Update Channel</>}
-            {!data?.channelName && <>Update All Channels</>}
+            {data?.name && <>Update Channel</>}
+            {!data?.name && <>Update All Channels</>}
           </Button>
         )}
       </div>

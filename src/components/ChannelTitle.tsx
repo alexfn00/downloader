@@ -15,10 +15,10 @@ const ChannelTitle = ({ params }: { params: { id: string } }) => {
   return (
     <>
       <div className='text-3xl font-semibold p-4'>
-        {!isLoading && data?.channelName ? data?.channelName : 'All Channels'}
+        {!isLoading && data?.name ? data?.name : 'All Channels'}
       </div>
       <div className='text-lg text-gray-600 px-4'>
-        {!isLoading && data?.channelName && '@' + data?.channelId}
+        {!isLoading && data?.name && '@' + data?.id}
       </div>
     </>
   )

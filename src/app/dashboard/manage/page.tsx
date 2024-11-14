@@ -341,29 +341,29 @@ export default function Home() {
                             alt='Author'
                             height={48}
                             width={48}
-                            src={item.channelAvatar}
+                            src={item.avatar}
                           />
                         </Link>
                       </TableCell>
                       <TableCell>
                         <Link href={`/dashboard/videos/${item.id}`}>
-                          {item.channelName}
+                          {item.name}
                         </Link>
                       </TableCell>
-                      <TableCell>@{item.channelId}</TableCell>
+                      <TableCell>@{item.id}</TableCell>
                       <TableCell>
-                        {new Date(item.updatedAt).toLocaleString()}
+                        {new Date(item.updated).toLocaleString()}
                       </TableCell>
                       <TableCell className='text-right'>
                         <Button
                           size='sm'
                           variant='ghost'
                           onClick={() => {
-                            setAuthor(item.channelId)
-                            setCurrentUpdateChannel(item.channelId)
-                            handleUpdate({ channelId: item.channelId })
+                            setAuthor(item.id)
+                            setCurrentUpdateChannel(item.id)
+                            handleUpdate({ channelId: item.id })
                           }}>
-                          {currentUpdateChannel == item.channelId && (
+                          {currentUpdateChannel == item.id && (
                             <Loader2 className='mr-4 h-8 w-8 animate-spin' />
                           )}
                           Update
@@ -372,10 +372,10 @@ export default function Home() {
                           size='sm'
                           variant='destructive'
                           onClick={() => {
-                            setCurrentDeleteChannel(item.channelId)
-                            handleDelete({ channelId: item.channelId })
+                            setCurrentDeleteChannel(item.id)
+                            handleDelete({ channelId: item.id })
                           }}>
-                          {currentDeleteChannel == item.channelId && (
+                          {currentDeleteChannel == item.id && (
                             <Loader2 className='mr-4 h-8 w-8 animate-spin' />
                           )}
                           Delete

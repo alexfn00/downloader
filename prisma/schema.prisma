@@ -11,76 +11,89 @@ generator client {
   interface            = "sync"
 }
 
-model User {
+model user {
   id    String @id @unique
   email String @unique
 
-  Channel Channel[]
-  Video   Video[]
+  Channels Channels[]
+  Videos   Videos[]
 
   stripeCustomerId       String?   @unique @map(name: "stripe_customer_id")
   stripeSubscriptionId   String?   @unique @map(name: "stripe_subscription_id")
   stripePriceId          String?   @map(name: "stripe_price_id")
   stripeCurrentPeriodEnd DateTime? @map(name: "stripe_current_period_end")
+
+  created DateTime @default(now())
+  updated DateTime @default(now())
+
+  @@map("user")
 }
 
 // data models
-model Channel {
-  id            String   @id @default(cuid())
-  channelId     String   @unique @map(name: "channel_id")
-  channelName   String   @map(name: "channel_name")
-  channelAvatar String   @map(name: "channel_avatar")
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+model Channels {
+  id      String   @unique @map(name: "id")
+  name    String   @map(name: "name")
+  avatar  String   @map(name: "avatar")
+  created DateTime @default(now())
+  updated DateTime
 
-  User   User?   @relation(fields: [userId], references: [id])
-  userId String?
+  user   user?   @relation(fields: [userId], references: [id])
+  userId String? @map(name: "user_id")
 
-  Video Video[]
+  videos Videos[]
+
+  @@map("channels")
 }
 
-model Video {
-  id             String   @id @default(cuid())
-  videoTitle     String   @map(name: "video_title")
-  videoHref      String   @map(name: "video_href")
-  videoThumbnail String   @map(name: "video_thumbnail")
-  videoPeriod    String   @map(name: "video_period")
-  videoPublished String   @map(name: "video_published")
-  videoViewCount String   @map(name: "video_view_count")
-  videoType      String   @map(name: "video_type")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+model Videos {
+  id        Int      @id @default(autoincrement())
+  title     String   @unique @map(name: "title")
+  href      String   @map(name: "href")
+  thumbnail String   @map(name: "thumbnail")
+  period    String   @map(name: "period")
+  published String   @map(name: "published")
+  viewCount String   @map(name: "view_count")
+  type      String   @map(name: "type")
+  created   DateTime @default(now())
+  updated   DateTime
 
-  channel   Channel? @relation(fields: [channelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  channelId String?
+  channels  Channels? @relation(fields: [channelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  channelId String?   @map(name: "channel_id")
 
-  User   User?   @relation(fields: [userId], references: [id])
-  userId String?
+  user   user?   @relation(fields: [userId], references: [id])
+  userId String? @map(name: "user_id")
+
+  @@map("videos")
 }
 
 model Task {
-  id        Int      @id @default(autoincrement())
-  task      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id      Int      @id @default(autoincrement())
+  task    String
+  created DateTime @default(now())
+  updated DateTime
+
+  @@map("task")
 }
 
 model Anonymous {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id      String   @id @default(cuid())
+  created DateTime @default(now())
+  updated DateTime
+
+  @@map("anonymous")
 }
 
 model R2Bucket {
-  id     String  @id @default(cuid())
-  userId String?
+  id       Int      @id @default(autoincrement())
+  r2       String
+  fileName String   @map(name: "filename")
+  size     Int?
+  type     String?
+  user_id  String?
+  created  DateTime @default(now())
+  updated  DateTime
 
-  r2        String
-  fileName  String   @map(name: "filename")
-  size      Int?
-  type      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  @@map("r2bucket")
 }
 
 model InstagramUser {
@@ -93,10 +106,12 @@ model InstagramUser {
   biography    String   @unique
   external_url String   @unique
   pic_url      String   @unique
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  created      DateTime @default(now())
+  updated      DateTime
 
   InstagramPost InstagramPost[]
+
+  @@map("instagramuser")
 }
 
 model InstagramPost {
@@ -110,9 +125,19 @@ model InstagramPost {
   comments         String @unique
   caption_hashtags String @unique
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  created DateTime @default(now())
+  updated DateTime
 
   user   InstagramUser? @relation(fields: [userid], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userid String?
+
+  @@map("instagrampost")
+}
+
+model MyTable {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(100)
+  age  Int?
+
+  @@map("my_table")
 }

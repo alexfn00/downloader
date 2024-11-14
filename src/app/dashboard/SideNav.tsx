@@ -76,10 +76,10 @@ export default function SideNav() {
                       alt='Author'
                       height={48}
                       width={48}
-                      src={item.channelAvatar}
+                      src={item.avatar}
                     />
                     <p className='hidden md:block overflow-ellipsis overflow-hidden whitespace-nowrap'>
-                      {item.channelName}
+                      {item.name}
                     </p>
                   </Link>
                 )
