@@ -25,7 +25,7 @@ import { Info, Loader2 } from 'lucide-react'
 
 const DownloadCounter = () => {
   const [anonymous, setAnonymous] = useState<string | null>('')
-  const [currentItem, setCurrentItem] = useState('')
+  const [currentItem, setCurrentItem] = useState(Number)
 
   const { toast } = useToast()
   const queryClient = useQueryClient()

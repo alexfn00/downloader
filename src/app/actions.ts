@@ -82,7 +82,6 @@ export const fetchVideos = async ({
     ],
     take: LIMIT,
   })
-  console.log('video data', data)
   const nextPage = pageParam + LIMIT < totalCount ? pageParam + 1 : null
   const totalPages = totalCount / LIMIT + (totalCount % LIMIT)
   return {
@@ -149,7 +148,7 @@ export const fetchChannels = async ({
       created: 'desc', // 'asc' for ascending order
     }
   })
-  console.log('fetchChannels data', data)
+
   const nextPage = pageParam + LIMIT < totalCount ? pageParam + 1 : null
   const totalPages = totalCount / LIMIT + (totalCount % LIMIT)
 
@@ -164,7 +163,6 @@ export const fetchChannels = async ({
 }
 
 export const deleteChannel = async (channel: { channelId: string }) => {
-  console.log('channel', channel)
   await db.channels.delete({
     where: {
       id: channel.channelId,
@@ -204,7 +202,6 @@ export const parseURL = async (search: string | null) => {
     const info = await ytdl.getInfo(url, {
       requestOptions: options,
     })
-    // console.log(info)
 
     const audio_formats = ytdl.filterFormats(info.formats, 'audio')
     const format = ytdl.chooseFormat(audio_formats, { quality: 'highest' })
@@ -425,7 +422,6 @@ export const getTaskInfo = async (taskId: string | null) => {
   try {
     const response = await axios.get(process.env.TASK_URL + `/task/${taskId}`)
     const result = response.data
-    console.log('getTaskInfo result:', result)
     return result
   } catch (error) {
     console.log('getTaskInfo error:', error)
@@ -467,7 +463,6 @@ export const getInstagramInfo = async (userId: string | null) => {
     }
     const url = process.env.TASK_URL + '/task/instagram'
     const result = await axios.post(url, data)
-    console.log('post result:', result.data)
     return result.data
   } catch (error) {
     console.log('run task getInstagramInfo error:', error)
@@ -556,7 +551,7 @@ export const fetch2buckets = async (userId: string | null) => {
 }
 
 
-export const deleter2bucket = async (r2: { id: string }) => {
+export const deleter2bucket = async (r2: { id: Number }) => {
   await db.r2Bucket.delete({
     where: {
       id: Number(r2.id),
