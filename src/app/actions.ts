@@ -101,13 +101,13 @@ export const authCallback = async () => {
     if (!user?.id || !user.email) {
       return { success: false }
     }
-    const dbUser = await db.user.findFirst({
+    const dbUser = await db.userInfo.findFirst({
       where: {
         id: user.id,
       },
     })
     if (!dbUser) {
-      await db.user.create({
+      await db.userInfo.create({
         data: {
           id: user.id,
           email: user.email,
@@ -480,7 +480,7 @@ export const createStripeSession = async () => {
     throw new Error('403 Forbidden')
   }
 
-  const dbUser = await db.user.findFirst({
+  const dbUser = await db.userInfo.findFirst({
     where: {
       id: user?.id,
     },

@@ -11,7 +11,7 @@ generator client {
   interface            = "sync"
 }
 
-model user {
+model UserInfo {
   id    String @id @unique
   email String @unique
 
@@ -26,7 +26,7 @@ model user {
   created DateTime @default(now())
   updated DateTime @default(now())
 
-  @@map("user")
+  @@map("userinfo")
 }
 
 // data models
@@ -37,8 +37,8 @@ model Channels {
   created DateTime @default(now())
   updated DateTime
 
-  user   user?   @relation(fields: [userId], references: [id])
-  userId String? @map(name: "user_id")
+  user   UserInfo? @relation(fields: [userId], references: [id])
+  userId String?   @map(name: "user_id")
 
   videos Videos[]
 
@@ -60,8 +60,8 @@ model Videos {
   channels  Channels? @relation(fields: [channelId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   channelId String?   @map(name: "channel_id")
 
-  user   user?   @relation(fields: [userId], references: [id])
-  userId String? @map(name: "user_id")
+  user   UserInfo? @relation(fields: [userId], references: [id])
+  userId String?   @map(name: "user_id")
 
   @@map("videos")
 }
