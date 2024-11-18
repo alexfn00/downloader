@@ -13,7 +13,7 @@ const DashboardLayout = async ({ children }: ChatLayoutProps) => {
 
   if (!user || !user.id) redirect('/auth-callback?origin=dashboard')
 
-  const dbUser = await db.user.findFirst({
+  const dbUser = await db.userInfo.findFirst({
     where: {
       id: user.id,
     },

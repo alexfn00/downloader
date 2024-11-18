@@ -21,7 +21,7 @@ export async function getUserSubscriptionPlan() {
     }
   }
 
-  const dbUser = await db.user.findFirst({
+  const dbUser = await db.userInfo.findFirst({
     where: {
       id: user.id,
     },
