@@ -47,7 +47,7 @@ const Downloader = ({
   const [videoId, setVideoId] = useState('')
   const [isTaskRunning, setIsTaskRunning] = useState(false)
   const [isTranscripting, setIsTranscript] = useState(false)
-  const [transcription, settranscription] = useState<string>('')
+  const [transcription, setTranscription] = useState<string>('')
   const [progress, setProgress] = useState('')
   const [state, setState] = useState('')
   const [currentOption, setCurrentOption] = useState('0')
@@ -188,7 +188,7 @@ const Downloader = ({
           if (data.state == 'SUCCESS') {
             clearInterval(intervalId)
             setIsTranscript(false)
-            settranscription(data.value)
+            setTranscription(data.value)
           }
           console.log(data)
         },
@@ -308,7 +308,7 @@ const Downloader = ({
                 variant='ghost'
                 className='rounded-md py-4 ml-2 bg-green-700 text-white hover:bg-green-600 hover:text-white'
                 onClick={() => {
-                  settranscription('')
+                  setTranscription('')
                   handleTranscript(url)
                 }}>
                 {isTranscripting ? (

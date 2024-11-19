@@ -49,6 +49,7 @@ model Videos {
   id        Int      @id @default(autoincrement())
   title     String   @unique @map(name: "title")
   href      String   @map(name: "href")
+  text      String?  @map(name: "text") @db.Text
   thumbnail String   @map(name: "thumbnail")
   period    String   @map(name: "period")
   published String   @map(name: "published")
