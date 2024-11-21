@@ -1,6 +1,6 @@
 'use client'
 
-import { deleteR2Bucket, fetchR2Buckets } from '@/app/actions'
+import { deleter2bucket, fetch2buckets } from '@/app/actions'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Table,
@@ -11,36 +11,38 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import React, { useEffect, useState } from 'react'
 import { Button } from './ui/button'
-import { download, getAnonymousSession } from '@/lib/utils'
-import { useKindeAuth } from '@kinde-oss/kinde-auth-nextjs'
+import { bytesToReadableSize, download, getAnonymousSession } from '@/lib/utils'
 import { useToast } from '@/components/ui/use-toast'
-import { Loader2 } from 'lucide-react'
+import { Info, Loader2 } from 'lucide-react'
 
 const DownloadCounter = () => {
   const [anonymous, setAnonymous] = useState<string | null>('')
-  const [currentItem, setCurrentItem] = useState('')
+  const [currentItem, setCurrentItem] = useState(Number)
 
-  const { isAuthenticated } = useKindeAuth()
   const { toast } = useToast()
   const queryClient = useQueryClient()
   useEffect(() => {
-    const session = getAnonymousSession(isAuthenticated)
-    setAnonymous(session)
-    console.log('DownloadCounter', session)
+    setAnonymous(getAnonymousSession())
     refetch()
   }, [])
 
-  const { data, refetch } = useQuery({
-    queryFn: () => fetchR2Buckets(anonymous),
+  const { data, refetch, isLoading } = useQuery({
+    queryFn: () => fetch2buckets(anonymous),
     queryKey: ['r2buckets', { anonymous }],
     enabled: true, // disable this query from automatically running
     gcTime: 0,
   })
 
   const { mutateAsync: handleDelete, isPending } = useMutation({
-    mutationFn: deleteR2Bucket,
+    mutationFn: deleter2bucket,
     onSuccess: () => {
       toast({
         title: 'Remove',
@@ -59,10 +61,38 @@ const DownloadCounter = () => {
         <p className='mt-y text-lg text-gray-600'>
           File will be deleted within
           <span className='font-semibold'> 60 </span>
-          minutes. Please save as soon as possible.
+          minutes. Please save it as soon as possible.
         </p>
+        {isLoading && (
+          <div className='flex items-center justify-center'>
+            <Loader2 className='mr-4 h-8 w-8 animate-spin' />
+          </div>
+        )}
         <div className='my-4 flex flex-row items-center text-left'>
-          <div className='my-4'>Total: {data && data.data.length}</div>
+          <div className='my-4'>
+            Total: {data && data.data.length}/
+            {data && data.subscriptionPlan.quota}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className='ml-4 h-4 w-4' />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>
+                    You are now on the{' '}
+                    <span className='font-semibold'>
+                      {data && data.subscriptionPlan.name}
+                    </span>{' '}
+                    Plan. Limited to{' '}
+                    <span className='font-semibold'>
+                      {data && data.subscriptionPlan.quota}
+                    </span>{' '}
+                    downloads per month
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         </div>
       </div>
 
@@ -72,8 +102,9 @@ const DownloadCounter = () => {
           <TableHeader>
             <TableRow>
               <TableHead className='w-[10px] text-left'>No.</TableHead>
-              <TableHead>File Name</TableHead>
-              <TableHead>File Type/Size</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Size</TableHead>
               <TableHead className='text-left'>Action</TableHead>
             </TableRow>
           </TableHeader>
@@ -89,7 +120,10 @@ const DownloadCounter = () => {
                   </div>
                 </TableCell>
                 <TableCell className='text-left'>
-                  <div>{item.size}</div>
+                  <div>{item.type}</div>
+                </TableCell>
+                <TableCell className='text-left'>
+                  <div>{item.size && bytesToReadableSize(item.size)}</div>
                 </TableCell>
                 <TableCell className='text-left'>
                   <Button

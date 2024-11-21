@@ -29,6 +29,7 @@ export function download(fileUrl: string, filename: string) {
   const anchor = document.createElement('a')
   anchor.href = fileUrl
   anchor.download = filename
+  anchor.target = '_blank'
   document.body.appendChild(anchor)
   anchor.click()
   document.body.removeChild(anchor)
@@ -89,17 +90,13 @@ export function b64toBlob(b64Data: string, contentType = '', sliceSize = 512) {
   }
 }
 
-export function getAnonymousSession(isAuthenticated: boolean | null) {
+export function getAnonymousSession() {
   if (typeof window !== 'undefined') {
     const old_session = localStorage.getItem('anonymousSession')
-    if (!isAuthenticated && !old_session) {
+
+    if (!old_session) {
       localStorage.setItem('anonymousSession', uuidv4())
     }
-
-    if (isAuthenticated) {
-      localStorage.removeItem('anonymousSession')
-    }
-
     return localStorage.getItem('anonymousSession')
   } else {
     return null

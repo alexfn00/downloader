@@ -66,15 +66,19 @@ const UserAccountNav = async ({
         <DropdownMenuSeparator />
 
         <DropdownMenuItem asChild>
-          <Link href='/dashboard'>Dashboard</Link>
+          <Link className='hover:cursor-pointer' href='/dashboard'>
+            Dashboard
+          </Link>
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
           {subscriptionPlan?.isSubscribed ? (
-            <Link href='/billing'>Manage Subscription</Link>
+            <Link className='hover:cursor-pointer' href='/billing'>
+              Manage Subscription
+            </Link>
           ) : (
-            <Link href='/pricing'>
-              Upgrade <Gem className='text-blue-600 h-4 w-4 ml-1.5' />
+            <Link className='hover:cursor-pointer' href='/pricing'>
+              Upgrade <Gem className='text-blue-600 h-4 w-4 ml-1.5 ' />
             </Link>
           )}
         </DropdownMenuItem>

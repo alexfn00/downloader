@@ -13,7 +13,14 @@ const ChannelTitle = ({ params }: { params: { id: string } }) => {
     gcTime: 0,
   })
   return (
-    <>{!isLoading && data?.channelName ? data?.channelName : 'All Channels'} </>
+    <>
+      <div className='text-3xl font-semibold p-4'>
+        {!isLoading && data?.name ? data?.name : 'All Channels'}
+      </div>
+      <div className='text-lg text-gray-600 px-4'>
+        {!isLoading && data?.name && '@' + data?.id}
+      </div>
+    </>
   )
 }
 

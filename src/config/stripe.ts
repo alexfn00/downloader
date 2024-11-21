@@ -1,9 +1,24 @@
 export const PLANS = [
   {
+    name: 'Anonymous',
+    slug: 'anonymous',
+    quota: 3,
+    channelCount: 0,
+    hd: false,
+    price: {
+      amount: 0,
+      priceIds: {
+        test: '',
+        prouction: '',
+      },
+    },
+  },
+  {
     name: 'Free',
     slug: 'free',
     quota: 10,
     channelCount: 3,
+    hd: false,
     price: {
       amount: 0,
       priceIds: {
@@ -17,6 +32,7 @@ export const PLANS = [
     slug: 'pro',
     quota: 50,
     channelCount: 20,
+    hd: true,
     price: {
       amount: 14,
       priceIds: {

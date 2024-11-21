@@ -13,7 +13,7 @@ import { PLANS } from '@/config/stripe'
 
 
 export const getChannelNameById = async ({ id }: { id: string }) => {
-  const data = await db.channel.findFirst({
+  const data = await db.channels.findFirst({
     where: {
       id,
     }
@@ -38,10 +38,19 @@ export const fetchVideos = async ({
   search: string
   pageParam: number | 0
 }) => {
+
+  const { getUser } = getKindeServerSession()
+  const user = await getUser()
+
+  if (!user?.id || !user.email) {
+    throw new Error('403 Forbidden')
+  }
+
   const where = channel == '' ? {
     AND: {
-      videoType: type,
-      videoTitle: {
+      type: type,
+      userId: user?.id,
+      title: {
         contains: search
       }
     }
@@ -49,25 +58,26 @@ export const fetchVideos = async ({
   } : {
     AND: {
       channelId: channel,
-      videoType: type,
-      videoTitle: {
+      userId: user?.id,
+      type: type,
+      title: {
         contains: search
       }
     }
   }
 
-  const totalCount = await db.video.count({
+  const totalCount = await db.videos.count({
     where: where
   })
-  const data = await db.video.findMany({
+  const data = await db.videos.findMany({
     skip: pageParam * LIMIT,
     where: where,
     include: {
-      channel: true,
+      channels: true,
     },
     orderBy: [
       {
-        updatedAt: 'desc',
+        updated: 'asc',
       },
     ],
     take: LIMIT,
@@ -91,13 +101,13 @@ export const authCallback = async () => {
     if (!user?.id || !user.email) {
       return { success: false }
     }
-    const dbUser = await db.user.findFirst({
+    const dbUser = await db.userInfo.findFirst({
       where: {
         id: user.id,
       },
     })
     if (!dbUser) {
-      await db.user.create({
+      await db.userInfo.create({
         data: {
           id: user.id,
           email: user.email,
@@ -111,7 +121,7 @@ export const authCallback = async () => {
   }
 }
 
-export const fetchAuthors = async ({
+export const fetchChannels = async ({
   pageParam,
 }: {
   pageParam: number | 0
@@ -120,19 +130,25 @@ export const fetchAuthors = async ({
   const { getUser } = getKindeServerSession()
   const user = await getUser()
 
+  const subscriptionPlan = await getUserSubscriptionPlan()
 
-  const totalCount = await db.channel.count({
+
+  const totalCount = await db.channels.count({
     where: {
       userId: user?.id,
     }
   })
-  const data = await db.channel.findMany({
+  const data = await db.channels.findMany({
     where: {
       userId: user?.id,
     },
     skip: pageParam * LIMIT,
     take: LIMIT,
+    orderBy: {
+      created: 'desc', // 'asc' for ascending order
+    }
   })
+
   const nextPage = pageParam + LIMIT < totalCount ? pageParam + 1 : null
   const totalPages = totalCount / LIMIT + (totalCount % LIMIT)
 
@@ -142,13 +158,14 @@ export const fetchAuthors = async ({
     totalPages: totalPages,
     currentPage: pageParam,
     nextPage: nextPage,
+    subscriptionPlan: subscriptionPlan
   }
 }
 
 export const deleteChannel = async (channel: { channelId: string }) => {
-  await db.channel.delete({
+  await db.channels.delete({
     where: {
-      channelId: channel.channelId,
+      id: channel.channelId,
     },
   })
 }
@@ -185,7 +202,6 @@ export const parseURL = async (search: string | null) => {
     const info = await ytdl.getInfo(url, {
       requestOptions: options,
     })
-    // console.log(info)
 
     const audio_formats = ytdl.filterFormats(info.formats, 'audio')
     const format = ytdl.chooseFormat(audio_formats, { quality: 'highest' })
@@ -224,7 +240,7 @@ export const addChannel = async (channel: { channelId: string }) => {
     const { getUser } = getKindeServerSession()
     const user = await getUser()
 
-    const channelCount = await db.channel.count({
+    const channelCount = await db.channels.count({
       where: {
         userId: user?.id,
       },
@@ -233,27 +249,30 @@ export const addChannel = async (channel: { channelId: string }) => {
     const { isSubscribed } = subscriptionPlan
 
     const isProExceeded =
-      channelCount > PLANS.find((plan) => plan.name === 'Pro')!.channelCount
+      channelCount >= PLANS.find((plan) => plan.name === 'Pro')!.channelCount
 
     const isFreeExceeded =
       channelCount > PLANS.find((plan) => plan.name === 'Free')!.channelCount
 
+    if (!isSubscribed && isFreeExceeded) {
+      return { id: '', 'state': 'Error', value: 'Free Plan Exceeded or Pro plan expired, Please Upgrade to Pro Plan to continue' }
+    }
 
-    if ((isSubscribed && isProExceeded) || (!isSubscribed && isFreeExceeded)) {
-      return { id: '', 'state': 'Error', value: 'PlanExceeded' }
+    if (isSubscribed && isProExceeded) {
+      return { id: '', 'state': 'Error', value: 'Pro Plan Exceeded' }
     }
 
     let channels = []
     if (channel.channelId == '') {
-      const channel_list = await db.channel.findMany({
+      const channel_list = await db.channels.findMany({
         where: {
           userId: user?.id,
         },
         select: {
-          channelId: true,
+          id: true,
         },
       })
-      channels = [...channel_list.map((item) => item['channelId'])]
+      channels = [...channel_list.map((item) => item['id'])]
     } else {
       channels = [channel.channelId]
     }
@@ -264,6 +283,7 @@ export const addChannel = async (channel: { channelId: string }) => {
       userId: user?.id
     }
     const result = await axios.post(process.env.TASK_URL + '/task/', data)
+
     return result.data
   } catch (error) {
     return { id: '', 'state': 'Error', value: error }
@@ -275,9 +295,21 @@ export const updateChannel = async (channel: { channelId: string }) => {
     const { getUser } = getKindeServerSession()
     const user = await getUser()
 
+    const channelCount = await db.channels.count({
+      where: {
+        userId: user?.id,
+      },
+    })
+
+    const subscriptionPlan = await getUserSubscriptionPlan()
+
+    if (subscriptionPlan.channelCount && channelCount > subscriptionPlan.channelCount) {
+      return { id: '', state: 'Error', value: 'You cannot update any channels, please delete channels to ensure the number of channels is less than ' + subscriptionPlan.channelCount }
+    }
+
     let channels = []
     if (channel.channelId == '') {
-      return { id: '', 'state': 'Error', value: 'channel id cannot be empty' }
+      return { id: '', state: 'Error', value: 'channel id cannot be empty' }
     } else {
       channels = [channel.channelId]
     }
@@ -299,19 +331,31 @@ export const updateChannels = async () => {
     const { getUser } = getKindeServerSession()
     const user = await getUser()
 
-    const channels = await db.channel.findMany({
+    const channelCount = await db.channels.count({
+      where: {
+        userId: user?.id,
+      },
+    })
+
+    const subscriptionPlan = await getUserSubscriptionPlan()
+
+    if (subscriptionPlan.channelCount && channelCount > subscriptionPlan.channelCount) {
+      return { id: '', state: 'Error', value: 'You cannot update any channels, please delete channels to ensure the number of channels is less than ' + subscriptionPlan.channelCount }
+    }
+
+    const channels = await db.channels.findMany({
       where: {
         userId: user?.id,
       },
       select: {
-        channelId: true,
+        id: true,
       },
     })
 
     const data = {
       task_type: 'crawl',
       name: 'youtube',
-      channels: [...channels.map((item) => item['channelId'])],
+      channels: [...channels.map((item) => item['id'])],
       userId: user?.id
     }
     const result = await axios.post(process.env.TASK_URL + '/task/', data)
@@ -325,20 +369,38 @@ export const updateChannels = async () => {
 export const startDownload = async (param: { downloadURL: string, type: string, value: string, userId: string | null }) => {
   try {
     let _userId = null
+    let isAnonymous = true
 
-    if (param.userId && param.userId.length > 0) {
-      _userId = param.userId
+    const { getUser } = getKindeServerSession()
+    const user = await getUser()
+    if (user && user?.id) {
+      _userId = user?.id
+      isAnonymous = true
     } else {
-      const { getUser } = getKindeServerSession()
-      const user = await getUser()
-      if (user && user?.id) {
-        _userId = user?.id
+      if (param.userId && param.userId.length > 0) {
+        _userId = param.userId
       }
     }
 
     if (!_userId) {
       console.log('UserId cannot be none')
       throw new Error('403 Forbidden')
+    }
+
+    const fileCount = await db.r2Bucket.count({
+      where: {
+        user_id: _userId,
+      }
+    })
+
+    const subscriptionPlan = await getUserSubscriptionPlan()
+
+    if (subscriptionPlan.quota && fileCount > subscriptionPlan.quota) {
+      return { id: '', state: 'Error', value: 'You cannot download files, You are limited to download ' + subscriptionPlan.quota + ' files' }
+    }
+
+    if (param.type == 'dimension' && parseInt(param.value) >= 720 && !subscriptionPlan.hd) {
+      return { id: '', state: 'Error', value: 'You cannot download HD videos in 720p or above' }
     }
 
     const data = {
@@ -360,7 +422,6 @@ export const getTaskInfo = async (taskId: string | null) => {
   try {
     const response = await axios.get(process.env.TASK_URL + `/task/${taskId}`)
     const result = response.data
-    console.log('getTaskInfo', result)
     return result
   } catch (error) {
     console.log('getTaskInfo error:', error)
@@ -402,7 +463,6 @@ export const getInstagramInfo = async (userId: string | null) => {
     }
     const url = process.env.TASK_URL + '/task/instagram'
     const result = await axios.post(url, data)
-    console.log('post result:', result.data)
     return result.data
   } catch (error) {
     console.log('run task getInstagramInfo error:', error)
@@ -420,7 +480,7 @@ export const createStripeSession = async () => {
     throw new Error('403 Forbidden')
   }
 
-  const dbUser = await db.user.findFirst({
+  const dbUser = await db.userInfo.findFirst({
     where: {
       id: user?.id,
     },
@@ -458,41 +518,58 @@ export const createStripeSession = async () => {
 }
 
 
-export const fetchR2Buckets = async (userId: string | null) => {
+export const fetch2buckets = async (userId: string | null) => {
 
   let _userId = null
-
-  if (userId && userId.length > 0) {
-    _userId = userId
+  const { getUser } = getKindeServerSession()
+  const user = await getUser()
+  if (user && user?.id) {
+    _userId = user?.id
   } else {
-    const { getUser } = getKindeServerSession()
-    const user = await getUser()
-    if (user && user?.id) {
-      _userId = user?.id
+    if (userId && userId.length > 0) {
+      _userId = userId
     }
   }
+
 
   if (!_userId) {
     console.log('UserId cannot be none')
     throw new Error('403 Forbidden')
   }
 
+  const subscriptionPlan = await getUserSubscriptionPlan()
+
   const data = await db.r2Bucket.findMany({
     where: {
-      userId: _userId,
+      user_id: _userId,
     }
   })
-
   return {
-    data: [...data]
+    data: [...data],
+    subscriptionPlan: subscriptionPlan
   }
 }
 
 
-export const deleteR2Bucket = async (r2: { id: string }) => {
+export const deleter2bucket = async (r2: { id: Number }) => {
   await db.r2Bucket.delete({
     where: {
-      id: r2.id,
+      id: Number(r2.id),
     },
   })
+}
+
+
+export const doTranscript = async (url: string | null) => {
+  try {
+    const data = {
+      userId: 'userId',
+      url: url
+    }
+    const task_url = process.env.TASK_URL + '/task/transcribe'
+    const response = await axios.post(task_url, data)
+    return response.data
+  } catch (error) {
+    console.log('doTranscript error:', error)
+  }
 }

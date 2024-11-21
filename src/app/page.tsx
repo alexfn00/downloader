@@ -5,10 +5,8 @@ import { Button } from '@/components/ui/button'
 import { useQuery } from '@tanstack/react-query'
 import { getVideoInfo } from './actions'
 import { Loader2, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Downloader from '@/components/Downloader'
-import { v4 as uuidv4 } from 'uuid'
-import { useKindeAuth } from '@kinde-oss/kinde-auth-nextjs'
 import Image from 'next/image'
 
 export default function Home() {
@@ -90,45 +88,58 @@ export default function Home() {
             </div>
           </div>
           {/* steps */}
-          <ol className='my-8 space-y-4 pt-8 md:flex md:space-x-12 md:space-y-0'>
+          <ol className='my-8 space-y-10 pt-8 md:space-y-0'>
             <li className='md:flex-1'>
-              <div className='flex flex-col space-y-2 border-l-4 border-zinc-300 py-2 pl-4 md:border-l-0 md:border-t-2 md:pb-0 md:pl-0 md:pt-4'>
-                <span className='text-sm font-medium text-blue-600'>
+              <div className='flex flex-col space-y-2 border-l-4 border-zinc-300 py-2 pl-4 md:border-l-0 md:border-t-2 md:pb-0 md:pl-0 md:pt-4 mb-10'>
+                <span className='text-xl font-semibold text-blue-600'>
                   Step 1
                 </span>
-                <span className='text-xl font-semibold'>
-                  Paste the video URL into the designated field and click the
-                  download button
+                <span className=''>
+                  Copy & paste the video URL into the designated field and click
+                  the download button
                 </span>
+                <div className='mx-auto max-w-6xl px-6 lg:px8'>
+                  <div className='mt-16 flow-root sm:mt-24'>
+                    <div className='-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4'>
+                      <Image
+                        src='/dashboard-preview.png'
+                        alt='searching preview'
+                        width={1021}
+                        height={904}
+                        quality={100}
+                        className='rounded-md bg-white p-2 sm:p-8 md:p-20 shadow-2xl ring-1 ring-gray-900/10'
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             </li>
             <li className='md:flex-1'>
               <div className='flex flex-col space-y-2 border-l-4 border-zinc-300 py-2 pl-4 md:border-l-0 md:border-t-2 md:pb-0 md:pl-0 md:pt-4'>
-                <span className='text-sm font-medium text-blue-600'>
+                <span className='text-xl font-semibold text-blue-600'>
                   Step 2
                 </span>
-                <span className='text-xl font-semibold'>
+                <span className=''>
                   Select the video drop-down box and click the download button,
                   then wait for the task to complete
                 </span>
+                <div className='mx-auto max-w-6xl px-6 lg:px8'>
+                  <div className='mt-16 flow-root sm:mt-24'>
+                    <div className='-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4'>
+                      <Image
+                        src='/download-button.jpg'
+                        alt='download preview'
+                        width={1021}
+                        height={904}
+                        quality={100}
+                        className='rounded-md bg-white p-2 sm:p-8 md:p-20 shadow-2xl ring-1 ring-gray-900/10'
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             </li>
           </ol>
-
-          <div className='mx-auto max-w-6xl px-6 lg:px8'>
-            <div className='mt-16 flow-root sm:mt-24'>
-              <div className='-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4'>
-                <Image
-                  src='/dashboard-preview.png'
-                  alt='searching preview'
-                  width={1021}
-                  height={904}
-                  quality={100}
-                  className='rounded-md bg-white p-2 sm:p-8 md:p-20 shadow-2xl ring-1 ring-gray-900/10'
-                />
-              </div>
-            </div>
-          </div>
         </div>
       </MaxWidthWrapper>
     </div>

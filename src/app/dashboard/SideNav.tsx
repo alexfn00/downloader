@@ -1,11 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { Globe, Loader2, Plus } from 'lucide-react'
+import { Loader2, Settings } from 'lucide-react'
 import clsx from 'clsx'
 import { usePathname } from 'next/navigation'
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { fetchAuthors } from '../actions'
+import { fetchChannels } from '../actions'
 import { SkeletonCard } from '@/components/skeletons'
 import { useEffect } from 'react'
 import { useInView } from 'react-intersection-observer'
@@ -15,7 +15,7 @@ export default function SideNav() {
   const { data, error, status, fetchNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ['authors'],
-      queryFn: ({ pageParam }) => fetchAuthors({ pageParam }),
+      queryFn: ({ pageParam }) => fetchChannels({ pageParam }),
       initialPageParam: 0,
       getNextPageParam: (lastPage) => {
         return lastPage.nextPage
@@ -42,12 +42,12 @@ export default function SideNav() {
   return (
     <div className='flex max-full flex-col px-3 md:px-2 md:h-[calc(100vh-6rem)] '>
       <Link
-        className='mb-2 flex h-20 items-end justify-start rounded-md p-4 md:h-30'
+        className='mb-2 flex  items-end justify-start rounded-md p-4  hover:bg-gray-100'
         href={`/dashboard/manage/`}>
-        <Plus />
-        <div className='w-32 md:w-40'>
-          <div className={` flex flex-row items-center leading-none`}>
-            <p className='text-[20px] ml-2'>Add Channel</p>
+        <Settings />
+        <div className='w-32 md:w-64'>
+          <div className='flex flex-row items-center'>
+            <p className='ml-2'>Channel Managment</p>
           </div>
         </div>
       </Link>
@@ -76,10 +76,10 @@ export default function SideNav() {
                       alt='Author'
                       height={48}
                       width={48}
-                      src={item.channelAvatar}
+                      src={item.avatar}
                     />
                     <p className='hidden md:block overflow-ellipsis overflow-hidden whitespace-nowrap'>
-                      {item.channelName}
+                      {item.name}
                     </p>
                   </Link>
                 )

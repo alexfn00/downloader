@@ -9,7 +9,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { ArrowLeft, Loader2 } from 'lucide-react'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+
+import { ArrowLeft, CircleHelp, Info, Loader2, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { SkeletonCard } from '@/components/skeletons'
 import { useRouter } from 'next/navigation'
@@ -22,7 +29,7 @@ import {
 import {
   addChannel,
   deleteChannel,
-  fetchAuthors,
+  fetchChannels,
   getTaskInfo,
   updateChannel,
   updateChannels,
@@ -41,7 +48,10 @@ export default function Home() {
   const [taskId, setTaskId] = useState<string>('')
   const queryClient = useQueryClient()
   const [author, setAuthor] = useState<string>('')
-  const [currentChannel, setCurrentChannel] = useState('')
+  const [currentUpdateChannel, setCurrentUpdateChannel] = useState('')
+  const [currentDeleteChannel, setCurrentDeleteChannel] = useState('')
+  const [isAddDisabled, setIsAddDisabled] = useState(true)
+
   const { toast } = useToast()
 
   const { refetch: fetchtask } = useQuery({
@@ -62,7 +72,6 @@ export default function Home() {
           description: 'Your plan has exceeded the maximum number of channels',
         })
         setIsTaskRunning(false)
-        setCurrentChannel('')
         return
       }
       setTaskId(data.id)
@@ -81,7 +90,6 @@ export default function Home() {
               title: 'Update',
               description: 'Channel updated successfully',
             })
-            setCurrentChannel('')
             queryClient.invalidateQueries({ queryKey: ['authors'] })
           }
         },
@@ -96,10 +104,10 @@ export default function Home() {
         toast({
           variant: 'destructive',
           title: 'Error',
-          description: 'Your plan has exceeded the maximum number of channels',
+          description: data.value,
         })
         setIsTaskRunning(false)
-        setCurrentChannel('')
+        setCurrentUpdateChannel('')
         return
       }
       setTaskId(data.id)
@@ -118,8 +126,8 @@ export default function Home() {
               title: 'Update',
               description: 'Channel added successfully',
             })
-            setCurrentChannel('')
             queryClient.invalidateQueries({ queryKey: ['authors'] })
+            setCurrentUpdateChannel('')
           }
         },
       )
@@ -129,6 +137,15 @@ export default function Home() {
   const { mutateAsync: handleUpdateAll } = useMutation({
     mutationFn: updateChannels,
     onSuccess: (data) => {
+      if (data && data.state == 'Error') {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: data.value,
+        })
+        setIsAllTaskRunning(false)
+        return
+      }
       setTaskId(data.id)
       intervalId = window.setInterval(
         (callback: (result: string) => void) => {
@@ -155,7 +172,7 @@ export default function Home() {
   const { data, error, status, fetchNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ['authors'],
-      queryFn: ({ pageParam }) => fetchAuthors({ pageParam }),
+      queryFn: ({ pageParam }) => fetchChannels({ pageParam }),
       initialPageParam: 0,
       getNextPageParam: (lastPage) => {
         return lastPage.nextPage
@@ -179,6 +196,7 @@ export default function Home() {
           description: 'Channel has been removed',
         })
         queryClient.invalidateQueries({ queryKey: ['authors'] })
+        setCurrentDeleteChannel('')
       },
     },
   )
@@ -197,38 +215,67 @@ export default function Home() {
       <h1 className='text-xl sm:text-3xl font-semibold sm:my-4'>
         Channel Managment
       </h1>
-      <Button className='ml-4' onClick={() => router.back()}>
+      {/* <Button className='ml-4' onClick={() => router.back()}>
         <ArrowLeft />
         <span className='pl-2'></span>
         Back
-      </Button>
-      <div className='flex w-full max-w-2xl justify-start items-start space-x-2 py-8'>
-        <Input
-          type='text'
-          placeholder='Input youtube channel name'
-          value={author}
-          onChange={(e) => setAuthor(e.target.value)}
-        />
-        {isTaskRunning && <Loader2 className='mr-4 h-8 w-8 animate-spin' />}
-        <Button
-          size='sm'
-          variant='ghost'
-          className='rounded-md '
-          onClick={() => {
-            setIsTaskRunning(true)
-            handleAdd({ channelId: author })
-          }}>
-          Add
-        </Button>
-        <Button
-          size='sm'
-          variant='ghost'
-          onClick={() => {
-            setIsAllTaskRunning(true)
-            handleUpdateAll()
-          }}>
-          Update All
-        </Button>
+      </Button> */}
+      <div className='flex w-full max-w-6xl justify-start items-start space-x-2 py-8'>
+        <div className='flex w-full items-center rounded-lg border-2 ml-2 px-4'>
+          <Input
+            className='w-full py-2 mr-4 border-none bg-transparent outline-none focus:outline-none focus-visible:ring-transparent '
+            type='text'
+            value={author}
+            onChange={(e) => {
+              setAuthor(e.target.value)
+              if (e.target.value.length > 0) {
+                setIsAddDisabled(false)
+              } else {
+                setIsAddDisabled(true)
+              }
+            }}
+            placeholder='Input youtube channel ID'
+          />
+
+          <Button
+            size='sm'
+            variant='ghost'
+            className='rounded-md m-2'
+            onClick={() => {
+              setAuthor('')
+              setIsAddDisabled(true)
+            }}>
+            <X className='h-4 w-4' />
+          </Button>
+        </div>
+
+        <div className='flex w-full items-center rounded-lg ml-2 px-4'>
+          {isTaskRunning && <Loader2 className='mr-4 h-8 w-8 animate-spin' />}
+
+          <Button
+            size='lg'
+            variant='ghost'
+            className='rounded-md'
+            disabled={isAddDisabled}
+            onClick={() => {
+              setIsTaskRunning(true)
+              handleAdd({ channelId: author })
+            }}>
+            Add Channel
+          </Button>
+          <Link className='' href={`/dashboard/help`}>
+            <CircleHelp className=' text-red-500 h8 w-8 animate-pulse' />
+          </Link>
+          <Button
+            size='lg'
+            variant='ghost'
+            onClick={() => {
+              setIsAllTaskRunning(true)
+              handleUpdateAll()
+            }}>
+            Update All Channels
+          </Button>
+        </div>
       </div>
 
       {isDeletePending && (
@@ -241,19 +288,43 @@ export default function Home() {
           <Loader2 className='mr-4 h-8 w-8 animate-spin' />
         </div>
       )}
-
       {data && data.pages.length > 0 && (
-        <div>Total: {data.pages[0].totalCount}</div>
+        <>
+          <div className='pl-4'>
+            Total: {data.pages[0].totalCount}/
+            {data.pages[0].subscriptionPlan.channelCount}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className='ml-4 h-4 w-4' />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>
+                    You are now on the{' '}
+                    <span className='font-semibold'>
+                      {data.pages[0].subscriptionPlan.name}
+                    </span>{' '}
+                    Plan. Limited to{' '}
+                    <span className='font-semibold'>
+                      {data.pages[0].subscriptionPlan.channelCount}
+                    </span>{' '}
+                    channels
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        </>
       )}
-
       <Table className='mt-4'>
         <TableCaption>Your favourite channels</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead className='w-[100px]'></TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Last Update</TableHead>
-            <TableHead className='text-right'>Action</TableHead>
+            <TableHead className='w-[200px]'>Name</TableHead>
+            <TableHead className='w-[150px]'>ID</TableHead>
+            <TableHead className='w-[180px]'>Last Update</TableHead>
+            <TableHead className='w-[200px] text-right'>Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -270,28 +341,29 @@ export default function Home() {
                             alt='Author'
                             height={48}
                             width={48}
-                            src={item.channelAvatar}
+                            src={item.avatar}
                           />
                         </Link>
                       </TableCell>
                       <TableCell>
                         <Link href={`/dashboard/videos/${item.id}`}>
-                          {item.channelName}
+                          {item.name}
                         </Link>
                       </TableCell>
+                      <TableCell>@{item.id}</TableCell>
                       <TableCell>
-                        {new Date(item.updatedAt).toLocaleString()}
+                        {new Date(item.updated).toLocaleString()}
                       </TableCell>
                       <TableCell className='text-right'>
                         <Button
                           size='sm'
                           variant='ghost'
                           onClick={() => {
-                            setAuthor(item.channelId)
-                            setCurrentChannel(item.channelId)
-                            handleUpdate({ channelId: item.channelId })
+                            setAuthor(item.id)
+                            setCurrentUpdateChannel(item.id)
+                            handleUpdate({ channelId: item.id })
                           }}>
-                          {currentChannel == item.channelId && (
+                          {currentUpdateChannel == item.id && (
                             <Loader2 className='mr-4 h-8 w-8 animate-spin' />
                           )}
                           Update
@@ -300,8 +372,12 @@ export default function Home() {
                           size='sm'
                           variant='destructive'
                           onClick={() => {
-                            handleDelete({ channelId: item.channelId })
+                            setCurrentDeleteChannel(item.id)
+                            handleDelete({ channelId: item.id })
                           }}>
+                          {currentDeleteChannel == item.id && (
+                            <Loader2 className='mr-4 h-8 w-8 animate-spin' />
+                          )}
                           Delete
                         </Button>
                       </TableCell>

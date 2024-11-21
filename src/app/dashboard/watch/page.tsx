@@ -44,6 +44,9 @@ const Page = () => {
               }}
             />
           )}
+          {!isLoading && url && todos == undefined && (
+            <p>Video is not ready or invalid video url</p>
+          )}
         </div>
       </main>
     </Suspense>
