@@ -28,6 +28,7 @@ import {
   doTranscript,
   fetch2buckets,
   getTaskInfo,
+  getVideoInfo,
   startDownload,
 } from '@/app/actions'
 import { VideoInfo } from '@/lib/type'
@@ -38,13 +39,13 @@ const Downloader = ({
 }: {
   params: {
     url: string
-    data: VideoInfo
   }
 }) => {
   let intervalId = 0
   const url = params.url
-  const todos = params.data
+  const [videoData, setVideoData] = useState<VideoInfo>()
   const [videoId, setVideoId] = useState('')
+  const [isLoadingVideoInfo, setIsLoadingVideoInfo] = useState(true)
   const [isTaskRunning, setIsTaskRunning] = useState(false)
   const [isTranscripting, setIsTranscript] = useState(false)
   const [transcription, setTranscription] = useState<string>('')
@@ -60,13 +61,50 @@ const Downloader = ({
   })
   const boxRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (params.data.id && params.data.id.length > 0) {
-      setVideoId(params.data.id)
-    }
-  }, [url])
+  const { mutateAsync: handleVideoInfo } = useMutation({
+    mutationFn: getVideoInfo,
+    onSuccess: (data) => {
+      if (data && data.state == 'Error') {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description:
+            'Cannot get video infomation, video might not be avaliable.',
+        })
+        setIsLoadingVideoInfo(false)
+        return
+      }
+      setTaskId(data.id)
+      intervalId = window.setInterval(
+        (callback: (result: string) => void) => {
+          fetchtask().then((data) => {
+            callback(data.data)
+          })
+        },
+        5000,
+        (data: any) => {
+          if (data.state == 'SUCCESS') {
+            clearInterval(intervalId)
+            setIsLoadingVideoInfo(false)
+            const videoInfo: VideoInfo = {
+              id: data.value.id,
+              title: data.value.title,
+              duration: data.value.duration,
+              formats: [...data.value.formats],
+            }
+
+            setVideoData(videoInfo)
+            setVideoId(data.value.id)
+          }
+        },
+      )
+    },
+  })
 
   useEffect(() => {
+    if (url) {
+      handleVideoInfo(url)
+    }
     setAnonymous(getAnonymousSession())
   }, [])
 
@@ -96,7 +134,7 @@ const Downloader = ({
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  const { data, refetch, isLoading } = useQuery({
+  const { data } = useQuery({
     queryFn: () => fetch2buckets(anonymous),
     queryKey: ['r2buckets', { anonymous }],
     enabled: true, // disable this query from automatically running
@@ -214,148 +252,158 @@ const Downloader = ({
     <div
       className='mt-4 w-full flex-row sm:flex-col overflow-y-auto items-center justify-center border'
       ref={boxRef}>
-      <div className='flex flex-col items-center my-4'>
-        <div className='w-full items-center justify-center pl-4'>
-          {videoId && videoId && videoId.length > 0 && (
-            <YouTube videoId={videoId} opts={opts} onReady={onPlayerReady} />
-          )}
+      {isLoadingVideoInfo && (
+        <div className='flex items-center justify-center'>
+          <Loader2 className='mr-4 h-8 w-8 animate-spin' />
         </div>
-        <div className='w-full pl-4 border'>
-          <div className='text-xl font-semibold my-4 flex items-start'>
-            {todos?.title}
+      )}
+      {!isLoadingVideoInfo && (
+        <div className='flex flex-col items-center my-4'>
+          <div className='w-full items-center justify-center pl-4'>
+            {videoId && videoId && videoId.length > 0 && (
+              <YouTube videoId={videoId} opts={opts} onReady={onPlayerReady} />
+            )}
           </div>
-          <div className=' text-gray-500 my-4 flex items-start'>
-            {secondsToTimeFormat(todos?.duration)}
-          </div>
-          <div className='py-4 w-full flex items-center'>
-            <Select
-              defaultValue={currentOption}
-              onValueChange={(value: any) => {
-                setCurrentOption(value)
-              }}>
-              <SelectTrigger className='w-3/4 border-4 border-green-700 py-4'>
-                <SelectValue placeholder='Qualitiy' />
-              </SelectTrigger>
-              <SelectContent>
-                {todos?.formats.map((todo, index) => (
-                  <SelectItem
-                    className='flex items-center'
-                    value={index.toString()}
-                    key={index.toString()}>
-                    <div className='flex items-end justify-end'>
-                      <div className='pl-2 pr-4'>
-                        {todo['ext'].toUpperCase()}
+          <div className='w-full pl-4 border'>
+            <div className='text-xl font-semibold my-4 flex items-start'>
+              {videoData?.title}
+            </div>
+            <div className=' text-gray-500 my-4 flex items-start'>
+              {videoData?.duration && secondsToTimeFormat(videoData?.duration)}
+            </div>
+            <div className='py-4 w-full flex items-center'>
+              <Select
+                defaultValue={currentOption}
+                onValueChange={(value: any) => {
+                  setCurrentOption(value)
+                }}>
+                <SelectTrigger className='w-3/4 border-4 border-green-700 py-4'>
+                  <SelectValue placeholder='Qualitiy' />
+                </SelectTrigger>
+                <SelectContent>
+                  {videoData?.formats.map((todo, index) => (
+                    <SelectItem
+                      className='flex items-center'
+                      value={index.toString()}
+                      key={index.toString()}>
+                      <div className='flex items-end justify-end'>
+                        <div className='pl-2 pr-4'>
+                          {todo['ext'].toUpperCase()}
+                        </div>
+
+                        {todo['code'] == 'Video' ? (
+                          <VolumeX className='text-red-500 w-8' />
+                        ) : (
+                          <span className='pl-8'></span>
+                        )}
+                        <span className='px-2 w-20'>{todo['format_note']}</span>
+                        <span className='pl-2'>
+                          {bytesToReadableSize(todo['filesize'])}
+                        </span>
                       </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className='flex flex-row items-end sm:justify-end justify-end mr-4'>
+                <Button
+                  size='sm'
+                  variant='ghost'
+                  className='rounded-md py-4 ml-4 bg-green-700 text-white hover:bg-green-600 hover:text-white'
+                  onClick={() => {
+                    const code =
+                      videoData?.formats[Number(currentOption)][
+                        'code'
+                      ].toString()
 
-                      {todo['code'] == 'Video' ? (
-                        <VolumeX className='text-red-500 w-8' />
-                      ) : (
-                        <span className='pl-8'></span>
-                      )}
-                      <span className='px-2 w-20'>{todo['format_note']}</span>
-                      <span className='pl-2'>
-                        {bytesToReadableSize(todo['filesize'])}
-                      </span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <div className='flex flex-row items-end sm:justify-end justify-end mr-4'>
-              <Button
-                size='sm'
-                variant='ghost'
-                className='rounded-md py-4 ml-4 bg-green-700 text-white hover:bg-green-600 hover:text-white'
-                onClick={() => {
-                  const code =
-                    todos?.formats[Number(currentOption)]['code'].toString()
+                    const itag: string =
+                      videoData?.formats[Number(currentOption)][
+                        'format_id'
+                      ].toString() ?? ''
 
-                  const itag =
-                    todos?.formats[Number(currentOption)][
-                      'format_id'
-                    ].toString()
+                    const dimension: string =
+                      videoData?.formats[Number(currentOption)]['dimension'] ??
+                      ''
 
-                  const dimension =
-                    todos?.formats[Number(currentOption)]['dimension']
-
-                  handleDownload({
-                    downloadURL: url,
-                    type: code == 'Video and Audio' ? 'dimension' : 'itag',
-                    value: code == 'Video and Audio' ? dimension : itag,
-                    userId: anonymous,
-                  })
-                  setProgress('0%')
-                  setIsTaskRunning(true)
-                }}>
-                {isTaskRunning ? (
-                  <>
-                    <span className='pr-2'>{progress}</span>
-                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                    {state == 'download' && <>Downloading</>}
-                    {state == 'upload' && <>Saving</>}
-                    {state == '' && <>Download</>}
-                  </>
-                ) : (
-                  <>Download</>
-                )}
-              </Button>
+                    handleDownload({
+                      downloadURL: url,
+                      type: code == 'Video and Audio' ? 'dimension' : 'itag',
+                      value: code == 'Video and Audio' ? dimension : itag,
+                      userId: anonymous,
+                    })
+                    setProgress('0%')
+                    setIsTaskRunning(true)
+                  }}>
+                  {isTaskRunning ? (
+                    <>
+                      <span className='pr-2'>{progress}</span>
+                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                      {state == 'download' && <>Downloading</>}
+                      {state == 'upload' && <>Saving</>}
+                      {state == '' && <>Download</>}
+                    </>
+                  ) : (
+                    <>Download</>
+                  )}
+                </Button>
+              </div>
             </div>
-          </div>
-          <div className='py-2 w-full flex items-center'>
-            <div className='flex flex-row items-end sm:justify-end justify-end '>
-              <Button
-                size='lg'
-                variant='ghost'
-                className='rounded-md py-4 ml-2 bg-green-700 text-white hover:bg-green-600 hover:text-white'
-                onClick={() => {
-                  setTranscription('')
-                  handleTranscript(url)
-                }}>
-                {isTranscripting ? (
-                  <>
-                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                    Transcript
-                  </>
-                ) : (
-                  <>Transcript</>
-                )}
-              </Button>
+            <div className='py-2 w-full flex items-center'>
+              <div className='flex flex-row items-end sm:justify-end justify-end '>
+                <Button
+                  size='lg'
+                  variant='ghost'
+                  className='rounded-md py-4 ml-2 bg-green-700 text-white hover:bg-green-600 hover:text-white'
+                  onClick={() => {
+                    setTranscription('')
+                    handleTranscript(url)
+                  }}>
+                  {isTranscripting ? (
+                    <>
+                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                      Transcript
+                    </>
+                  ) : (
+                    <>Transcript</>
+                  )}
+                </Button>
+              </div>
             </div>
-          </div>
 
-          <div className='p-2 w-full flex items-center border mr-4'>
-            <p>{transcription}</p>
-          </div>
+            <div className='p-2 w-full flex items-center border mr-4'>
+              <p>{transcription}</p>
+            </div>
 
-          <div className='my-4'>
-            Total: {data && data.data.length}/
-            {data && data.subscriptionPlan.quota}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className='ml-4 h-4 w-4' />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>
-                    You are now on the{' '}
-                    <span className='font-semibold'>
-                      {data && data.subscriptionPlan.name}
-                    </span>{' '}
-                    Plan. Limited to{' '}
-                    <span className='font-semibold'>
-                      {data && data.subscriptionPlan.quota}
-                    </span>{' '}
-                    downloads per month
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <Link className='ml-4' href='/download'>
-              Goto My Files
-            </Link>
+            <div className='my-4'>
+              Total: {data && data.data.length}/
+              {data && data.subscriptionPlan.quota}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info className='ml-4 h-4 w-4' />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>
+                      You are now on the{' '}
+                      <span className='font-semibold'>
+                        {data && data.subscriptionPlan.name}
+                      </span>{' '}
+                      Plan. Limited to{' '}
+                      <span className='font-semibold'>
+                        {data && data.subscriptionPlan.quota}
+                      </span>{' '}
+                      downloads per month
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <Link className='ml-4' href='/download'>
+                Goto My Files
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

@@ -172,19 +172,13 @@ export const deleteChannel = async (channel: { channelId: string }) => {
 
 export const getVideoInfo = async (url: string | null) => {
   try {
-    const response = await axios.post(process.env.TASK_URL + '/video', {
+    const response = await axios.post(process.env.TASK_URL + '/task/', {
+      task_type: 'video_info',
       url: url,
     })
-
-    const videoInfo: VideoInfo = {
-      id: response.data['id'],
-      title: response.data['title'],
-      duration: response.data['duration'],
-      formats: [...response.data['formats']]
-    }
-    return videoInfo
+    return response.data
   } catch (error) {
-    console.log('getVideoInfo error:', error)
+    return { id: '', 'state': 'Error', value: error }
   }
 }
 

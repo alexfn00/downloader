@@ -11,18 +11,8 @@ import Image from 'next/image'
 
 export default function Home() {
   const [url, setUrl] = useState<string>('')
-
-  const {
-    data: todos,
-    refetch,
-    isLoading,
-  } = useQuery({
-    queryFn: () => getVideoInfo(url),
-
-    queryKey: ['parseURL', { url }],
-    enabled: false, // disable this query from automatically running
-    gcTime: 0,
-  })
+  const [isEnable, setIsEnable] = useState(false)
+  const [isDisabled, setIsDisabled] = useState(true)
 
   return (
     <div>
@@ -39,6 +29,11 @@ export default function Home() {
                 className='w-full px-4 py-4 border-none bg-transparent outline-none focus:outline-none'
                 onChange={(e) => {
                   setUrl(e.target.value)
+                  if (e.target.value.length > 0) {
+                    setIsDisabled(false)
+                  } else {
+                    setIsDisabled(true)
+                  }
                 }}
                 placeholder='Paste video URL here'
               />
@@ -48,6 +43,7 @@ export default function Home() {
                 className='rounded-md m-2'
                 onClick={() => {
                   setUrl('')
+                  setIsDisabled(true)
                 }}>
                 <X className='h-4 w-4' />
               </Button>
@@ -56,20 +52,19 @@ export default function Home() {
               <Button
                 size='sm'
                 variant='ghost'
+                disabled={isDisabled}
                 className='rounded-md py-6 mr-4 bg-green-700 text-white hover:bg-green-600 hover:text-white'
                 onClick={() => {
-                  refetch()
+                  setIsEnable(true)
                 }}>
-                {isLoading && <Loader2 className='mr-4 h-8 w-8 animate-spin' />}
                 Download
               </Button>
             </div>
           </div>
-          {!isLoading && todos && (
+          {isEnable && (
             <Downloader
               params={{
                 url: url,
-                data: todos,
               }}
             />
           )}
