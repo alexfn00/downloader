@@ -87,8 +87,8 @@ export default function Home() {
             clearInterval(intervalId)
             setIsTaskRunning(false)
             toast({
-              title: 'Update',
-              description: 'Channel updated successfully',
+              title: 'Add',
+              description: 'Channel added successfully',
             })
             queryClient.invalidateQueries({ queryKey: ['authors'] })
           }
@@ -211,8 +211,8 @@ export default function Home() {
   if (status === 'error') return <div>{error.message}</div>
 
   return (
-    <main className='md:max-w-6xl md:px-4 px-2 md:w-2/3'>
-      <h1 className='text-xl sm:text-3xl font-semibold sm:my-4'>
+    <main className='md:max-w-6xl md:px-4 px-2'>
+      <h1 className='text-xl sm:text-3xl font-semibold sm:my-4 px-4 my-2'>
         Channel Managment
       </h1>
       {/* <Button className='ml-4' onClick={() => router.back()}>
@@ -220,8 +220,8 @@ export default function Home() {
         <span className='pl-2'></span>
         Back
       </Button> */}
-      <div className='flex w-full max-w-6xl justify-start items-start space-x-2 py-8'>
-        <div className='flex w-full items-center rounded-lg border-2 ml-2 px-4'>
+      <div className='flex flex-col sm:flex-row sm:items-center items-start'>
+        <div className='flex w-full  items-center rounded-lg px-2 border'>
           <Input
             className='w-full py-2 mr-4 border-none bg-transparent outline-none focus:outline-none focus-visible:ring-transparent '
             type='text'
@@ -238,41 +238,43 @@ export default function Home() {
           />
 
           <Button
-            size='sm'
+            size='icon'
             variant='ghost'
-            className='rounded-md m-2'
+            className='rounded-md m-1'
             onClick={() => {
               setAuthor('')
               setIsAddDisabled(true)
             }}>
-            <X className='h-4 w-4' />
+            <X className='h-6 w-6' />
           </Button>
         </div>
 
-        <div className='flex w-full items-center rounded-lg ml-2 px-4'>
-          {isTaskRunning && <Loader2 className='mr-4 h-8 w-8 animate-spin' />}
-
+        <div className='flex w-full items-center sm:justify-end rounded-lg py-2'>
           <Button
             size='lg'
-            variant='ghost'
+            variant='outline'
             className='rounded-md'
             disabled={isAddDisabled}
             onClick={() => {
               setIsTaskRunning(true)
               handleAdd({ channelId: author })
             }}>
+            {isTaskRunning && <Loader2 className='mr-4 h-4 w-4 animate-spin' />}
             Add Channel
           </Button>
           <Link className='' href={`/dashboard/help`}>
-            <CircleHelp className=' text-red-500 h8 w-8 animate-pulse' />
+            <CircleHelp className='text-blue-700 h8 w-8' />
           </Link>
           <Button
             size='lg'
-            variant='ghost'
+            variant='outline'
             onClick={() => {
               setIsAllTaskRunning(true)
               handleUpdateAll()
             }}>
+            {isAllTaskRunning && (
+              <Loader2 className='mr-4 h-4 w-4 animate-spin' />
+            )}
             Update All Channels
           </Button>
         </div>
@@ -283,36 +285,37 @@ export default function Home() {
           <Loader2 className='mr-4 h-8 w-8 animate-spin' />
         </div>
       )}
-      {isAllTaskRunning && (
-        <div className='flex items-center justify-center'>
-          <Loader2 className='mr-4 h-8 w-8 animate-spin' />
-        </div>
-      )}
+
       {data && data.pages.length > 0 && (
         <>
-          <div className='pl-4'>
-            Total: {data.pages[0].totalCount}/
-            {data.pages[0].subscriptionPlan.channelCount}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className='ml-4 h-4 w-4' />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>
-                    You are now on the{' '}
-                    <span className='font-semibold'>
-                      {data.pages[0].subscriptionPlan.name}
-                    </span>{' '}
-                    Plan. Limited to{' '}
-                    <span className='font-semibold'>
-                      {data.pages[0].subscriptionPlan.channelCount}
-                    </span>{' '}
-                    channels
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+          <div className='pl-4 py-4'>
+            <div className='flex w-full sm:w-1/2 items-center rounded-lg'>
+              <p>
+                Total: {data.pages[0].totalCount}/
+                {data.pages[0].subscriptionPlan.channelCount}
+              </p>
+
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info className='text-blue-700 ml-6 h-6 w-6' />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>
+                      You are now on the{' '}
+                      <span className='font-semibold'>
+                        {data.pages[0].subscriptionPlan.name}
+                      </span>{' '}
+                      Plan. Limited to{' '}
+                      <span className='font-semibold'>
+                        {data.pages[0].subscriptionPlan.channelCount}
+                      </span>{' '}
+                      channels
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </div>
         </>
       )}

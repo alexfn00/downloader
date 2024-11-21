@@ -52,9 +52,11 @@ export default function SideNav() {
         </div>
       </Link>
       <div className='flex flex-col space-y-2 border-l-4 border-zinc-300 py-2 pl-4 md:border-l-0 md:border-t-2 md:pb-0 md:pl-0 md:pt-4'>
-        <span className='font-bold text-2xl text-gray-900 my-4'>
-          Your favorite channels
-        </span>
+        <Link href={`/dashboard/`}>
+          <span className='font-bold text-2xl text-gray-900 my-4'>
+            Your favorite channels
+          </span>
+        </Link>
       </div>
       <div className='flex grow flex-row overflow-auto justify-start space-x-2 md:flex-col md:space-x-0 md:space-y-2'>
         {data.pages.map((page) => {

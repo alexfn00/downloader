@@ -133,11 +133,11 @@ const ChannelPage = ({ params }: { params: { id: string } }) => {
           }}
         />
       </div>
-      <div className='flex flex-col sm:flex-row sm:items-center items-start '>
-        <div className='flex w-full sm:w-1/2 items-center rounded-lg border-2 px-4'>
+      <div className='flex flex-col sm:flex-row sm:items-center items-start mx-2'>
+        <div className='flex w-full items-center rounded-lg border-2'>
           <Search className='h-8 w-8 ml-2' />
           <Input
-            className='w-full px-4 py-2 mr-4 border-none bg-transparent outline-none focus:outline-none focus-visible:ring-transparent '
+            className='w-full  py-2 mr-2 border-none bg-transparent outline-none focus:outline-none focus-visible:ring-transparent '
             type='text'
             value={term}
             onChange={(e) => {
@@ -148,19 +148,19 @@ const ChannelPage = ({ params }: { params: { id: string } }) => {
           />
 
           <Button
-            size='lg'
+            size='icon'
             variant='ghost'
-            className='rounded-md m-2'
+            className='rounded-md m-1'
             onClick={() => {
               setTerm('')
             }}>
-            <X className='h-4 w-4' />
+            <X className='h-6 w-6' />
           </Button>
         </div>
         {!isLoading && (
           <Button
             size='lg'
-            variant='ghost'
+            variant='outline'
             className='rounded-md m-2'
             onClick={() => {
               setIsTaskRunning(true)
@@ -170,14 +170,14 @@ const ChannelPage = ({ params }: { params: { id: string } }) => {
                 handleUpdateAll()
               }
             }}>
-            {isTaskRunning && <Loader2 className='mr-4 h-8 w-8 animate-spin' />}
+            {isTaskRunning && <Loader2 className='mr-4 h-4 w-4 animate-spin' />}
             {data?.name && <>Update Channel</>}
             {!data?.name && <>Update All Channels</>}
           </Button>
         )}
       </div>
 
-      <Tabs defaultValue='videos' className='w-full mt-4'>
+      <Tabs defaultValue='videos' className='w-full mt-4 mx-2'>
         <TabsList className='grid w-[400px] grid-cols-3'>
           <TabsTrigger value='videos'>Videos</TabsTrigger>
           <TabsTrigger value='streams'>Alives</TabsTrigger>
